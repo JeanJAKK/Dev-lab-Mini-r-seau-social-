@@ -1,4 +1,5 @@
-#Cahier des Charges — Projet de Réseau Social
+# Mini réseau social
+
 
 ## Objectif du projet
 
@@ -121,4 +122,4 @@ Tables détaillées des tâches par jour et responsables incluses dans le docume
 
     API REST personnalisée (hors supabase)
 
-    Auteur Membres de Dev lab ⚙️🕶️
+Auteur Membres de Dev lab ⚙️🕶️
