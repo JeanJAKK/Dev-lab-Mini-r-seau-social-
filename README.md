@@ -7,27 +7,27 @@ Développer un réseau social minimaliste permettant à un utilisateur de s’in
 
 ## Technologies utilisées
 
-_ Frontend : React + Vite, Tailwind CSS, React Router
+📌 Frontend : React + Vite, Tailwind CSS, React Router
 
-_ Backend : Supabase (Auth, Database PostgreSQL, Storage)
+📌 Backend : Supabase (Auth, Database PostgreSQL, Storage)
 
-_ Outils de travail : GitHub, Trello/Notion, Figma, WhatsApp
+📌 Outils de travail : GitHub, Trello/Notion, Figma, WhatsApp
 
 ## Fonctionnalités principales
 
-_ Inscription / Connexion via email/password
+📌 Inscription / Connexion via email/password
 
-_ Création de post (texte + image optionnelle)
+📌 Création de post (texte + image optionnelle)
 
-_ Fil d’actualité (affichage des posts récents)
+📌 Fil d’actualité (affichage des posts récents)
 
-_ Profil utilisateur (nom, bio, photo, liste des posts)
+📌 Profil utilisateur (nom, bio, photo, liste des posts)
 
-_ Système de likes (like/unlike un post)
+📌 Système de likes (like/unlike un post)
 
-_ Design responsive (interface claire et mobile-friendly)
+📌 Design responsive (interface claire et mobile-friendly)
 
-_ Navigation entre les pages principales : login, feed, profil
+📌 Navigation entre les pages principales : login, feed, profil
 
 ## Structure de la base de données (Supabase)
 
@@ -106,7 +106,7 @@ Respect des bonnes pratiques de développement
 
 Tests manuels avant toute mise en production
 
-## Évolutions futures possibles
+## 💡 Évolutions futures possibles
 
 Ajout de commentaires
 
