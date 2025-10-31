@@ -7,61 +7,61 @@ Développer un réseau social minimaliste permettant à un utilisateur de s’in
 
 ## Technologies utilisées
 
-    _ Frontend : React + Vite, Tailwind CSS, React Router
+_ Frontend : React + Vite, Tailwind CSS, React Router
 
-    _ Backend : Supabase (Auth, Database PostgreSQL, Storage)
+_ Backend : Supabase (Auth, Database PostgreSQL, Storage)
 
-    _ Outils de travail : GitHub, Trello/Notion, Figma, WhatsApp
+_ Outils de travail : GitHub, Trello/Notion, Figma, WhatsApp
 
 ## Fonctionnalités principales
 
-    _ Inscription / Connexion via email/password
+_ Inscription / Connexion via email/password
 
-    _ Création de post (texte + image optionnelle)
+_ Création de post (texte + image optionnelle)
 
-    _ Fil d’actualité (affichage des posts récents)
+_ Fil d’actualité (affichage des posts récents)
 
-    _ Profil utilisateur (nom, bio, photo, liste des posts)
+_ Profil utilisateur (nom, bio, photo, liste des posts)
 
-    _ Système de likes (like/unlike un post)
+_ Système de likes (like/unlike un post)
 
-    _ Design responsive (interface claire et mobile-friendly)
+_ Design responsive (interface claire et mobile-friendly)
 
-    _ Navigation entre les pages principales : login, feed, profil
+_ Navigation entre les pages principales : login, feed, profil
 
 ## Structure de la base de données (Supabase)
 
 Table : profiles
 
-    id (UUID)
+id (UUID)
 
-    username (text)
+username (text)
 
-    avatar_url (text)
+avatar_url (text)
 
-    bio (text)
+bio (text)
 
-    created_at (timestamp)
+created_at (timestamp)
 
 Table : posts
 
-    id (UUID)
+id (UUID)
 
-    user_id (UUID)
+user_id (UUID)
 
-    content (text)
+content (text)
 
-    image_url (text)
+image_url (text)
 
-    created_at (timestamp)
+created_at (timestamp)
 
 Table : likes
 
-    id (UUID)
+id (UUID)
 
-    user_id (UUID)
+user_id (UUID)
 
-    post_id (UUID)
+post_id (UUID)
 
 ## Planning prévisionnel
 
@@ -70,56 +70,56 @@ Tables détaillées des tâches par jour et responsables incluses dans le docume
 
 ## Organisation de l’équipe
 
-    Chef de projet
+Chef de projet
 
-    Frontend Lead
+Frontend Lead
 
-    Backend Lead
+Backend Lead
 
-    UI/UX Designer
+UI/UX Designer
 
-    QA / Testeur
+QA / Testeur
 
-    Documentaliste
+Documentaliste
 
-    2 Développeurs Fullstack
+2 Développeurs Fullstack
 
 ## Livrables attendus
 
-    Application web fonctionnelle (React + Supabase)
+Application web fonctionnelle (React + Supabase)
 
-    Code source hébergé sur GitHub ou GitLab
+Code source hébergé sur GitHub ou GitLab
 
-    Documentation complète (README, cahier des charges, guide rapide)
+Documentation complète (README, cahier des charges, guide rapide)
 
-    Présentation ou démonstration interne
+Présentation ou démonstration interne
 
 ## Contraintes
 
-    Durée maximale : 3 semaines
+Durée maximale : 3 semaines
 
-    Utilisation d’outils gratuits ou open-source
+Utilisation d’outils gratuits ou open-source
 
-    Priorité à la simplicité et à la cohérence visuelle
+Priorité à la simplicité et à la cohérence visuelle
 
-    Respect des bonnes pratiques de développement
+Respect des bonnes pratiques de développement
 
-    Tests manuels avant toute mise en production
+Tests manuels avant toute mise en production
 
 ## Évolutions futures possibles
 
-    Ajout de commentaires
+Ajout de commentaires
 
-    Système de messagerie privée
+Système de messagerie privée
 
-    Système de followers / amis
+Système de followers / amis
 
-    Notifications
+Notifications
 
-    Recherche d’utilisateurs
+Recherche d’utilisateurs
 
-    Mode sombre
+Mode sombre
 
-    API REST personnalisée (hors supabase)
+API REST personnalisée (hors supabase)
 
-Auteur Membres de Dev lab ⚙️🕶️
+####Auteur Membres de Dev lab ⚙️🕶️
