@@ -1,0 +1,213 @@
+
+
+/* Conteneur principal de la page */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f7f8f9ff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  /* Animation */
+  opacity: 0;                 /* commence invisible */
+  transform: translateY(20px); /* décalage vers le bas */
+  animation: fadeInUp 0.8s ease forwards; /* animation */
+}
+
+/* Définition de l'animation */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;             /* devient visible */
+    transform: translateY(0); /* remonte à sa place */
+  }
+}
+
+/* Partie gauche (logo et texte) */
+.auth-left {
+  flex: 1;
+  text-align: left;
+  padding: 0 80px;
+  margin-left: 70px;
+  margin-bottom: 50px;
+}
+
+.logo {
+  color: #c217d9;
+  font-size: 48px;
+  font-weight: bold;
+   background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 20px;
+  color: black;
+  font-weight: bold;
+  font-style: italic;
+}
+
+/* Partie droite (formulaire) */
+.auth-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-form {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 10px rgba(0.5, 0.5, 0.5, 0.5);
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form input {
+  margin-bottom: 15px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  color: black;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.login-form input:focus{
+  border-color: #8a2be2; 
+  outline: none;         
+}
+
+.login-form input::placeholder{
+  color: #888;
+}
+
+.login-btn {
+  background-color: #8a2be2;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition:  0.3s;
+}
+
+.login-btn:hover {
+  background-color:  #d309c9;
+}
+
+.divider {
+  text-align: center;
+  margin: 15px 0;
+  color: #0c0101;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 50px;
+  background-color: black;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background-color 0.5s;
+}
+
+.facebook-btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 50px;
+  background-color: blue;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background-color 0.5s;
+}
+
+.google-btn:hover {
+  background-color: #e8eaeb;
+  color: black;
+  font-weight: bold;
+}
+
+.facebook-btn:hover {
+  background-color: #fcfdfd;
+  font-weight: bold;
+  color: black;
+}
+
+.create-account {
+  margin-top: 20px;
+  font-size: 14px;
+  color: black;
+  font-weight: bold;
+}
+
+.create-account a {
+  color: blue;
+  text-decoration: none;
+}
+
+.create-account a:hover {
+  text-decoration: underline;
+}
+
+.remember-forgot{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #0c0101;
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: 15px;
+
+}
+
+.remember-label{
+  display: flex;
+  gap: 8px;
+}
+.remember-forgot a{
+  color: blue;
+  text-align: none;
+  transition: 0.5s;
+  font-weight: bold;
+  margin-bottom: 10px;
+
+}
+
+.remember-forgot a:hover{
+  text-decoration: underline;
+}
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px; /* pour laisser de la place à l’icône */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.3s;
+}
+
+.toggle-password:hover {
+  color: #8a2be2;
+}
