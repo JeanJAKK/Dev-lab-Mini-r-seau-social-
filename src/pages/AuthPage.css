@@ -33,7 +33,6 @@
 }
 
 .logo {
-  color: #c217d9;
   font-size: 48px;
   font-weight: bold;
    background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
@@ -86,18 +85,18 @@
 }
 
 .login-btn {
-  background-color: #8a2be2;
+  background-color: rgb(0, 153, 255);
   color: white;
   border: none;
   padding: 12px;
   border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
-  transition:  0.3s;
+  transition:  0.5s;
 }
 
 .login-btn:hover {
-  background-color:  #d309c9;
+  background-color:  rgb(0, 89, 255);
 }
 
 .divider {
