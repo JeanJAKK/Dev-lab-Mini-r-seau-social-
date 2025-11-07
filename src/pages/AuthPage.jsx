@@ -4,6 +4,7 @@ import { FcGoogle } from "react-icons/fc"; // icône Google (React Icons)
 import { FaFacebook } from "react-icons/fa"; // icône facebook (React Icons)
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./AuthPage.css"; // fichier CSS pour les styles
+import { Link } from "react-router-dom";  
 
 
 // Ce composant représente la page d'authentification (comme Facebook)
@@ -55,12 +56,12 @@ function AuthPage() {
           </button>
           <div className="remember-forgot">
             <label><input type="checkbox" name="remember" id="remember" />Se souvenir de moi</label>
-            <a href="">Mot de passe oublié ?</a>
+            <Link to="">Mot de passe oublié ?</Link>
         </div>
         </form>
 
         <p className="create-account">
-          Nouveau sur SocialNet ?  <a href="#">Créer un compte</a>
+          Nouveau sur SocialNet ?  <Link to="/Register">Créer un compte</Link>
         </p>
         
       </div>
