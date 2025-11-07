@@ -13,7 +13,7 @@ function AuthPage() {
     <div className="auth-container">
       {/* Partie gauche : logo et texte (comme Facebook) */}
       <div className="auth-left">
-        <h1 className="logo">JAKK</h1>
+        <h1 className="logo">SynapseLink</h1>
         <p className="subtitle">
           Connecte-toi avec tes amis et découvre le monde autour de toi.
         </p>
@@ -24,18 +24,18 @@ function AuthPage() {
         <form className="login-form">
           <input type="email" placeholder="Adresse e-mail" required />
           <div className="password-field">
-  <input
-    type={showPassword ? "text" : "password"}
-    placeholder="Mot de passe"
-    required
-  />
-  <span
-    className="toggle-password"
-    onClick={() => setShowPassword(!showPassword)}
-  >
-    {showPassword ? <FaEyeSlash /> : <FaEye />}
-  </span>
-</div>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Mot de passe"
+              required
+            />
+            <span
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
           <button type="submit" className="login-btn">
             Se connecter
@@ -56,7 +56,7 @@ function AuthPage() {
           <div className="remember-forgot">
             <label><input type="checkbox" name="remember" id="remember" />Se souvenir de moi</label>
             <a href="">Mot de passe oublié ?</a>
-        </div>
+          </div>
         </form>
 
         <p className="create-account">
