@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./Register.css";
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
+  
   return (
     <>
       <div className="bg-white h-screen w-full">
