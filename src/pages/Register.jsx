@@ -8,7 +8,7 @@ function Register() {
     <>
       <div className="bg-white h-screen w-full">
         <div className="logos">
-          <h1 className="logo1">Synapselink</h1>
+          <h1 className="logo1">SynapseLink</h1>
         </div>
         <div className="regis">
           <form action="" className="regis-form">
@@ -29,9 +29,9 @@ function Register() {
             </div>
             <div className="policy">
               <p>
-                En cliquant sur S'inscrire, vous acceptez nos Conditions
-                d'utilisation, notre Politique de confidentialité et notre
-                Politique relativea aux cookies. Vous pourrez recevoir des
+                En cliquant sur "S'inscrire", vous acceptez nos <span className="text-blue-700">Conditions
+                d'utilisation</span>, notre <span className="text-blue-700">Politique de confidentialité</span> et notre
+                <span className="text-blue-700">Politique relatives aux cookies</span>. Vous pourrez recevoir des
                 notifications par SMS de notre part et vous désabonner à tout
                 moment.
               </p>
@@ -40,10 +40,10 @@ function Register() {
               S'inscrire
             </button>
           </form>
-          <p>
-            retour{" "}
-            <Link to="/Authpage" className="text-blue-700 hover:text-blue-400">
-              retour
+          <p className="connect">
+            Vous avez déjà un compte?{" "}
+            <Link to="/Authpage"className="text-blue-700 hover:text-blue-900 ">
+              Se connecter
             </Link>{" "}
           </p>
         </div>

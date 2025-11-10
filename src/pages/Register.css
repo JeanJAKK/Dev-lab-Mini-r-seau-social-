@@ -46,3 +46,94 @@
   -webkit-text-fill-color: transparent;
 
 }
+
+.connect{
+  color: black;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-top: 20px;
+}
+
+/* ==========================
+   RESPONSIVE : TABLETTES
+   ========================== */
+@media (max-width: 992px) {
+  .logo1 {
+    font-size: 42px;
+    margin-top: 25px;
+  }
+
+  .regis-form {
+    width: 320px;
+    padding: 25px;
+  }
+
+  .policy {
+    font-size: 10px;
+  }
+}
+
+/* ==========================
+   RESPONSIVE : MOBILES
+   ========================== */
+@media (max-width: 600px) {
+  body {
+    background-color: white;
+  }
+
+  .bg-white {
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .logo1 {
+    font-size: 36px;
+    margin-top: 10px;
+  }
+
+  .regis {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .regis-form {
+    width: 100%;
+    max-width: 320px;
+    padding: 20px;
+    box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .regis-form input {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .login-btn {
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  .policy {
+    font-size: 10px;
+    max-width: 100%;
+  }
+}
+
+/* ==========================
+   PETITS ÉCRANS (≤ 400px)
+   ========================== */
+@media (max-width: 400px) {
+  .logo1 {
+    font-size: 30px;
+  }
+
+  .regis-form {
+    max-width: 280px;
+    padding: 15px;
+  }
+
+  .policy {
+    font-size: 9px;
+  }
+}
