@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import AuthPage from "./AuthPage"; 
+import AuthPage from "./AuthPage."; 
 
 function Register(){
     return (<div>
