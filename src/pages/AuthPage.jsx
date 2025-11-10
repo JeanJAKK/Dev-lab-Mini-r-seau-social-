@@ -14,7 +14,7 @@ function AuthPage() {
     <div className="auth-container">
       {/* Partie gauche : logo et texte (comme Facebook) */}
       <div className="auth-left">
-        <h1 className="logo">Synapselink</h1>
+        <h1 className="logo">SynapseLink</h1>
         <p className="subtitle">
           Connecte-toi avec tes amis et découvre le monde autour de toi.
         </p>

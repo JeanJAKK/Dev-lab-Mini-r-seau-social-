@@ -8,6 +8,7 @@
   height: 100vh;
   background-color: #f7f8f9ff;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
 
   /* Animation */
   opacity: 0;                 /* commence invisible */
@@ -35,7 +36,9 @@
 .logo {
   font-size: 48px;
   font-weight: bold;
-   background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
+  font-family: 'Times New Roman', Times, serif;
+  background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
