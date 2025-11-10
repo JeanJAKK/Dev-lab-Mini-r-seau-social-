@@ -35,8 +35,9 @@
 .logo {
   font-size: 48px;
   font-weight: bold;
-   background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
+  background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -260,8 +261,8 @@ html, body, #root {
   font-size: 34px;
   font-weight: 800;
   background: linear-gradient(to right, var(--accent1), var(--accent2));
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
