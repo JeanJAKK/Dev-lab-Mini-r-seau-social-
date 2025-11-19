@@ -1,32 +1,27 @@
-import React, { useState } from "react";
-import { Home, Search, Bell, Mail, Menu, X } from "lucide-react";
+
+import { Home, Search, Bell, Mail, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { logout } from "../fakeAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function NavBar() {
-  const [open, setOpen] = useState(false);
-
+   const navigate = useNavigate();
+  
+    const handleLogout = () => {
+      logout();
+      navigate("/login", { replace: true });
+    };
   return (
-    <nav className="w-full h-20 bg-white shadow-md px-4 py-3 flex items-center justify-between">
+    <nav className="w-full shadow-md flex h-20 px-4 py-3 justify-between items-center">
       
       {/* LOGO */}
       <div className="text-xl font-bold text-purple-600">
         SynapseLink
       </div>
 
-      {/* MENU HAMBURGER MOBILE */}
-      <button
-        className="md:hidden text-gray-700"
-        onClick={() => setOpen(!open)}
-      >
-        {open ? <X size={28} /> : <Menu size={28} />}
-      </button>
-
       {/* LINKS */}
       <ul
-        className={`md:flex items-center gap-6 font-medium text-gray-700 
-        absolute md:static top-16 left-0 w-full md:w-auto bg-white md:bg-transparent p-5 md:p-0 shadow-md md:shadow-none
-        transition-all duration-300
-        ${open ? "block" : "hidden md:flex"}`}
+        className= "md:flex hidden items-center gap-6 font-medium text-gray-700 absolute md:static top-16 left-0 w-full md:w-auto bg-white md:bg-transparent p-5 md:p-0 shadow-md md:shadow-none transition-all duration-300"
       >
         <li className="flex items-center gap-2 hover:text-purple-600 cursor-pointer">
           <Home size={20} />
@@ -47,6 +42,11 @@ export default function NavBar() {
           <Mail size={20} />
           <Link to="/messages">Messages</Link>
         </li>
+        <div>
+        <button onClick={handleLogout} className="text-red-500 p-2 rounded cursor-pointer hidden md:flex">
+       <ArrowLeft /> Déconnexion
+      </button>
+      </div>
       </ul>
 
       {/* PROFIL */}
@@ -54,10 +54,11 @@ export default function NavBar() {
         <img
           src="backend........."
           alt="profile"
-          className="w-9 h-9 rounded-full border"
+          className="w-9 h-9 rounded-full bg-amber-400 border"
         />
         <span className="text-black"> Profil </span>
       </div>
+      
 
     </nav>
   );

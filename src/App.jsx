@@ -1,31 +1,35 @@
+// App.jsx
 import React from "react";
 import AuthPage from "./pages/AuthPage";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { isAuthenticated } from "./fakeAuth"
-import { useState } from "react"
-function App() {const [auth, setAuth] = useState(isAuthenticated());
+import ProtectedRoute from "./components/ProtectedRoute";
+
+export default function App() {
+
   return (
-    
-
-
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/authPage" />} />
-        <Route path="/authPage" element={<AuthPage />} />
-        <Route path="/register" element={<Register />} />
-        
-      </Routes>
-      {auth ? (
-        <Home setAuth={setAuth} />
-      ) : (
-        <AuthPage setAuth={setAuth} />
-      )}
-    </BrowserRouter>
-     
 
+        {/* PAGE PAR DÉFAUT */}
+        <Route path="/" element={<Navigate to="/login" />} />
+
+        {/* PUBLIC */}
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* PRIVÉ */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;

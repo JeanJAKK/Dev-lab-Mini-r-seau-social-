@@ -8,25 +8,27 @@ import { fakeLogin } from "../fakeAuth";
 
 
 // Ce composant représente la page d'authentification (comme Facebook)
-function AuthPage({ setAuth }) {
+function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+const handleLogin = (e) => {
+  e.preventDefault();
 
-    const success = fakeLogin(email, password);
+  const success = fakeLogin(email, password);
 
-    if (success) {
-      setAuth(true);
-    } else {
-      setError("Email ou mot de passe incorrect !");
-    }
-  };
+  if (success) {
+    setError("");
+    // redirection propre
+    window.location.href = "/home";
+  } else {
+    setError("Email ou mot de passe incorrect !");
+  }
+};
 
-  return (
+return (
     <div className="auth-container">
       {/* Partie gauche : logo et texte (comme Facebook) */}
       <div className="auth-left">
@@ -61,8 +63,9 @@ function AuthPage({ setAuth }) {
           </div>
 
           <button type="submit" className="login-btn">
-            <Link to="/Home">Se connecter</Link>
-          </button>
+  Se connecter
+</button>
+
           {error && <p className="text-red-600 mt-2">{error}</p>}
 
           <div className="divider">ou</div>
