@@ -36,10 +36,9 @@
 .logo {
   font-size: 48px;
   font-weight: bold;
-  font-family: 'Times New Roman', Times, serif;
   background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -213,3 +212,254 @@
 .toggle-password:hover {
   color: #8a2be2;
 }
+
+
+/* ===== Variables globales ===== */
+:root {
+  --accent1: #1877f2;
+  --accent2: #8a2be2;
+  --muted: #666;
+  --card-bg: #ffffff;
+  --page-bg: linear-gradient(180deg, #f3f6ff 0%, #ffffff 100%);
+  --shadow: 0 6px 18px rgba(20, 20, 40, 0.08);
+  --radius: 12px;
+}
+
+/* ===== RESET ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  background: var(--page-bg);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===== BASE (mobile par défaut) ===== */
+.auth-container {
+  min-height: 100svh; /* ✅ svh = small viewport height, corrige le bug mobile */
+  width: 100%;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: var(--page-bg);
+}
+
+/* --- Partie gauche (logo) --- */
+.auth-left {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 34px;
+  font-weight: 800;
+  background: linear-gradient(to right, var(--accent1), var(--accent2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 300px;
+  margin-inline: auto;
+}
+
+/* --- Partie droite (formulaire) --- */
+.auth-right {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-form {
+  background: var(--card-bg);
+  padding: 22px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-form input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e6e6e6;
+  font-size: 15px;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: var(--accent2);
+  box-shadow: 0 4px 10px rgba(138, 43, 226, 0.15);
+}
+
+/* --- Champ mot de passe --- */
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-field input {
+  width: 100%;
+  padding-right: 40px;
+}
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+.toggle-password:hover {
+  color: var(--accent2);
+}
+
+/* --- Boutons --- */
+.login-btn {
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.3s ease;
+}
+.login-btn:hover {
+  background: linear-gradient(90deg, var(--accent2), var(--accent1));
+}
+
+.divider {
+  text-align: center;
+  margin: 6px 0;
+  color: #444;
+}
+
+.google-btn, .facebook-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 999px;
+  border: 1px solid #e6e6e6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.google-btn {
+  background: white;
+  color: #111;
+}
+.facebook-btn {
+  background: #1877f2;
+  color: white;
+}
+.google-btn:hover, .facebook-btn:hover {
+  transform: scale(1.03);
+}
+
+/* --- Liens et bas de page --- */
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.remember-label input {
+  margin-right: 6px;
+}
+
+.forgot-link, .create-link {
+  color: var(--accent1);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.create-account {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+
+/* ===== TABLETTE ===== */
+@media (min-width: 768px) {
+  .auth-container {
+    padding: 40px;
+  }
+
+  .logo {
+    font-size: 42px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .auth-right {
+    max-width: 460px;
+  }
+}
+/* ===== DESKTOP ===== */
+@media (min-width: 1024px) {
+  .auth-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 80px;
+    padding: 60px;
+  }
+
+  .auth-left {
+    flex: 1;
+    max-width: 520px;
+    text-align: left;
+  }
+
+  .auth-right {
+    flex: 1;
+    max-width: 420px;
+  }
+
+  .logo {
+    font-size: 52px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: #222;
+  }
+
+  .login-form {
+    padding: 28px;
+  }
+}
+
+/* ===== GRAND ÉCRAN ===== */
+@media (min-width: 1440px) {
+  .auth-right {
+    max-width: 520px;
+  }
+  .login-form {
+    padding: 36px;
+  }
+}
+
+
+
