@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import supabase from ".services/supabaseClient";
+import supabase from "../services/supabase.js";
 
 export default function CreatePost() {
   const [title, setTitle] = useState("");
@@ -62,36 +62,16 @@ export default function CreatePost() {
 
 
   return (
-    <div style={{ maxWidth: "500px", margin: "auto" }}>
-      <h2>Créer un post</h2>
-
-      <form onSubmit={handleCreatePost}>
-        <input
-          type="text"
-          placeholder="Titre"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-
-        <textarea
-          placeholder="Contenu"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
-        />
-
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImageFile(e.target.files[0])}
-          required
-        />
-
-        <button type="submit">Publier</button>
-      </form>
-
-      {message && <p>{message}</p>}
+    
+    <div style={{
+      backgroundColor: "yellow",
+      color: "black",
+      padding: "20px",
+      fontSize: "22px"
+    }}>
+      <h1>Create Post OK</h1>
+      <p>Le texte est visible maintenant.</p>
     </div>
+
   );
 }

@@ -5,14 +5,16 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./AuthPage.css"; // fichier CSS pour les styles
 import { Link } from "react-router-dom";
 import { fakeLogin } from "../fakeAuth";
+import { useNavigate } from "react-router-dom";
 
 
-// Ce composant représente la page d'authentification (comme Facebook)
 function AuthPage({ setAuth }) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -21,8 +23,10 @@ function AuthPage({ setAuth }) {
 
     if (success) {
       setAuth(true);
+       navigate("/create-post");
     } else {
       setError("Email ou mot de passe incorrect !");
+      
     }
   };
 
@@ -61,7 +65,7 @@ function AuthPage({ setAuth }) {
           </div>
 
           <button type="submit" className="login-btn">
-            <Link to="/Home">Se connecter</Link>
+            Se connecter
           </button>
           {error && <p className="text-red-600 mt-2">{error}</p>}
 
