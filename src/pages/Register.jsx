@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import supabase from "../services/supabase.js";
 import "./Register.css";
+
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -135,4 +137,5 @@ function Register() {
     </>
   );
 }
+
 export default Register;
