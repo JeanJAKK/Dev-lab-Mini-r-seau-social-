@@ -1,0 +1,35 @@
+.feed-page {
+  color: black;
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.posts-list {
+  color: black;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-card {
+  color: black;
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.post-image {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.post-card h3 {
+  margin: 10px 0 6px;
+}
+
+.post-card p {
+  color: #444;
+}
