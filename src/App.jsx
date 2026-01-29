@@ -1,35 +1,32 @@
-// App.jsx
-import React from "react";
+import React, { useState } from "react";
 import AuthPage from "./pages/AuthPage";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
+import CreatePost from "./pages/CreatePost";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { isAuthenticated } from "./fakeAuth";
 
-export default function App() {
+function App() {
+  const [auth, setAuth] = useState(isAuthenticated());
 
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* PAGE PAR DÉFAUT */}
-        <Route path="/" element={<Navigate to="/login" />} />
-
-        {/* PUBLIC */}
-        <Route path="/login" element={<AuthPage />} />
+        <Route path="/" element={<Navigate to="/authPage" />} />
+        <Route path="/authPage" element={<AuthPage setAuth={setAuth} />} />
         <Route path="/register" element={<Register />} />
 
-        {/* PRIVÉ */}
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-
+        {auth ? (
+          <>
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/home" element={<Home />} />
+          </>
+        ) : (
+          <Route path="*" element={<Navigate to="/authPage" />} />
+        )}
       </Routes>
     </BrowserRouter>
   );
 }
+
+export default App;
