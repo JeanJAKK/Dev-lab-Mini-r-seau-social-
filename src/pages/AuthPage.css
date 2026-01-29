@@ -8,6 +8,7 @@
   height: 100vh;
   background-color: #f7f8f9ff;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
 
   /* Animation */
   opacity: 0;                 /* commence invisible */
