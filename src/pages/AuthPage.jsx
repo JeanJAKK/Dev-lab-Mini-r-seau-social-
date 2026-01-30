@@ -50,7 +50,7 @@ function AuthPage({ setAuth }) {
       setLoading(false);
 
       // Redirection vers la page d'accueil ou création de post
-      navigate("/create-post");
+      navigate("/home");
     } catch (err) {
       console.error(err);
       setMessage("Erreur inattendue. Regarde la console.");
