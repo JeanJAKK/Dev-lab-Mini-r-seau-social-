@@ -17,7 +17,7 @@ export default function Posts() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        setMessage("Erreur lors du chargement des posts");
+        setMessage("❌ Erreur lors du chargement des posts");
         console.error(error);
       } else {
         setPosts(data);
