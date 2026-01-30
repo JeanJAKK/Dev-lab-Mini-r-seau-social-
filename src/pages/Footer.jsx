@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <ul
       className="md:hidden fixed bottom-0 left-0 right-0 
-      flex items-center justify-around gap-6 
+      flex items-center justify-around gap-3 
       font-medium text-gray-700 bg-white p-4 shadow-lg"
     >
       <li title="Accueil" className="flex flex-col items-center text-sm hover:text-purple-600 cursor-pointer">
