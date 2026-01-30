@@ -20,37 +20,37 @@ export default function CreatePost() {
   setLoading(true);
 
   try {
-    // 🔐 0️⃣ Vérifier utilisateur connecté
+    //  Vérifier utilisateur connecté
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      setMessage("❌ Vous devez être connecté pour publier.");
+      setMessage(" Vous devez être connecté pour publier.");
       setLoading(false);
       return;
     }
 
     if (!imageFile) {
-      setMessage("❌ Choisissez une image !");
+      setMessage("Choisissez une image !");
       setLoading(false);
       return;
     }
 
-    // 1️⃣ Nom unique du fichier
+    // Nom unique du fichier
     const fileName = sanitizeFileName(`${Date.now()}_${imageFile.name}`);
 
-    // 2️⃣ Upload image
+    // Upload image
     const { error: uploadError } = await supabase
       .storage
       .from("posts_images")
       .upload(fileName, imageFile);
 
     if (uploadError) {
-      setMessage("❌ Erreur Upload : " + uploadError.message);
+      setMessage("Erreur Upload : " + uploadError.message);
       setLoading(false);
       return;
     }
 
-    // 3️⃣ URL publique
+    // URL publique
     const { data: urlData } = supabase
       .storage
       .from("posts_images")
@@ -58,7 +58,7 @@ export default function CreatePost() {
 
     const imageUrl = urlData.publicUrl;
 
-    // 4️⃣ Insertion du post (✅ user réel)
+    // Insertion du post (user réel)
     const { error: insertError } = await supabase
       .from("posts")
       .insert({
@@ -69,12 +69,12 @@ export default function CreatePost() {
       });
 
     if (insertError) {
-      setMessage("❌ Erreur insertion : " + insertError.message);
+      setMessage("Erreur insertion : " + insertError.message);
       setLoading(false);
       return;
     }
 
-    // ✅ Succès
+    //  Succès
     setMessage("✅ Post publié avec succès !");
     setTitle("");
     setContent("");
@@ -82,7 +82,7 @@ export default function CreatePost() {
 
   } catch (err) {
     console.error(err);
-    setMessage("❌ Erreur inattendue");
+    setMessage(" Erreur inattendue");
   } finally {
     setLoading(false);
   }

@@ -32,21 +32,21 @@ function AuthPage({ setAuth }) {
     }
 
     try {
-      // 1️⃣ Connexion avec Supabase Auth
+      // 1️ Connexion avec Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        setMessage("❌ Email ou mot de passe incorrect !");
+        setMessage("Email ou mot de passe incorrect !");
         setLoading(false);
         return;
       }
 
-      // ✅ Connexion réussie
+      //  Connexion réussie
       setAuth(true);
-      setMessage("✅ Connexion réussie !");
+      setMessage(" Connexion réussie !");
       setLoading(false);
 
       // Redirection vers la page d'accueil ou création de post
