@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import supabase from "../services/supabase.js";
-import "./CreatePost.css";
+import { Link } from "react-router-dom";
+import { User, Camera } from "lucide-react";
 
 export default function CreatePost() {
   const [title, setTitle] = useState("");
@@ -9,127 +10,137 @@ export default function CreatePost() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Fonction pour nettoyer le nom du fichier
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
   };
 
- const handleCreatePost = async (e) => {
-  e.preventDefault();
-  setMessage("");
-  setLoading(true);
+  const handleCreatePost = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setLoading(true);
 
-  try {
-    //  Vérifier utilisateur connecté
-    const { data: { user } } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      setMessage(" Vous devez être connecté pour publier.");
-      setLoading(false);
-      return;
-    }
+      if (!user) {
+        setMessage("Vous devez être connecté pour publier.");
+        setLoading(false);
+        return;
+      }
 
-    if (!imageFile) {
-      setMessage("Choisissez une image !");
-      setLoading(false);
-      return;
-    }
+      if (!imageFile) {
+        setMessage("Choisissez une image !");
+        setLoading(false);
+        return;
+      }
 
-    // Nom unique du fichier
-    const fileName = sanitizeFileName(`${Date.now()}_${imageFile.name}`);
+      const fileName = sanitizeFileName(`${Date.now()}_${imageFile.name}`);
 
-    // Upload image
-    const { error: uploadError } = await supabase
-      .storage
-      .from("posts_images")
-      .upload(fileName, imageFile);
+      const { error: uploadError } = await supabase.storage
+        .from("posts_images")
+        .upload(fileName, imageFile);
 
-    if (uploadError) {
-      setMessage("Erreur Upload : " + uploadError.message);
-      setLoading(false);
-      return;
-    }
+      if (uploadError) {
+        setMessage("Erreur Upload : " + uploadError.message);
+        setLoading(false);
+        return;
+      }
 
-    // URL publique
-    const { data: urlData } = supabase
-      .storage
-      .from("posts_images")
-      .getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage
+        .from("posts_images")
+        .getPublicUrl(fileName);
 
-    const imageUrl = urlData.publicUrl;
+      const imageUrl = urlData.publicUrl;
 
-    // Insertion du post (user réel)
-    const { error: insertError } = await supabase
-      .from("posts")
-      .insert({
+      const { error: insertError } = await supabase.from("posts").insert({
         title,
         content,
         image_url: imageUrl,
-        user_id: user.id
+        user_id: user.id,
       });
 
-    if (insertError) {
-      setMessage("Erreur insertion : " + insertError.message);
+      if (insertError) {
+        setMessage("Erreur insertion : " + insertError.message);
+        setLoading(false);
+        return;
+      }
+
+      setMessage("✅ Post publié avec succès !");
+      setTitle("");
+      setContent("");
+      setImageFile(null);
+    } catch (err) {
+      console.error(err);
+      setMessage("Erreur inattendue");
+    } finally {
       setLoading(false);
-      return;
     }
+  };
 
-    //  Succès
-    setMessage("✅ Post publié avec succès !");
-    setTitle("");
-    setContent("");
-    setImageFile(null);
+  return (
+    <div className="justify-center items-center  flex">
+      <div className="bg-white md:w-[600px]  border w-[396px] rounded-xl shadow-sm">
+        <form onSubmit={handleCreatePost} className="md:border-8 rounded-2xl border-white">
+          <div className="flex gap-5 h-40">
+            <p className="text-black border hover:text-purple-600 transition h-10 w-12 items-center flex justify-center rounded-full">
+              <Link to="profile" className="">
+                <User size={24} />
+              </Link>
+            </p>
+            <div className="flex gap-2 w-full flex-col">
+              <input
+                type="text"
+                placeholder="Titre du post"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="h-8 rounded bg-gray-50 border-gray-300 border text-gray-900 transition-all"
+              />
 
-  } catch (err) {
-    console.error(err);
-    setMessage(" Erreur inattendue");
-  } finally {
-    setLoading(false);
-  }
-};
+              <textarea
+                placeholder="Exprime-toi..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+                rows={3}
+                className="h-28 p-4 bg-gray-50 border-gray-300 border  rounded text-gray-900 placeholder-gray-400 transition-all resize-none"
+              />
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <label className="flex px-4 py-3 bg-gray-50 cursor-pointer hover:border-blue-400 transition-all group">
+              <span className="text-sm text-black group-hover:text-blue-600">
+                {imageFile ? imageFile.name : ""}
+                <Camera />
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files[0])}
+                className="hidden"
+              />
+            </label>
 
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-400 w-30 h-10 text-white py-3.5 rounded font-semibold hover:bg-blue-700 active:scale-[0.98] disabled:bg-blue-300 disabled:active:scale-100 transition-all duration-200"
+            >
+              {loading ? "Publication..." : "Publier"}
+            </button>
+          </div>
+        </form>
 
-return (
-  <div className="create-post-page">
-    <div className="create-post-card">
-      <h2 className="create-post-title">Créer un post</h2>
-
-      <form onSubmit={handleCreatePost} className="create-post-form">
-        <input
-          type="text"
-          className="create-post-input"
-          placeholder="Titre du post"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-
-        <textarea
-          className="create-post-textarea"
-          placeholder="Exprime-toi..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
-        />
-
-        <label className="file-label">
-          Choisir une image
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files[0])}
-            hidden
-          />
-        </label>
-
-        <button type="submit" className="create-post-btn" disabled={loading}>
-          {loading ? "Publication..." : "Publier"}
-        </button>
-      </form>
-
-      {message && <p className="create-post-message">{message}</p>}
+        {message && (
+          <p
+            className={`mt-4 text-center text-sm font-medium ${message.includes("✅") ? "text-green-600" : "text-red-500"}`}
+          >
+            {message}
+          </p>
+        )}
+      </div>
     </div>
-  </div>
-);
-
+  );
 }

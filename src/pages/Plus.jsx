@@ -1,16 +1,13 @@
 import React from 'react'
 import CreatePost from './CreatePost'
-import Posts from './Posts'
-function Acceuil() {
+
+function Plus() {
     return (
         <>
         <div className="md:top-20 top-23 px-10 relative">
-        <CreatePost />
-        <Posts />
-        
-        </div>
+        <CreatePost /> </div>
         </>
     )
 }
 
-export default Acceuil
+export default Plus
