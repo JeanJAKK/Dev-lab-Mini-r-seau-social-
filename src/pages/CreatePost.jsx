@@ -81,7 +81,7 @@ export default function CreatePost() {
 
   return (
     <div className="justify-center items-center  flex">
-      <div className="bg-white md:w-[600px]  border w-[396px] rounded-xl shadow-sm">
+      <div className="bg-white md:w-[700px]  border w-[396px] rounded-xl shadow-sm">
         <form onSubmit={handleCreatePost} className="md:border-8 rounded-2xl border-white">
           <div className="flex gap-5 h-40">
             <p className="text-black border hover:text-purple-600 transition h-10 w-12 items-center flex justify-center rounded-full">
