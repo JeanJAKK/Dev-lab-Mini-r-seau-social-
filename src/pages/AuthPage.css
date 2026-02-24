@@ -220,7 +220,7 @@
   --accent2: #8a2be2;
   --muted: #666;
   --card-bg: #ffffff;
-  --page-bg: linear-gradient(180deg, #f3f6ff 0%, #ffffff 100%);
+  --page-bg: #f3f6ff;
   --shadow: 0 6px 18px rgba(20, 20, 40, 0.08);
   --radius: 12px;
 }
