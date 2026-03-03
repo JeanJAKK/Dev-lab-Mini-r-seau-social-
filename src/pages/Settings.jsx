@@ -316,7 +316,7 @@ export default function Parameter() {
         minHeight: "100vh",
         maxWidth: "420px",
         margin: "0 auto",
-        marginTop: "100px",
+        paddingTop: "40px",
         paddingBottom: "40px",
       }}
     >

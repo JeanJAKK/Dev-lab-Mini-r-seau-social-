@@ -50,30 +50,19 @@ export default function NavBar() {
     navigate("/authPage", { replace: true });
   };
 
-  const activeClass = "text-purple-600 font-bold";
-<<<<<<< Updated upstream
-  const normalClass = "text-gray-500 hover:text-purple-600 transition-colors duration-150";
-=======
-  const normalClass = isDark
-    ? "text-gray-300 hover:text-purple-400 transition"
-    : "text-gray-600 hover:text-purple-600 transition";
->>>>>>> Stashed changes
+const activeClass = "text-purple-600 font-bold";
+const normalClass = isDark
+  ? "text-gray-300 hover:text-purple-400 transition"
+  : "text-gray-600 hover:text-purple-600 transition";
 
   return (
     <>
-      {/* NAVBAR DESKTOP */}
-<<<<<<< Updated upstream
-      <nav className="w-full h-16 flex items-center bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 w-full">
-          <div className="flex items-center justify-between">
-
-=======
-      <nav
-        className={`w-full h-20 md:h-17 items-center border-b fixed top-0 left-0 right-0 z-50 ${isDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}`}
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-full">
->>>>>>> Stashed changes
+{/* NAVBAR DESKTOP */}
+<nav
+  className={`w-full h-19 flex items-center border-b fixed top-0 left-0 right-0 z-50 shadow-sm backdrop-blur-md ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-100"}`}
+>
+  <div className="max-w-7xl mx-auto px-6 w-full">
+    <div className="flex items-center justify-between">
             {/* LOGO */}
             <p className="text-xl md:w-44 text-center font-extrabold bg-linear-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent tracking-tight">
               SynapseLink
@@ -126,23 +115,15 @@ export default function NavBar() {
 
             {/* PROFILE DROPDOWN */}
             <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-<<<<<<< Updated upstream
-                className="flex items-center gap-2.5 hover:bg-gray-50 px-3 py-2 rounded-xl transition focus:outline-none border border-transparent hover:border-gray-100"
-=======
-                className={`flex items-center gap-3 p-2 rounded-full transition focus:outline-none ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
->>>>>>> Stashed changes
-              >
-                <img
-                  src={avatarUrl}
-                  alt="profile"
-<<<<<<< Updated upstream
-                  className="w-8 h-8 rounded-full border-2 border-purple-200 object-cover"
-=======
-                  className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-800" : "border-purple-100"}`}
->>>>>>> Stashed changes
-                />
+<button
+  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+  className={`flex items-center gap-3 p-2 rounded-full transition focus:outline-none ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
+>
+<img
+  src={avatarUrl}
+  alt="profile"
+  className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-800" : "border-purple-100"}`}
+/>
                 <div className="hidden md:flex flex-col items-start text-sm">
                   <span
                     className={`font-semibold text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}
@@ -208,14 +189,10 @@ export default function NavBar() {
         </div>
       </nav>
 
-      {/* NAVBAR MOBILE */}
-<<<<<<< Updated upstream
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-100 shadow-lg h-16">
-=======
-      <nav
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow h-16 ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-200"}`}
-      >
->>>>>>> Stashed changes
+{/* NAVBAR MOBILE */}
+<nav
+  className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow h-16 ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-200"}`}
+>
         <ul className="relative flex justify-around items-center py-3 text-xs font-medium">
           <li>
             <NavLink

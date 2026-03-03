@@ -9,24 +9,16 @@ export default function Home() {
 
   return (
     <>
-      <NavBar />
-<<<<<<< Updated upstream
-      
-      <main style={{ paddingTop: '72px' }}>
-        <Outlet />
-      </main>
-=======
-
-      <div
-        style={{
-          minHeight: "calc(100vh - 80px)",
-          background: isDark ? "#111827" : "#f8fafc",
-          marginTop: "80px",
-        }}
-      >
-        <Outlet />
-      </div>
->>>>>>> Stashed changes
+<NavBar />
+<div
+  style={{
+    minHeight: "calc(100vh - 80px)",
+    background: isDark ? "#111827" : "#f8fafc",
+    marginTop: "76px",
+  }}
+>
+  <Outlet />
+</div>
     </>
   );
 }
