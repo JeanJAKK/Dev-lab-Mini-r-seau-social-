@@ -27,14 +27,19 @@ function ThemeToggle() {
 
 // ── Account Card ──
 function AccountCard() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   return (
     <div
       style={{
-        background: "#ffffff",
+        background: isDark ? "#111827" : "#ffffff",
         borderRadius: "16px",
         margin: "16px 16px 12px",
         padding: "14px 18px",
-        boxShadow: "0 1px 4px rgba(0,0,0,.06)",
+        boxShadow: isDark
+          ? "0 1px 4px rgba(255,255,255,.06)"
+          : "0 1px 4px rgba(0,0,0,.06)",
         display: "flex",
         alignItems: "center",
         gap: "14px",
@@ -66,7 +71,7 @@ function AccountCard() {
             height: "18px",
             borderRadius: "50%",
             background: "#007aff",
-            border: "2px solid #ffffff",
+            border: isDark ? "2px solid #2c2c2e" : "2px solid #ffffff",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -82,27 +87,39 @@ function AccountCard() {
 
       {/* Infos */}
       <div>
-        <div style={{ fontSize: "16px", fontWeight: 700, color: "#1c1c1e" }}>
+        <div
+          style={{
+            fontSize: "16px",
+            fontWeight: 700,
+            color: isDark ? "#e5e5ea" : "#1c1c1e",
+          }}
+        >
           <NavLink
             to="/home/profil"
-            style={{ color: "#1c1c1e", textDecoration: "none" }}
+            style={{
+              color: isDark ? "#e5e5ea" : "#1c1c1e",
+              textDecoration: "none",
+            }}
           >
-            JohnDoe123
+            SophieMartin123
           </NavLink>
         </div>
         <div
           style={{
             fontSize: "14px",
             fontWeight: 600,
-            color: "#007aff",
+            color: isDark ? "#a78bfa" : "#007aff",
             marginTop: "2px",
           }}
         >
           <NavLink
             to="/home/Profil"
-            style={{ color: "#007aff", textDecoration: "none" }}
+            style={{
+              color: isDark ? "#a78bfa" : "#007aff",
+              textDecoration: "none",
+            }}
           >
-            john.doe@example.com
+            sophie.martin@example.com
           </NavLink>
         </div>
       </div>
@@ -163,6 +180,9 @@ function Reglage({
   toggleState,
   onToggle,
 }) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   // if toggleState/onToggle provided, component is controlled by parent
   const [active, setActive] = useState(defaultOn);
   const isControlled =
@@ -179,11 +199,13 @@ function Reglage({
   return (
     <div
       style={{
-        background: "#ffffff",
+        background: isDark ? "#111827" : "#ffffff",
         borderRadius: "16px",
         margin: "0 16px 12px",
         padding: "16px 18px",
-        boxShadow: "0 1px 4px rgba(0,0,0,.06)",
+        boxShadow: isDark
+          ? "0 1px 4px rgba(255,255,255,.06)"
+          : "0 1px 4px rgba(0,0,0,.06)",
       }}
     >
       <div
@@ -199,7 +221,7 @@ function Reglage({
             style={{
               fontSize: "16px",
               fontWeight: 800,
-              color: "#1c1c1e",
+              color: isDark ? "#ffffff" : "#1c1c1e",
               marginBottom: "4px",
             }}
           >
@@ -209,7 +231,7 @@ function Reglage({
             style={{
               fontSize: "13.5px",
               fontWeight: 500,
-              color: "#6e6e73",
+              color: isDark ? "#98989f" : "#6e6e73",
               lineHeight: 1.5,
             }}
           >
@@ -226,7 +248,7 @@ function Reglage({
               borderRadius: "8px",
               border: "none",
               background: "transparent",
-              color: "#1c1c1e",
+              color: isDark ? "#ffffff" : "#1c1c1e",
               WebkitAppearance: "none",
               MozAppearance: "none",
             }}
@@ -246,18 +268,19 @@ function Reglage({
 // ── Parameter (page principale) ──
 export default function Parameter() {
   const [language, setLanguage] = useState("fr");
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
-  const containerBg = darkMode ? "#1c1c1e" : "#eef2f7";
-  const containerColor = darkMode ? "#f2f2f7" : "#1c1c1e";
+  const containerBg = isDark ? "#111827" : "#eef2f7";
+  const containerColor = isDark ? "#f2f2f7" : "#1c1c1e";
 
   const reglages = [
     {
       titre: "Thèmes",
       description: "Activer pour mode sombre.",
       hasToggle: true,
-      toggleState: darkMode,
-      onToggle: () => setDarkMode(!darkMode),
+      toggleState: isDark,
+      onToggle: toggleTheme,
     },
     {
       titre: "Notifications",

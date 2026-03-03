@@ -20,38 +20,41 @@ import Search from "./pages/Search";
 import Profil from "./pages/Profil";
 import Plus from "./pages/Plus";
 import Settings from "./pages/Settings.jsx";
+import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
   const [auth, setAuth] = useState(isAuthenticated());
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/authPage" />} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/authPage" />} />
 
-        <Route path="/authPage" element={<AuthPage setAuth={setAuth} />} />
-        <Route path="/register" element={<Register />} />
+          <Route path="/authPage" element={<AuthPage setAuth={setAuth} />} />
+          <Route path="/register" element={<Register />} />
 
-        {auth ? (
-          <Route path="/home" element={<Home />}>
-            <Route index element={<Acceuil />} />
+          {auth ? (
+            <Route path="/home" element={<Home />}>
+              <Route index element={<Acceuil />} />
 
-            <Route path="profil" element={<Profil />} />
-            <Route path="acceuil" element={<Acceuil />} />
-            <Route path="feed" element={<Feed />} />
-            <Route path="posts" element={<Posts />} />
-            <Route path="search" element={<Search />} />
-            <Route path="messages" element={<Messages />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="create-post" element={<CreatePost />} />
-            <Route path="plus" element={<Plus />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-        ) : (
-          <Route path="*" element={<Navigate to="/authPage" />} />
-        )}
-      </Routes>
-    </BrowserRouter>
+              <Route path="profil" element={<Profil />} />
+              <Route path="acceuil" element={<Acceuil />} />
+              <Route path="feed" element={<Feed />} />
+              <Route path="posts" element={<Posts />} />
+              <Route path="search" element={<Search />} />
+              <Route path="messages" element={<Messages />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="create-post" element={<CreatePost />} />
+              <Route path="plus" element={<Plus />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          ) : (
+            <Route path="*" element={<Navigate to="/authPage" />} />
+          )}
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
