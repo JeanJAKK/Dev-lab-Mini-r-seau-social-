@@ -13,7 +13,7 @@ export default function Posts() {
     const fetchPosts = async () => {
       const { data, error } = await supabase
         .from("posts")
-        .select("*")
+        .select("*, profiles (name)")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -46,7 +46,7 @@ export default function Posts() {
             <div className="post-header">
               <div className="user-avatar"><User size={20} /></div>
               <div className="post-meta">
-                <h3 className="post-title">{post.title}</h3>
+                <h3 className="post-title">{post.profiles?.name}</h3>
                 <span className="post-date">{new Date(post.created_at).toLocaleString()}</span>
               </div>
             </div>

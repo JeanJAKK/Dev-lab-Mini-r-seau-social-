@@ -6,6 +6,7 @@ export default function Feed() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [name, setName] = useState("");
 
   useEffect(() => {
     fetchPosts();
