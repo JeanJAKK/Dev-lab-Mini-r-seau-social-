@@ -13,6 +13,7 @@ import Notifications from "./pages/Notifications";
 import Search from "./pages/Search";
 import Profil from "./pages/Profil";
 import Plus from "./pages/Plus";
+import Settings from "./pages/Settings.jsx"
 
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
         <Route path="notifications" element={<Notifications />} />
         <Route path="create-post" element={<CreatePost />} />
         <Route path="plus" element={<Plus />} />
+        <Route path="settings" element={<Settings />} />
 
       </Route>
     ) : (
