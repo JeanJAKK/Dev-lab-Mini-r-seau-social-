@@ -35,22 +35,22 @@ export default function NavBar() {
   };
 
   const activeClass = "text-purple-600 font-bold";
-  const normalClass = "text-gray-600 hover:text-purple-600 transition";
+  const normalClass = "text-gray-500 hover:text-purple-600 transition-colors duration-150";
 
   return (
     <>
       {/* NAVBAR DESKTOP */}
-      <nav className="w-full h-20 md:h-17 items-center bg-white border-b fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-full">
+      <nav className="w-full h-16 flex items-center bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm fixed top-0 left-0 right-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 w-full">
+          <div className="flex items-center justify-between">
 
             {/* LOGO */}
-            <p className="text-2xl md:w-42 text-center font-bold text-purple-600">
+            <p className="text-xl md:w-44 text-center font-extrabold bg-linear-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent tracking-tight">
               SynapseLink
             </p>
 
             {/* LINKS */}
-            <ul className="hidden md:flex text-lg items-center gap-8 font-medium">
+            <ul className="hidden md:flex text-sm items-center gap-6 font-medium">
               <li>
                 <NavLink to="." end className={({ isActive }) => `flex items-center gap-2 ${isActive ? activeClass : normalClass}`}>
                   <Home size={18} /> Accueil
@@ -77,12 +77,12 @@ export default function NavBar() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-full transition focus:outline-none"
+                className="flex items-center gap-2.5 hover:bg-gray-50 px-3 py-2 rounded-xl transition focus:outline-none border border-transparent hover:border-gray-100"
               >
                 <img
                   src={avatarUrl}
                   alt="profile"
-                  className="w-10 h-10 rounded-full border-2 border-purple-100 object-cover"
+                  className="w-8 h-8 rounded-full border-2 border-purple-200 object-cover"
                 />
                 <div className="hidden md:flex flex-col items-start text-sm">
                   <span className="font-semibold text-gray-700">{displayName}</span>
@@ -132,7 +132,7 @@ export default function NavBar() {
       </nav>
 
       {/* NAVBAR MOBILE */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t shadow h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-100 shadow-lg h-16">
         <ul className="relative flex justify-around items-center py-3 text-xs font-medium">
           <li>
             <NavLink to="." end className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`}>

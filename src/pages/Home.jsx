@@ -7,8 +7,9 @@ export default function Home() {
     <>
       <NavBar />
       
-      <Outlet />
-      
+      <main style={{ paddingTop: '72px' }}>
+        <Outlet />
+      </main>
     </>
   );
 }

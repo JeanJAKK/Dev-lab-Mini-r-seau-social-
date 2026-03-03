@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import supabase from "../services/supabase";
 import "./Posts.css";
-import { User } from "lucide-react";
+import { User, Heart, MessageCircle, Share2 } from "lucide-react";
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
@@ -39,15 +39,21 @@ export default function Posts() {
         <h2 className="posts-title">Fil d'actualité</h2>
 
         {message && <p className="message">{message}</p>}
-        {posts.length === 0 && <p className="empty-message">Aucun post pour le moment.</p>}
+        {posts.length === 0 && (
+          <p className="empty-message">Aucun post pour le moment.</p>
+        )}
 
         {posts.map((post) => (
           <div className="post-card" key={post.id}>
             <div className="post-header">
-              <div className="user-avatar"><User size={20} /></div>
+              <div className="user-avatar">
+                <User size={20} />
+              </div>
               <div className="post-meta">
-                <h3 className="post-title">{post.profiles?.name}</h3>
-                <span className="post-date">{new Date(post.created_at).toLocaleString()}</span>
+                <h3 className="post-username">{post.profiles?.name}</h3>
+                <span className="post-date">
+                  {new Date(post.created_at).toLocaleString()}
+                </span>
               </div>
             </div>
 
@@ -61,6 +67,13 @@ export default function Posts() {
             )}
 
             <p className="post-content">{post.content}</p>
+
+           
+            <div className="post-actions">
+              <button className="post-action-btn"><Heart size={16} /> J'aime</button>
+              <button className="post-action-btn"><MessageCircle size={16} /> Commenter</button>
+              <button className="post-action-btn"><Share2 size={16} /> Partager</button>
+            </div>
           </div>
         ))}
 
@@ -69,30 +82,30 @@ export default function Posts() {
           <div className="image-modal" onClick={closeModal}>
             <img src={modalImage} alt="Agrandie" />
             <button
-  className="download-btn"
-  onClick={async (e) => {
-    e.stopPropagation(); // empêcher la fermeture de la modale
-    try {
-      const response = await fetch(modalImage);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+              className="download-btn"
+              onClick={async (e) => {
+                e.stopPropagation(); // empêcher la fermeture de la modale
+                try {
+                  const response = await fetch(modalImage);
+                  const blob = await response.blob();
+                  const url = URL.createObjectURL(blob);
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "image.jpg"; // tu peux mettre le nom que tu veux
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = "image.jpg"; // tu peux mettre le nom que tu veux
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
 
-      URL.revokeObjectURL(url); // libérer la mémoire
-    } catch (error) {
-      console.error("Erreur lors du téléchargement :", error);
-      alert("Impossible de télécharger l'image.");
-    }
-  }}
->
-  Télécharger
-</button>
+                  URL.revokeObjectURL(url); // libérer la mémoire
+                } catch (error) {
+                  console.error("Erreur lors du téléchargement :", error);
+                  alert("Impossible de télécharger l'image.");
+                }
+              }}
+            >
+              Télécharger
+            </button>
           </div>
         )}
       </div>
