@@ -1,4 +1,29 @@
 import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
+
+// ── Toggle de thème global (exemple d'utilisation du contexte) ──
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      style={{
+        position: "fixed",
+        top: "16px",
+        right: "16px",
+        padding: "8px 12px",
+        borderRadius: "8px",
+        border: "none",
+        background: theme === "light" ? "#1c1c1e" : "#e5e5ea",
+        color: theme === "light" ? "#e5e5ea" : "#1c1c1e",
+        cursor: "pointer",
+      }}
+    >
+      {theme === "light" ? "Dark Mode" : "Light Mode"}
+    </button>
+  );
+}
 
 // ── Account Card ──
 function AccountCard() {
@@ -58,7 +83,12 @@ function AccountCard() {
       {/* Infos */}
       <div>
         <div style={{ fontSize: "16px", fontWeight: 700, color: "#1c1c1e" }}>
-          JohnDoe123
+          <NavLink
+            to="/home/profil"
+            style={{ color: "#1c1c1e", textDecoration: "none" }}
+          >
+            JohnDoe123
+          </NavLink>
         </div>
         <div
           style={{
@@ -68,7 +98,12 @@ function AccountCard() {
             marginTop: "2px",
           }}
         >
-          john.doe@example.com
+          <NavLink
+            to="/home/Profil"
+            style={{ color: "#007aff", textDecoration: "none" }}
+          >
+            john.doe@example.com
+          </NavLink>
         </div>
       </div>
     </div>
@@ -116,8 +151,31 @@ function Toggle({ checked, onChange }) {
 }
 
 // ── Reglage ──
-function Reglage({ titre, description, hasToggle, defaultOn = false }) {
+function Reglage({
+  titre,
+  description,
+  hasToggle,
+  defaultOn = false,
+  hasDropdown = false,
+  options = [],
+  value,
+  onChange,
+  toggleState,
+  onToggle,
+}) {
+  // if toggleState/onToggle provided, component is controlled by parent
   const [active, setActive] = useState(defaultOn);
+  const isControlled =
+    toggleState !== undefined && typeof onToggle === "function";
+  const current = isControlled ? toggleState : active;
+  const handleToggle = () => {
+    if (isControlled) {
+      onToggle(!toggleState);
+    } else {
+      setActive(!active);
+    }
+  };
+
   return (
     <div
       style={{
@@ -158,8 +216,27 @@ function Reglage({ titre, description, hasToggle, defaultOn = false }) {
             {description}
           </div>
         </div>
-        {hasToggle && (
-          <Toggle checked={active} onChange={() => setActive(!active)} />
+        {hasToggle && <Toggle checked={current} onChange={handleToggle} />}
+        {hasDropdown && (
+          <select
+            value={value}
+            onChange={onChange}
+            style={{
+              padding: "6px 10px",
+              borderRadius: "8px",
+              border: "none",
+              background: "transparent",
+              color: "#1c1c1e",
+              WebkitAppearance: "none",
+              MozAppearance: "none",
+            }}
+          >
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         )}
       </div>
     </div>
@@ -168,14 +245,19 @@ function Reglage({ titre, description, hasToggle, defaultOn = false }) {
 
 // ── Parameter (page principale) ──
 export default function Parameter() {
-  const [mode, setMode] = useState("dark");
+  const [language, setLanguage] = useState("fr");
+  const [darkMode, setDarkMode] = useState(false);
+
+  const containerBg = darkMode ? "#1c1c1e" : "#eef2f7";
+  const containerColor = darkMode ? "#f2f2f7" : "#1c1c1e";
 
   const reglages = [
     {
       titre: "Thèmes",
       description: "Activer pour mode sombre.",
       hasToggle: true,
-      defaultOn: true,
+      toggleState: darkMode,
+      onToggle: () => setDarkMode(!darkMode),
     },
     {
       titre: "Notifications",
@@ -192,6 +274,13 @@ export default function Parameter() {
       titre: "Langue",
       description: "Choisir la langue de l'application.",
       hasToggle: false,
+      hasDropdown: true,
+      options: [
+        { value: "fr", label: "Français" },
+        { value: "en", label: "English" },
+      ],
+      value: language,
+      onChange: (e) => setLanguage(e.target.value),
     },
   ];
 
@@ -199,47 +288,15 @@ export default function Parameter() {
     <div
       style={{
         fontFamily: "'Nunito', -apple-system, BlinkMacSystemFont, sans-serif",
-        background: "#f2f2f7",
+        background: containerBg,
+        color: containerColor,
         minHeight: "100vh",
         maxWidth: "420px",
         margin: "0 auto",
+        marginTop: "100px",
         paddingBottom: "40px",
       }}
     >
-      {/* Switcher Dark / Clair */}
-      <div
-        style={{
-          display: "flex",
-          margin: "16px 16px 12px",
-          background: "#e5e5ea",
-          borderRadius: "12px",
-          padding: "3px",
-          gap: "3px",
-        }}
-      >
-        {["dark", "light"].map((m) => (
-          <button
-            key={m}
-            onClick={() => setMode(m)}
-            style={{
-              flex: 1,
-              padding: "10px 0",
-              border: "none",
-              borderRadius: "10px",
-              fontSize: "15px",
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "background .2s, color .2s",
-              background: mode === m ? "#1c1c1e" : "transparent",
-              color: mode === m ? "#ffffff" : "#1c1c1e",
-              boxShadow: mode === m ? "0 2px 8px rgba(0,0,0,.18)" : "none",
-            }}
-          >
-            {m === "dark" ? "Dark Mode" : "Mode Clair"}
-          </button>
-        ))}
-      </div>
-
       {/*  Account Card ici */}
       <AccountCard />
 

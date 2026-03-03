@@ -1,5 +1,5 @@
 import React from "react";
-import Contact from "./contact";
+import Contact from "../pages/Contact";
 import { Search } from "lucide-react";
 import "./Message.css";
 export default function Messages() {
