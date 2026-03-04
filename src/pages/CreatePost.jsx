@@ -90,7 +90,7 @@ export default function CreatePost() {
 
   return (
     <div className="bg-white rounded-2xl! border! border-gray-100! shadow-sm! mb-5! overflow-hidden!">
-      <div className="px-5! pt-5! pb-4!">
+      <div className="md:px-5! md:pt-5! md:pb-4!">
         <form onSubmit={handleCreatePost}>
           <div className="flex! gap-4!">
             {/* Avatar */}
