@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import supabase from "../services/supabase.js";
-import { Link } from "react-router-dom";
 import { User, Camera } from "lucide-react";
 
 export default function CreatePost() {
@@ -9,6 +8,16 @@ export default function CreatePost() {
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user] = useState({
+    full_name: "Sophie Martin",
+    email: "sophie.martin@example.com",
+    avatar_url: "https://i.pravatar.cc/300",
+  });
+  const displayName = user.full_name;
+   const avatarUrl =
+    user.avatar_url ||
+    `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+
 
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -80,53 +89,59 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="justify-center items-center  flex">
-      <div className="bg-white md:w-[700px]  border w-[396px] rounded-xl shadow-sm">
-        <form onSubmit={handleCreatePost} className="md:border-8 rounded-2xl border-white">
-          <div className="flex gap-5 h-40">
-            <p className="text-black border hover:text-purple-600 transition h-10 w-12 items-center flex justify-center rounded-full">
-              <Link to="profile" className="">
-                <User size={24} />
-              </Link>
-            </p>
-            <div className="flex gap-2 w-full flex-col">
+    <div className="bg-white rounded-2xl! border! border-gray-100! shadow-sm! mb-5! overflow-hidden!">
+      <div className="md:px-5! md:pt-5! md:pb-4!">
+        <form onSubmit={handleCreatePost}>
+          <div className="flex! gap-4!">
+            {/* Avatar */}
+            <div className="shrink-0!">
+              <img
+  src={avatarUrl}
+  alt="profile"
+  className="w-10 h-10 rounded-full border-2 object-cover border-purple-100"
+/>
+            </div>
+
+            {/* Inputs */}
+            <div className="flex-1! flex! flex-col! gap-3!">
               <input
                 type="text"
                 placeholder="Titre du post"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="h-8 rounded bg-gray-50 border-gray-300 border text-gray-900 transition-all"
+                className="w-full! px-4! py-2.5! rounded-xl! bg-gray-50! border! border-gray-200! text-gray-900! text-sm! placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-400 transition"
               />
-
               <textarea
                 placeholder="Exprime-toi..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required
                 rows={3}
-                className="h-28 p-4 bg-gray-50 border-gray-300 border  rounded text-gray-900 placeholder-gray-400 transition-all resize-none"
+                className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-400 transition resize-none! leading-relaxed!"
               />
             </div>
           </div>
-          <div className="flex justify-between">
-            <label className="flex px-4 py-3 bg-gray-50 cursor-pointer hover:border-blue-400 transition-all group">
-              <span className="text-sm text-black group-hover:text-blue-600">
-                {imageFile ? imageFile.name : ""}
-                <Camera />
+
+          {/* Footer bar */}
+          <div className="flex! items-center! justify-between! mt-4! pt-3! border-t! border-gray-100!">
+            <label className="flex! items-center! gap-2.5! px-4! py-2! rounded-xl! bg-gray-50! hover:bg-purple-50 cursor-pointer! transition group">
+              <Camera size={17} className="text-gray-400 group-hover:text-purple-600 transition" />
+              <span className="text-sm! text-gray-400! group-hover:text-purple-600 transition max-w-40! truncate!">
+                {imageFile ? imageFile.name : "Ajouter une image"}
               </span>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImageFile(e.target.files[0])}
-                className="hidden"
+                className="hidden!"
               />
             </label>
 
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-400 w-30 h-10 text-white py-3.5 rounded font-semibold hover:bg-blue-700 active:scale-[0.98] disabled:bg-blue-300 disabled:active:scale-100 transition-all duration-200"
+              className="px-6! py-2.5! bg-linear-to-r from-blue-400 to-indigo-500 text-white! text-sm! font-semibold! rounded-xl! border-none! hover:from-blue-700 hover:to-indigo-600 active:scale-[0.97] disabled:opacity-60 transition-all! duration-200 shadow-sm!"
             >
               {loading ? "Publication..." : "Publier"}
             </button>
@@ -134,9 +149,7 @@ export default function CreatePost() {
         </form>
 
         {message && (
-          <p
-            className={`mt-4 text-center text-sm font-medium ${message.includes("✅") ? "text-green-600" : "text-red-500"}`}
-          >
+          <p className={`mt-3! text-center! text-sm! font-medium! ${message.includes("✅") ? "text-green-600!" : "text-red-500!"}`}>
             {message}
           </p>
         )}
