@@ -2,12 +2,15 @@
 import supabase from "../services/supabase";
 import "./Posts.css";
 import { User, Heart, MessageCircle, Share2 } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+import CreatePost from "./CreatePost";
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [modalImage, setModalImage] = useState(null); // Image en modale
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -35,7 +38,7 @@ export default function Posts() {
   const closeModal = () => setModalImage(null);
 
   return (
-    <div className="posts-page">
+    <div className="posts-page" data-theme={theme}>
       <div className="posts-container">
         <h2 className="posts-title">Fil d'actualité</h2>
 
@@ -69,11 +72,16 @@ export default function Posts() {
 
             <p className="post-content">{post.content}</p>
 
-           
             <div className="post-actions">
-              <button className="post-action-btn"><Heart size={16} /> J'aime</button>
-              <button className="post-action-btn"><MessageCircle size={16} /> Commenter</button>
-              <button className="post-action-btn"><Share2 size={16} /> Partager</button>
+              <button className="post-action-btn">
+                <Heart size={16} /> J'aime
+              </button>
+              <button className="post-action-btn">
+                <MessageCircle size={16} /> Commenter
+              </button>
+              <button className="post-action-btn">
+                <Share2 size={16} /> Partager
+              </button>
             </div>
           </div>
         ))}

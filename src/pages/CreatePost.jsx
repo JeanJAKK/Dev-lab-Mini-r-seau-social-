@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import supabase from "../services/supabase.js";
 import { User, Camera } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 export default function CreatePost() {
   const [title, setTitle] = useState("");
@@ -8,16 +9,6 @@ export default function CreatePost() {
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [user] = useState({
-    full_name: "Sophie Martin",
-    email: "sophie.martin@example.com",
-    avatar_url: "https://i.pravatar.cc/300",
-  });
-  const displayName = user.full_name;
-   const avatarUrl =
-    user.avatar_url ||
-    `https://ui-avatars.com/api/?name=${displayName}&background=random`;
-
 
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -90,16 +81,16 @@ export default function CreatePost() {
 
   return (
     <div className="bg-white rounded-2xl! border! border-gray-100! shadow-sm! mb-5! overflow-hidden!">
-      <div className="md:px-5! md:pt-5! md:pb-4!">
+      <div className="px-5! pt-5! pb-4!">
         <form onSubmit={handleCreatePost}>
           <div className="flex! gap-4!">
             {/* Avatar */}
             <div className="shrink-0!">
               <img
-  src={avatarUrl}
-  alt="profile"
-  className="w-10 h-10 rounded-full border-2 object-cover border-purple-100"
-/>
+                src={avatarUrl}
+                alt="profile"
+                className="w-10 h-10 rounded-full border-2 object-cover border-purple-100"
+              />
             </div>
 
             {/* Inputs */}
@@ -110,7 +101,7 @@ export default function CreatePost() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full! px-4! py-2.5! rounded-xl! bg-gray-50! border! border-gray-200! text-gray-900! text-sm! placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-400 transition"
+                className={`w-full! px-4! py-2.5! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition ${isDark ? "bg-gray-700! border-purple-600! text-gray-100! placeholder-gray-400! focus:ring-purple-400! focus:border-purple-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
               />
               <textarea
                 placeholder="Exprime-toi..."
@@ -118,16 +109,25 @@ export default function CreatePost() {
                 onChange={(e) => setContent(e.target.value)}
                 required
                 rows={3}
-                className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-400 transition resize-none! leading-relaxed!"
+                className={`w-full! px-4! py-3! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition resize-none! leading-relaxed! ${isDark ? "bg-gray-700! border-purple-600! text-gray-100! placeholder-gray-400! focus:ring-purple-400! focus:border-purple-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
               />
             </div>
           </div>
 
           {/* Footer bar */}
-          <div className="flex! items-center! justify-between! mt-4! pt-3! border-t! border-gray-100!">
-            <label className="flex! items-center! gap-2.5! px-4! py-2! rounded-xl! bg-gray-50! hover:bg-purple-50 cursor-pointer! transition group">
-              <Camera size={17} className="text-gray-400 group-hover:text-purple-600 transition" />
-              <span className="text-sm! text-gray-400! group-hover:text-purple-600 transition max-w-40! truncate!">
+          <div
+            className={`flex! items-center! justify-between! mt-4! pt-3! border-t! ${isDark ? "border-purple-600!" : "border-gray-300!"}`}
+          >
+            <label
+              className={`flex! items-center! gap-2.5! px-4! py-2! rounded-xl! cursor-pointer! transition! group! ${isDark ? "bg-gray-700! hover:bg-purple-900!" : "bg-gray-50! hover:bg-purple-50!"}`}
+            >
+              <Camera
+                size={17}
+                className={`${isDark ? "text-gray-400! group-hover:text-purple-400!" : "text-gray-400! group-hover:text-purple-600!"} transition`}
+              />
+              <span
+                className={`text-sm! transition! max-w-40! truncate! ${isDark ? "text-gray-400! group-hover:text-purple-400!" : "text-gray-400! group-hover:text-purple-600!"}`}
+              >
                 {imageFile ? imageFile.name : "Ajouter une image"}
               </span>
               <input
@@ -149,7 +149,9 @@ export default function CreatePost() {
         </form>
 
         {message && (
-          <p className={`mt-3! text-center! text-sm! font-medium! ${message.includes("✅") ? "text-green-600!" : "text-red-500!"}`}>
+          <p
+            className={`mt-3! text-center! text-sm! font-medium! ${message.includes("✅") ? "text-green-600!" : "text-red-500!"}`}
+          >
             {message}
           </p>
         )}
