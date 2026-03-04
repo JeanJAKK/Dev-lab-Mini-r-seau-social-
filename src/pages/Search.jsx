@@ -1,17 +1,17 @@
 import React from "react";
 import { Hammer } from "lucide-react";
 import supabase from "../services/supabase.js";
-import { useEffect } from "react";
-const [ usersName, setUsersName ] = useSate();
-  const getUsers = async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`name`)
-        .order("name", { ascending: true });
-      setUsersName(data)
-      console.log(data);
-    };
+import { useEffect, useState } from "react";
+
 function Search() {
+  const [usersName, setUsersName] = useState();
+  const getUsers = async () => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(`name`)
+      .order("name", { ascending: true });
+    console.log(data);
+  };
   useEffect(() => {
     getUsers();
   }, []);
