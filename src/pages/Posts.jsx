@@ -13,7 +13,7 @@ export default function Posts() {
     const fetchPosts = async () => {
       const { data, error } = await supabase
         .from("posts")
-        .select("*, profiles (name)")
+        .select("*, profiles(name)")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -26,6 +26,7 @@ export default function Posts() {
     };
 
     fetchPosts();
+    
   }, []);
 
   if (loading) return <p className="loading">Chargement...</p>;

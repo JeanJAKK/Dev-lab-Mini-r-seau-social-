@@ -19,11 +19,7 @@ export default function Feed() {
     const { data, error } = await supabase
       .from("posts")
       .select(`
-        id,
-        title,
-        content,
-        image_url,
-        created_at,
+        *,
         profiles (
           name
         )
@@ -55,7 +51,7 @@ export default function Feed() {
 
             {/* Auteur + date */}
             <div className="post-header">
-              <strong>{post.profiles?.name || "Utilisateur inconnu"}</strong>
+              <strong>{post.profiles?.name}</strong>
               <span className="post-date">
                 {new Date(post.created_at).toLocaleDateString("fr-FR", {
                   day: "2-digit",
@@ -73,7 +69,7 @@ export default function Feed() {
               />
             )}
 
-            <h3>{post.title}</h3>
+            <h3>{post.profiles?.name}</h3>
             <p>{post.content}</p>
           </div>
         ))}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc"; // icône Google (React Icons)
 import { FaFacebook } from "react-icons/fa"; // icône facebook (React Icons)
 import { Link, useNavigate } from "react-router-dom";
@@ -12,8 +12,29 @@ function AuthPage({ setAuth }) {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [user, setUser] = useState();
   const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   // 1️⃣ Vérifie si la session existe
+  //   const checkUser = async () => {
+  //     const { data } = await supabase.auth.getSession();
+  //     setUser(data.session?.user ?? null);
+  //   };
+
+  //   checkUser();
+
+  //   // 2️⃣ Écoute les changements de session
+  //   const { data: listener } = supabase.auth.onAuthStateChange(
+  //     (event, session) => {
+  //       setUser(session?.user ?? null);
+  //     }
+  //   );
+
+  //   return () => {
+  //     listener.subscription.unsubscribe();
+  //   };
+  // }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -37,6 +58,7 @@ function AuthPage({ setAuth }) {
         email,
         password,
       });
+      console.log(supabase.auth.getSession);
 
       if (error) {
         setMessage("Email ou mot de passe incorrect !");
