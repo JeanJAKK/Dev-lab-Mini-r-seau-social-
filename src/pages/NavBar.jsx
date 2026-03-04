@@ -117,7 +117,7 @@ const normalClass = isDark
             <div className="relative" ref={dropdownRef}>
 <button
   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-  className={`flex items-center gap-3 p-2 rounded-full transition focus:outline-none ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
+  className={`flex items-center gap-3 p-2! rounded-full transition focus:outline-none ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
 >
 <img
   src={avatarUrl}
@@ -139,10 +139,10 @@ const normalClass = isDark
 
               {isDropdownOpen && (
                 <div
-                  className={`absolute right-0 mt-2 w-56 rounded-xl shadow-lg border py-2 overflow-hidden ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}
+                  className={`absolute right-0 mt-2! w-56 rounded-xl shadow-lg border py-2! overflow-hidden ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}
                 >
                   <div
-                    className={`px-4 py-3 border-b mb-1 ${isDark ? "border-gray-700" : "border-gray-100"}`}
+                    className={`px-4! py-3! border-b mb-1! ${isDark ? "border-gray-700" : "border-gray-100"}`}
                   >
                     <p
                       className={`text-sm font-semibold ${isDark ? "text-gray-100" : "text-gray-900"}`}
@@ -159,7 +159,7 @@ const normalClass = isDark
                   <NavLink
                     to="profil"
                     onClick={() => setIsDropdownOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-2 text-sm transition ${isDark ? "text-gray-300 hover:bg-gray-700 hover:text-purple-400" : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"}`}
+                    className={`flex items-center gap-3 px-4! py-2! text-sm transition ${isDark ? "text-gray-300 hover:bg-gray-700 hover:text-purple-400" : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"}`}
                   >
                     <User size={18} /> Mon Profil
                   </NavLink>
@@ -167,18 +167,18 @@ const normalClass = isDark
                   <NavLink
                     to="settings"
                     onClick={() => setIsDropdownOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-2 text-sm transition ${isDark ? "text-gray-300 hover:bg-gray-700 hover:text-purple-400" : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"}`}
+                    className={`flex items-center gap-3 px-4! py-2! text-sm transition ${isDark ? "text-gray-300 hover:bg-gray-700 hover:text-purple-400" : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"}`}
                   >
                     <Settings size={18} /> Paramètres
                   </NavLink>
 
                   <div
-                    className={`border-t my-1 ${isDark ? "border-gray-700" : "border-gray-100"}`}
+                    className={`border-t my-1! ${isDark ? "border-gray-700" : "border-gray-100"}`}
                   ></div>
 
                   <button
                     onClick={handleLogout}
-                    className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition ${isDark ? "text-red-400 hover:bg-gray-700" : "text-red-600 hover:bg-red-50"}`}
+                    className={`w-full flex items-center gap-3 px-4! py-2! text-sm transition ${isDark ? "text-red-400 hover:bg-gray-700" : "text-red-600 hover:bg-red-50"}`}
                   >
                     <LogOut size={18} /> Déconnexion
                   </button>

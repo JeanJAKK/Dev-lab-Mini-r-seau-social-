@@ -69,7 +69,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a78bfa, #6d28d9);
+  background: linear-gradient(135deg, #19628d, #2875d9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,7 +144,7 @@
 
 .post-action-btn:hover {
   background: #f3f0ff;
-  color: #7c3aed;
+  color: blue;
 }
 
 /* Image Modal */

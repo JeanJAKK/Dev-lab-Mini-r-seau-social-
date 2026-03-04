@@ -9,7 +9,7 @@ function Acceuil() {
 
     return (
         <div style={{ minHeight: '100vh', background: isDark ? '#111827' : '#f8fafc' }}>
-        <div style={{ maxWidth: '660px', margin: '0 auto', padding: '20px 16px 112px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px 16px 112px' }}>
                 <CreatePost />
                 <Posts />
             </div>

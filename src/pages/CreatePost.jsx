@@ -8,6 +8,16 @@ export default function CreatePost() {
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user] = useState({
+    full_name: "Sophie Martin",
+    email: "sophie.martin@example.com",
+    avatar_url: "https://i.pravatar.cc/300",
+  });
+  const displayName = user.full_name;
+   const avatarUrl =
+    user.avatar_url ||
+    `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+
 
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -85,9 +95,11 @@ export default function CreatePost() {
           <div className="flex! gap-4!">
             {/* Avatar */}
             <div className="shrink-0!">
-              <div className="w-11! h-11! rounded-full! bg-linear-to-br from-purple-500 to-indigo-600 flex! items-center! justify-center! text-white! shadow-sm!">
-                <User size={20} />
-              </div>
+              <img
+  src={avatarUrl}
+  alt="profile"
+  className="w-10 h-10 rounded-full border-2 object-cover border-purple-100"
+/>
             </div>
 
             {/* Inputs */}
@@ -129,7 +141,7 @@ export default function CreatePost() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6! py-2.5! bg-linear-to-r from-purple-600 to-indigo-500 text-white! text-sm! font-semibold! rounded-xl! border-none! hover:from-purple-700 hover:to-indigo-600 active:scale-[0.97] disabled:opacity-60 transition-all! duration-200 shadow-sm!"
+              className="px-6! py-2.5! bg-linear-to-r from-blue-400 to-indigo-500 text-white! text-sm! font-semibold! rounded-xl! border-none! hover:from-blue-700 hover:to-indigo-600 active:scale-[0.97] disabled:opacity-60 transition-all! duration-200 shadow-sm!"
             >
               {loading ? "Publication..." : "Publier"}
             </button>

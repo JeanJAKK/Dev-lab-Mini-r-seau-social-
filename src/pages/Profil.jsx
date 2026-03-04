@@ -92,7 +92,7 @@ export default function Profile() {
             </div>
 
             {/* Bouton Modifier */}
-            <button className="mt-4 md:mt-0 text-black flex items-center gap-2 border px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+            <button className="mt-4! md:mt-0 text-black flex items-center gap-2 border px-4! py-2! rounded-lg hover:bg-gray-50 transition">
               <Settings size={16} />
               Modifier le profil
             </button>
@@ -100,12 +100,12 @@ export default function Profile() {
           </div>
 
           {/* ================= ONGLET ================= */}
-          <div className="mt-16 mb-6 px-6"> {/* ⬅ marge plus grande pour détacher des infos du haut */}
+          <div className="mt-16! mb-6! px-6!"> {/* ⬅ marge plus grande pour détacher des infos du haut */}
             <div className="bg-gray-200 text-black font-bold rounded-full p-1 flex">
 
               <button
                 onClick={() => setActiveTab("posts")}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
+                className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
                   activeTab === "posts"
                     ? "bg-white"
                     : "hover:bg-gray-400"
@@ -116,7 +116,7 @@ export default function Profile() {
 
               <button
                 onClick={() => setActiveTab("media")}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
+                className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
                   activeTab === "media"
                     ? "bg-white"
                     : "hover:bg-gray-400"
