@@ -9,6 +9,9 @@ export default function CreatePost() {
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
+  const [avatarUrl, setAvatarUrl] = useState("/api/placeholder/40/40");
+  const isDark = theme === "dark";
 
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -80,7 +83,9 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="bg-white rounded-2xl! border! border-gray-100! shadow-sm! mb-5! overflow-hidden!">
+    <div
+      className={`${isDark ? "bg-gray-800! border-purple-600!" : "bg-white! border-gray-300!"} rounded-2xl! border! shadow-sm! mb-5! overflow-hidden!`}
+    >
       <div className="px-5! pt-5! pb-4!">
         <form onSubmit={handleCreatePost}>
           <div className="flex! gap-4!">
@@ -89,7 +94,7 @@ export default function CreatePost() {
               <img
                 src={avatarUrl}
                 alt="profile"
-                className="w-10 h-10 rounded-full border-2 object-cover border-purple-100"
+                className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-600!" : "border-purple-100!"}`}
               />
             </div>
 

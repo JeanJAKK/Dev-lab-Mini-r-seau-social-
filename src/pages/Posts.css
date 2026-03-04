@@ -51,7 +51,7 @@
 .post-card {
   background: #ffffff;
   border-radius: 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d1d5db;
   padding: 20px 22px 14px;
   margin-bottom: 16px;
   box-shadow:
@@ -257,7 +257,16 @@
   border-bottom-color: #805ad5 !important;
 }
 
+[data-theme="dark"] .post-card {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
 [data-theme="dark"] .post-content {
+  color: #e5e5ea !important;
+}
+
+[data-theme="dark"] .post-username {
   color: #e5e5ea !important;
 }
 
