@@ -11,13 +11,13 @@ export default function CreatePost() {
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
- const [user] = useState({
+  const [user] = useState({
     full_name: "Sophie Martin",
     email: "sophie.martin@example.com",
     avatar_url: "https://i.pravatar.cc/300",
   });
 
- const displayName = user.full_name;
+  const displayName = user.full_name;
   const avatarUrl =
     user.avatar_url ||
     `https://ui-avatars.com/api/?name=${displayName}&background=random`;
@@ -93,7 +93,7 @@ export default function CreatePost() {
 
   return (
     <div
-      className={`${isDark ? "bg-gray-800! border-purple-600!" : "bg-white! border-gray-300!"} rounded-2xl! border! shadow-sm! mb-5! overflow-hidden!`}
+      className={`${isDark ? "bg-gray-800! border-purple-400!" : "bg-white! border-gray-300!"} rounded-2xl! border! shadow-sm! mb-5! overflow-hidden!`}
     >
       <div className="px-5! pt-5! pb-4!">
         <form onSubmit={handleCreatePost}>
@@ -103,7 +103,7 @@ export default function CreatePost() {
               <img
                 src={avatarUrl}
                 alt="profile"
-                className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-600!" : "border-purple-100!"}`}
+                className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-400!" : "border-purple-100!"}`}
               />
             </div>
 
@@ -115,7 +115,7 @@ export default function CreatePost() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className={`w-full! px-4! py-2.5! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition ${isDark ? "bg-gray-700! border-purple-600! text-gray-100! placeholder-gray-400! focus:ring-purple-400! focus:border-purple-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
+                className={`w-full! px-4! py-2.5! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition ${isDark ? "bg-gray-700! border-purple-400! text-gray-100! placeholder-gray-400! focus:ring-purple-400! focus:border-purple-300!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
               />
               <textarea
                 placeholder="Exprime-toi..."
@@ -123,14 +123,14 @@ export default function CreatePost() {
                 onChange={(e) => setContent(e.target.value)}
                 required
                 rows={3}
-                className={`w-full! px-4! py-3! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition resize-none! leading-relaxed! ${isDark ? "bg-gray-700! border-purple-600! text-gray-100! placeholder-gray-400! focus:ring-purple-400! focus:border-purple-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
+                className={`w-full! px-4! py-3! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition resize-none! leading-relaxed! ${isDark ? "bg-gray-700! border-purple-600! text-gray-100! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-300!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
               />
             </div>
           </div>
 
          
           <div
-            className={`flex! items-center! justify-between! mt-4! pt-3! border-t! ${isDark ? "border-purple-600!" : "border-gray-300!"}`}
+            className={`flex! items-center! justify-between! mt-4! pt-3! border-t! ${isDark ? "border-purple-200!" : "border-gray-300!"}`}
           >
             <label
               className={`flex! items-center! gap-2.5! px-4! py-2! rounded-xl! cursor-pointer! transition! group! ${isDark ? "bg-gray-700! hover:bg-purple-900!" : "bg-gray-50! hover:bg-purple-50!"}`}
