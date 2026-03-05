@@ -31,6 +31,18 @@ export default function Posts() {
   const [message, setMessage] = useState("");
   const [modalImage, setModalImage] = useState(null);
   const { theme } = useTheme();
+const [user] = useState({
+    full_name: "Sophie Martin",
+    email: "sophie.martin@example.com",
+    avatar_url: "https://i.pravatar.cc/300",
+  });
+
+ const displayName = user.full_name;
+  const avatarUrl =
+    user.avatar_url ||
+    `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -70,7 +82,11 @@ export default function Posts() {
           <div className="post-card" key={post.id}>
             <div className="post-header">
               <div className="user-avatar">
-                <User size={20} />
+               <img
+                src={avatarUrl}
+                alt="profile"
+                className={`w-10 h-10 rounded-full border-2 object-cover`}
+              />
               </div>
               <div className="post-meta">
                 <h3 className="post-username">{post.profiles?.name}</h3>

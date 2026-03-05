@@ -128,7 +128,7 @@ export default function CreatePost() {
             </div>
           </div>
 
-          {/* Footer bar */}
+         
           <div
             className={`flex! items-center! justify-between! mt-4! pt-3! border-t! ${isDark ? "border-purple-600!" : "border-gray-300!"}`}
           >
