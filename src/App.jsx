@@ -12,7 +12,6 @@ import {
 } from "react-router-dom";
 import { isAuthenticated } from "./fakeAuth";
 import Posts from "./pages/Posts";
-import Feed from "./pages/Feed";
 import Acceuil from "./pages/Acceuil";
 import Messages from "./pages/Messages";
 import Notifications from "./pages/Notifications";
@@ -38,7 +37,6 @@ function App() {
 
             <Route path="profil" element={<Profil />} />
             <Route path="acceuil" element={<Acceuil />} />
-            <Route path="feed" element={<Feed />} />
             <Route path="posts" element={<Posts />} />
             <Route path="search" element={<Search />} />
             <Route path="messages" element={<Messages />} />

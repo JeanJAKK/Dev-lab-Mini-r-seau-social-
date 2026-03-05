@@ -3,13 +3,33 @@ import supabase from "../services/supabase";
 import "./Posts.css";
 import { User, Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import CreatePost from "./CreatePost";
+
+function PostImage({ src, alt, onClick }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="post-image-wrapper">
+      {!loaded && <div className="post-image-skeleton" />}
+      <img
+        src={src}
+        alt={alt}
+        className="post-image"
+        onClick={onClick}
+        onLoad={() => setLoaded(true)}
+        style={
+          loaded
+            ? { opacity: 1 }
+            : { position: "absolute", opacity: 0, width: "1px", height: "1px", pointerEvents: "none" }
+        }
+      />
+    </div>
+  );
+}
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [modalImage, setModalImage] = useState(null); // Image en modale
+  const [modalImage, setModalImage] = useState(null);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -61,10 +81,9 @@ export default function Posts() {
             </div>
 
             {post.image_url && (
-              <img
+              <PostImage
                 src={post.image_url}
                 alt={post.title}
-                className="post-image"
                 onClick={() => openModal(post.image_url)}
               />
             )}
@@ -72,8 +91,20 @@ export default function Posts() {
             <p className="post-content">{post.content}</p>
 
             <div className="post-actions">
-              <button className="post-action-btn">
-                <Heart size={16} /> J'aime
+              <button
+                className={`post-action-btn ${post.liked ? "liked" : ""}`}
+                onClick={() =>
+                  setPosts(posts.map((p) =>
+                    p.id === post.id ? { ...p, liked: !p.liked } : p
+                  ))
+                }
+              >
+                <Heart
+                  size={16}
+                  fill={post.liked ? "#ef4444" : "none"}
+                  stroke={post.liked ? "#ef4444" : "currentColor"}
+                />
+                J'aime .<span>0</span> 
               </button>
               <button className="post-action-btn">
                 <MessageCircle size={16} /> Commenter

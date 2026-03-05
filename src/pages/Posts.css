@@ -113,13 +113,40 @@
 }
 
 /* Image */
+.post-image-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 12px 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.post-image-skeleton {
+  width: 100%;
+  height: 420px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 14px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .post-image {
   width: 100%;
-
-  object-fit: cover;
+  max-height: 520px;
+  object-fit: contain;
   border-radius: 14px;
-  margin: 12px 0;
+  margin: 0;
   cursor: pointer;
+  display: block;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -159,6 +186,10 @@
 .post-action-btn:hover {
   background: #f3f0ff;
   color: blue;
+}
+
+.post-action-btn.liked {
+  color: #ef4444;
 }
 
 /* Image Modal */
@@ -233,7 +264,14 @@
   }
   .post-image {
     border-radius: 10px;
-    margin: 10px 0;
+    max-height: 320px;
+  }
+  .post-image-skeleton {
+    height: 200px;
+    border-radius: 10px;
+  }
+  .post-image-wrapper {
+    border-radius: 10px;
   }
   .user-avatar {
     width: 40px;
@@ -260,6 +298,16 @@
 [data-theme="dark"] .post-card {
   background: #1f2937 !important;
   border-color: #374151 !important;
+}
+
+[data-theme="dark"] .post-image-wrapper {
+  background: #1a1f2e;
+}
+
+[data-theme="dark"] .post-image-skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
 }
 
 [data-theme="dark"] .post-content {
