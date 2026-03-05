@@ -10,8 +10,17 @@ export default function CreatePost() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
-  const [avatarUrl, setAvatarUrl] = useState("/api/placeholder/40/40");
   const isDark = theme === "dark";
+ const [user] = useState({
+    full_name: "Sophie Martin",
+    email: "sophie.martin@example.com",
+    avatar_url: "https://i.pravatar.cc/300",
+  });
+
+ const displayName = user.full_name;
+  const avatarUrl =
+    user.avatar_url ||
+    `https://ui-avatars.com/api/?name=${displayName}&background=random`;
 
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
