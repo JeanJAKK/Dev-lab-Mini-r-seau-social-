@@ -3,10 +3,9 @@ import supabase from "../services/supabase";
 import "./Posts.css";
 import { User, Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { getPostLikes } from "../services/systemeLike/getPostLikes";
 import { getUserId } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/Like";
-
+import { getPostLikes } from "../services/systemeLike/getPostLikes";
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -33,16 +32,7 @@ function PostImage({ src, alt, onClick }) {
     </div>
   );
 }
-const handleLike = async (postId, userId, liked) => {
-  const newCount = await like(postId, userId, liked);
 
-  // Mettre à jour l'état local
-  setPosts((prevPosts) =>
-    prevPosts.map((post) =>
-      post.id === postId ? { ...post, likes: newCount, liked: !liked } : post,
-    ),
-  );
-};
 export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,22 +53,50 @@ export default function Posts() {
     `https://ui-avatars.com/api/?name=${displayName}&background=random`;
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*, profiles!posts_user_id_fkey(name)")
-        .order("created_at", { ascending: false });
+    const fetchPostsWithLikes = async () => {
+      setLoading(true);
+      try {
+        // 1️⃣ Récupérer tous les posts
+        const { data: postsData, error: postsError } = await supabase
+          .from("posts")
+          .select("*, profiles!posts_user_id_fkey(name)")
+          .order("created_at", { ascending: false });
 
-      if (error) {
+        if (postsError) throw postsError;
+
+        // 2️⃣ Récupérer tous les likes pour tous les posts
+        const { data: likesData, error: likesError } = await supabase
+          .from("likes")
+          .select("*"); // on prend post_id et user_id
+
+        if (likesError) throw likesError;
+
+        const userId = await getUserId();
+
+        // 3️⃣ Ajouter likes et liked à chaque post
+        const postsWithLikes = postsData.map((post) => {
+          const postLikes = likesData.filter(
+            (like) => like.post_id === post.id,
+          );
+          const likesCount = postLikes.length;
+          const userLiked = postLikes.some((like) => like.user_id === userId);
+          return {
+            ...post,
+            likes: likesCount,
+            liked: userLiked,
+          };
+        });
+
+        setPosts(postsWithLikes);
+      } catch (err) {
+        console.error(err);
         setMessage("❌ Erreur lors du chargement des posts");
-        console.error(error);
-      } else {
-        setPosts(data);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    fetchPosts();
+    fetchPostsWithLikes();
   }, []);
 
   if (loading) return <p className="loading">Chargement...</p>;
@@ -145,7 +163,7 @@ export default function Posts() {
                   fill={post.liked ? "#ef4444" : "none"}
                   stroke={post.liked ? "#ef4444" : "currentColor"}
                 />
-                J'aime <span>{post.likes || 0}</span>
+                J'aime <span>{post.likes}</span>
               </button>
               <button className="post-action-btn">
                 <MessageCircle size={16} /> Commenter
