@@ -38,6 +38,7 @@ export default function Posts() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [modalImage, setModalImage] = useState(null);
+  const [openComments, setOpenComments] = useState({});
 
   const { theme } = useTheme();
   const [user] = useState({
@@ -168,13 +169,31 @@ export default function Posts() {
                 />
                 J'aime <span>{post.likes}</span>
               </button>
-              <button className="post-action-btn">
+              <button
+                className={`post-action-btn ${openComments[post.id] ? "active" : ""}`}
+                onClick={() =>
+                  setOpenComments((prev) => ({ ...prev, [post.id]: !prev[post.id] }))
+                }
+              >
                 <MessageCircle size={16} /> Commenter
               </button>
               <button className="post-action-btn">
                 <Share2 size={16} /> Partager
               </button>
             </div>
+
+            {openComments[post.id] && (
+              <div className="zone-commentaires">
+                <div className="ecrire-commentaire">
+                  <input
+                    className="champ-commentaire"
+                    type="text"
+                    placeholder="Écrire un commentaire…"
+                  />
+                  <button className="bouton-envoyer">Envoyer</button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
 

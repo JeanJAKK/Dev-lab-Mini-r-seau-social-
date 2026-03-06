@@ -200,6 +200,57 @@
   color: #ef4444;
 }
 
+.post-action-btn.active {
+  color: #7c3aed;
+  background: #f3f0ff;
+}
+
+/* Zone commentaires */
+.zone-commentaires {
+  border-top: 1px solid #f0f0f8;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.ecrire-commentaire {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.champ-commentaire {
+  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  outline: none;
+  background: #f8f9fa;
+  color: #111827;
+  transition: border-color 0.15s ease;
+}
+
+.champ-commentaire:focus {
+  border-color: #7c3aed;
+  background: #fff;
+}
+
+.bouton-envoyer {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bouton-envoyer:hover {
+  background: #6d28d9;
+}
+
 /* Image Modal */
 .image-modal {
   position: fixed;
