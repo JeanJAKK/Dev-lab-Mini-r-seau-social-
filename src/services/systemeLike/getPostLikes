@@ -1,0 +1,16 @@
+import supabase from "../supabase";
+
+export async function getPostLikes(postId) {
+  // On ne récupère pas les lignes, juste le count
+  const { count, error } = await supabase
+    .from('likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('post_id', postId);
+
+  if (error) {
+    console.error("Erreur récupération likes :", error);
+    throw error;
+  }
+  console.log(`${postId} a ${count} likes`);
+  return count; // nombre de likes
+}

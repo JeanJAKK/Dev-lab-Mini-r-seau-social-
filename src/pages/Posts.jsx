@@ -3,6 +3,9 @@ import supabase from "../services/supabase";
 import "./Posts.css";
 import { User, Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { getPostLikes } from "../services/systemeLike/getPostLikes";
+import { getUserId } from "../services/systemeLike/getUser";
+import { like } from "../services/systemeLike/Like";
 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
@@ -18,31 +21,46 @@ function PostImage({ src, alt, onClick }) {
         style={
           loaded
             ? { opacity: 1 }
-            : { position: "absolute", opacity: 0, width: "1px", height: "1px", pointerEvents: "none" }
+            : {
+                position: "absolute",
+                opacity: 0,
+                width: "1px",
+                height: "1px",
+                pointerEvents: "none",
+              }
         }
       />
     </div>
   );
 }
+const handleLike = async (postId, userId, liked) => {
+  const newCount = await like(postId, userId, liked);
 
+  // Mettre à jour l'état local
+  setPosts((prevPosts) =>
+    prevPosts.map((post) =>
+      post.id === postId ? { ...post, likes: newCount, liked: !liked } : post,
+    ),
+  );
+};
 export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [modalImage, setModalImage] = useState(null);
+  const [likes, setLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const { theme } = useTheme();
-const [user] = useState({
+  const [user] = useState({
     full_name: "Sophie Martin",
     email: "sophie.martin@example.com",
     avatar_url: "https://i.pravatar.cc/300",
   });
 
- const displayName = user.full_name;
+  const displayName = user.full_name;
   const avatarUrl =
     user.avatar_url ||
     `https://ui-avatars.com/api/?name=${displayName}&background=random`;
-
-
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -82,11 +100,11 @@ const [user] = useState({
           <div className="post-card" key={post.id}>
             <div className="post-header">
               <div className="user-avatar">
-               <img
-                src={avatarUrl}
-                alt="profile"
-                className={`w-10 h-10 rounded-full border-2 object-cover`}
-              />
+                <img
+                  src={avatarUrl}
+                  alt="profile"
+                  className="w-10 h-10 rounded-full border-2 object-cover"
+                />
               </div>
               <div className="post-meta">
                 <h3 className="post-username">{post.profiles?.name}</h3>
@@ -109,18 +127,25 @@ const [user] = useState({
             <div className="post-actions">
               <button
                 className={`post-action-btn ${post.liked ? "liked" : ""}`}
-                onClick={() =>
-                  setPosts(posts.map((p) =>
-                    p.id === post.id ? { ...p, liked: !p.liked } : p
-                  ))
-                }
+                onClick={async () => {
+                  const userId = await getUserId();
+                  const newCount = await like(post.id, userId, post.liked);
+
+                  setPosts((prevPosts) =>
+                    prevPosts.map((p) =>
+                      p.id === post.id
+                        ? { ...p, likes: newCount, liked: !p.liked }
+                        : p,
+                    ),
+                  );
+                }}
               >
                 <Heart
                   size={16}
                   fill={post.liked ? "#ef4444" : "none"}
                   stroke={post.liked ? "#ef4444" : "currentColor"}
                 />
-                J'aime .<span>0</span> 
+                J'aime <span>{post.likes || 0}</span>
               </button>
               <button className="post-action-btn">
                 <MessageCircle size={16} /> Commenter
