@@ -1,11 +1,11 @@
 ﻿import { useEffect, useState } from "react";
 import supabase from "../services/supabase";
-import "./Posts.css";
+import "../styles/Posts.css";
 import { User, Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getUserId } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/Like";
-import { getPostLikes } from "../services/systemeLike/getPostLikes";
+
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -38,8 +38,7 @@ export default function Posts() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [modalImage, setModalImage] = useState(null);
-  const [likes, setLikes] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
+
   const { theme } = useTheme();
   const [user] = useState({
     full_name: "Sophie Martin",
@@ -141,6 +140,10 @@ export default function Posts() {
             )}
 
             <p className="post-content">{post.content}</p>
+
+            {post.likes > 0 && (
+              <div className="post-likes">❤️ <span>{post.likes}</span></div>
+            )}
 
             <div className="post-actions">
               <button

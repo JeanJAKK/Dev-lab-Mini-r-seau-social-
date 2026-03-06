@@ -4,7 +4,7 @@ import { FaFacebook } from "react-icons/fa"; // icône facebook (React Icons)
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import supabase from "../services/supabase.js";
-import "./AuthPage.css"; // tu peux réutiliser le même CSS que pour l'inscription
+import "../styles/AuthPage.css"; // tu peux réutiliser le même CSS que pour l'inscription
 
 function AuthPage({ setAuth }) {
   const [showPassword, setShowPassword] = useState(false);

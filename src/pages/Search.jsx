@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search as SearchIcon, UserPlus } from "lucide-react";
 import supabase from "../services/supabase.js";
 import { useTheme } from "../context/ThemeContext";
-import "./Search.css";
+import "../styles/Search.css";
 
 function Search() {
   const [users, setUsers] = useState([]);

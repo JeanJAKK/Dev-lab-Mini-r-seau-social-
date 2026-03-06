@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import supabase from "../services/supabase.js";
-import "./Register.css";
+import "../styles/Register.css";
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false);

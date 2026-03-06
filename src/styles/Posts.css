@@ -161,6 +161,14 @@
   margin: 0;
 }
 
+.post-likes {
+  font-size: 13px;
+  color: #6b7280;
+  padding: 6px 2px 4px;
+  border-top: 1px solid #f0f0f8;
+  margin-top: 10px;
+}
+
 .post-actions {
   display: flex;
   gap: 4px;
@@ -172,7 +180,7 @@
   gap: 6px;
   padding: 6px 14px;
   border-radius: 999px;
-  background: transparent;
+  background: rgb(243, 242, 242);
   border: none;
   color: #9ca3af;
   font-size: 13px;
