@@ -135,8 +135,12 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .post-image {
@@ -379,4 +383,60 @@
 
 [data-theme="dark"] .post-card:hover {
   border-color: #805ad5 !important;
+}
+
+/* Zone commentaires - Thème sombre */
+[data-theme="dark"] .zone-commentaires {
+  border-top-color: #4b5563 !important;
+}
+
+/* Boutons d'action - Thème sombre */
+[data-theme="dark"] .post-action-btn {
+  color: #9ca3af !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .post-action-btn:hover {
+  background: #374151 !important;
+  color: #805ad5 !important;
+}
+
+[data-theme="dark"] .post-action-btn.liked {
+  color: #ef4444 !important;
+}
+
+[data-theme="dark"] .post-action-btn.active {
+  color: #805ad5 !important;
+  background: #312e81 !important;
+}
+
+[data-theme="dark"] .champ-commentaire {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #e5e5ea !important;
+}
+
+[data-theme="dark"] .champ-commentaire:focus {
+  border-color: #805ad5 !important;
+  background: #4b5563 !important;
+}
+
+[data-theme="dark"] .bouton-envoyer {
+  background: #805ad5 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .bouton-envoyer:hover {
+  background: #6d28d9 !important;
+}
+
+/* Image Modal - Thème sombre */
+[data-theme="dark"] .image-modal .download-btn {
+  background: rgba(31, 41, 55, 0.92) !important;
+  color: #805ad5 !important;
+  border: 1px solid #4b5563 !important;
+}
+
+[data-theme="dark"] .image-modal .download-btn:hover {
+  background: rgba(55, 65, 81, 0.95) !important;
 }

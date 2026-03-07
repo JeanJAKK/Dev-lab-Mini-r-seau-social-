@@ -62,7 +62,10 @@ function AccountCard() {
             background: "linear-gradient(135deg, #b0b0b8, #6e6e73)",
           }}
         />
-        <div
+        <button
+          onClick={() =>
+            document.getElementById("profile-picture-input").click()
+          }
           style={{
             position: "absolute",
             bottom: 0,
@@ -79,10 +82,34 @@ function AccountCard() {
             fontWeight: 800,
             color: "white",
             lineHeight: 1,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+          onMouseOver={(e) => {
+            e.target.style.background = "#0056cc";
+            e.target.style.transform = "scale(1.1)";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.background = "#007aff";
+            e.target.style.transform = "scale(1)";
           }}
         >
           +
-        </div>
+        </button>
+        <input
+          id="profile-picture-input"
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              // Logique pour traiter l'image
+              console.log("Photo de profil sélectionnée:", file);
+              // TODO: Implémenter l'upload vers Supabase
+            }
+          }}
+        />
       </div>
 
       {/* Infos */}
@@ -179,6 +206,7 @@ function Reglage({
   onChange,
   toggleState,
   onToggle,
+  onClick,
 }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -206,7 +234,9 @@ function Reglage({
         boxShadow: isDark
           ? "0 1px 4px rgba(255,255,255,.06)"
           : "0 1px 4px rgba(0,0,0,.06)",
+        cursor: onClick ? "pointer" : "default",
       }}
+      onClick={onClick}
     >
       <div
         style={{
@@ -270,6 +300,7 @@ export default function Parameter() {
   const [language, setLanguage] = useState("fr");
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+  const [showTerms, setShowTerms] = useState(false);
 
   const containerBg = isDark ? "#111827" : "#eef2f7";
   const containerColor = isDark ? "#f2f2f7" : "#1c1c1e";
@@ -305,6 +336,12 @@ export default function Parameter() {
       value: language,
       onChange: (e) => setLanguage(e.target.value),
     },
+    {
+      titre: "Conditions d'utilisation",
+      description: "Consulter les conditions d'utilisation.",
+      hasToggle: false,
+      onClick: () => setShowTerms(true),
+    },
   ];
 
   return (
@@ -327,6 +364,184 @@ export default function Parameter() {
       {reglages.map((r) => (
         <Reglage key={r.titre} {...r} />
       ))}
+
+      {/* Modal Conditions d'utilisation */}
+      {showTerms && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+          onClick={() => setShowTerms(false)}
+        >
+          <div
+            style={{
+              background: isDark ? "#1f2937" : "#ffffff",
+              borderRadius: "16px",
+              padding: "24px",
+              maxWidth: "500px",
+              width: "100%",
+              maxHeight: "80vh",
+              overflow: "auto",
+              color: isDark ? "#e5e5ea" : "#1c1c1e",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: "700",
+                marginBottom: "16px",
+                color: isDark ? "#e5e5ea" : "#1c1c1e",
+              }}
+            >
+              Conditions d'utilisation – SynapseLink
+            </h2>
+
+            <div style={{ lineHeight: "1.6", fontSize: "14px" }}>
+              <p style={{ marginBottom: "12px" }}>
+                Bienvenue sur <strong>SynapseLink</strong>, un mini-réseau
+                social dédié au partage et à la diffusion des connaissances. En
+                utilisant la plateforme, vous acceptez de respecter les règles
+                suivantes :
+              </p>
+
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  margin: "16px 0 8px 0",
+                }}
+              >
+                1. Objectif de la plateforme
+              </h3>
+              <p style={{ marginBottom: "12px" }}>
+                SynapseLink est un espace destiné à l'échange d'idées, de
+                savoirs et de ressources éducatives dans un esprit de
+                collaboration et de respect mutuel.
+              </p>
+
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  margin: "16px 0 8px 0",
+                }}
+              >
+                2. Comportement des utilisateurs
+              </h3>
+              <p style={{ marginBottom: "12px" }}>
+                Les utilisateurs s'engagent à :
+              </p>
+              <ul style={{ marginLeft: "20px", marginBottom: "12px" }}>
+                <li>
+                  publier des contenus respectueux, pertinents et légaux ;
+                </li>
+                <li>
+                  éviter toute forme de harcèlement, de discrimination ou de
+                  désinformation ;
+                </li>
+                <li>
+                  respecter les autres membres et encourager des échanges
+                  constructifs.
+                </li>
+              </ul>
+
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  margin: "16px 0 8px 0",
+                }}
+              >
+                3. Contenu partagé
+              </h3>
+              <p style={{ marginBottom: "12px" }}>
+                Chaque utilisateur reste responsable des contenus qu'il publie.
+                Les contenus ne doivent pas violer les droits d'auteur, la vie
+                privée ou toute loi en vigueur.
+              </p>
+
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  margin: "16px 0 8px 0",
+                }}
+              >
+                4. Modération
+              </h3>
+              <p style={{ marginBottom: "12px" }}>
+                L'équipe de SynapseLink se réserve le droit de modifier ou
+                supprimer tout contenu jugé inapproprié, ainsi que de suspendre
+                ou supprimer les comptes qui ne respectent pas ces conditions.
+              </p>
+
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  margin: "16px 0 8px 0",
+                }}
+              >
+                5. Protection des données
+              </h3>
+              <p style={{ marginBottom: "12px" }}>
+                Les informations personnelles sont utilisées uniquement dans le
+                cadre du fonctionnement de la plateforme et ne seront pas
+                partagées sans consentement, sauf obligation légale.
+              </p>
+
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  margin: "16px 0 8px 0",
+                }}
+              >
+                6. Évolution des conditions
+              </h3>
+              <p style={{ marginBottom: "12px" }}>
+                Ces conditions peuvent être mises à jour afin d'améliorer la
+                plateforme. Les utilisateurs seront informés en cas de
+                modification importante.
+              </p>
+
+              <p style={{ marginTop: "16px", fontStyle: "italic" }}>
+                En utilisant SynapseLink, vous contribuez à créer une communauté
+                ouverte, collaborative et orientée vers le partage du savoir.
+              </p>
+            </div>
+
+            <button
+              style={{
+                marginTop: "20px",
+                padding: "12px 24px",
+                background: isDark ? "#805ad5" : "#7c3aed",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+                width: "100%",
+              }}
+              onClick={() => setShowTerms(false)}
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
