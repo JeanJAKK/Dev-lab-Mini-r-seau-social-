@@ -58,7 +58,7 @@ function Suggestions() {
                 <p className="user-name">{user.name?.trim()}</p>
               </Link>
 
-              {/* Follow Button */}
+              {/* Bouton suivre */}
               <button className="follow-button">
                 <UserPlus size={14} />
                 Suivre

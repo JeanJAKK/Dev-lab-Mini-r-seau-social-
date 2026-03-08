@@ -21,7 +21,7 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [currentProfile, setCurrentProfile] = useState(null);
-  const [replyingTo, setReplyingTo] = useState(null); // { id, name }
+  const [replyingTo, setReplyingTo] = useState(null); // { id, nom } — commentaire ciblé par la réponse
 
   const getAvatarUrl = (profile) => {
     if (!profile) return `https://ui-avatars.com/api/?name=U&background=7c3aed&color=fff`;
@@ -29,7 +29,7 @@ export default function PostDetail() {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || "U")}&background=7c3aed&color=fff`;
   };
 
-  // Use tab character as separator — cannot be typed in a normal input field
+  // Tabulation comme séparateur — introuvable sur un clavier classique, impossible à injecter
   const buildReplyContent = (name, text) => `@${name}\t${text}`;
   const parseComment = (content) => {
     const tabIdx = content.indexOf("\t");
@@ -190,7 +190,7 @@ export default function PostDetail() {
             </button>
           </div>
 
-          {/* Caption */}
+          {/* Description du post */}
           {post.content && (
             <div className={`flex! gap-3! px-4! py-3! border-b! shrink-0! ${isDark ? "border-gray-700!" : "border-gray-100!"}`}>
               <img src={getAvatarUrl(post.profiles)} alt="" className="w-8! h-8! rounded-full! object-cover! shrink-0! mt-0.5!" />
@@ -201,7 +201,7 @@ export default function PostDetail() {
             </div>
           )}
 
-          {/* COMMENTAIRES scrollable */}
+          {/* Liste des commentaires — défilable */}
           <div className="flex-1! overflow-y-auto! px-4! py-3!">
             {comments.length === 0 ? (
               <p className={`text-center! text-sm! py-10! ${isDark ? "text-gray-500!" : "text-gray-400!"}`}>
@@ -253,7 +253,7 @@ export default function PostDetail() {
             )}
           </div>
 
-          {/* ACTIONS likes */}
+          {/* Actions — bouton j'aime */}
           <div className={`px-4! py-3! border-t! shrink-0! ${isDark ? "border-gray-700!" : "border-gray-200!"}`}>
             <button
               onClick={handleLike}
@@ -271,7 +271,7 @@ export default function PostDetail() {
             </button>
           </div>
 
-          {/* Bandeau répondre */}
+          {/* Bandeau de réponse à un commentaire */}
           {replyingTo && (
             <div className={`flex! items-center! justify-between! px-4! py-2! border-t! shrink-0! ${isDark ? "bg-gray-800! border-gray-700!" : "bg-purple-50! border-purple-100!"}`}>
               <div className="flex! items-center! gap-2!">
@@ -290,7 +290,7 @@ export default function PostDetail() {
             </div>
           )}
 
-          {/* ZONE INPUT commentaire */}
+          {/* Zone de saisie du commentaire */}
           <div className={`flex! items-center! gap-3! px-4! py-3! border-t! shrink-0! ${isDark ? "border-gray-700! bg-gray-900!" : "border-gray-200! bg-white!"}`}>
             <img
               src={getAvatarUrl(currentProfile)}

@@ -92,7 +92,7 @@ export default function UserProfile() {
               : "linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #4f46e5 100%)",
           }}
         />
-        {/* Overlay gradient bas */}
+        {/* Dégradé bas pour assurer la transition vers le fond de page */}
         <div className={`absolute! inset-0! ${isDark ? "bg-linear-to-t! from-gray-900! via-gray-900/30! to-transparent!" : "bg-linear-to-t! from-gray-50! via-transparent! to-transparent!"}`} />
       </div>
 
@@ -102,7 +102,7 @@ export default function UserProfile() {
         {/* Avatar + bouton message */}
         <div className="flex! items-end! justify-between! -mt-14! sm:-mt-16! mb-5!">
 
-          {/* Avatar avec ring */}
+          {/* Avatar entouré d'un anneau dégradé violet */}
           <div className="relative! shrink-0!">
             <div className="p-1! rounded-full! bg-linear-to-br! from-purple-500! to-indigo-500!">
               <img
@@ -146,7 +146,7 @@ export default function UserProfile() {
           )}
         </div>
 
-        {/* Stats bar */}
+        {/* Barre de statistiques : publications / abonnés / abonnements */}
         <div className={`flex! gap-0! rounded-2xl! overflow-hidden! mb-6! border! ${isDark ? "border-gray-700/60! bg-gray-800/50!" : "border-gray-200! bg-white!"}`}>
           <div className="flex-1! flex! flex-col! items-center! py-3! gap-0.5!">
             <span className={`text-xl! font-bold! ${isDark ? "text-white!" : "text-gray-900!"}`}>{posts.length}</span>
