@@ -20,20 +20,26 @@ function PostImage({ src, alt, onClick }) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: '#e5e7eb'
+          backgroundColor: '#e5e7eb',
+          zIndex: 1
         }} />
       )}
       <img
         src={src}
         alt={alt}
         onClick={onClick}
-        onLoad={() => setLoaded(true)}
+        onLoad={() => {
+          console.log('Image loaded:', src);
+          setLoaded(true);
+        }}
+        onError={() => console.error('Image failed to load', src)}
         style={{
           width: '100%',
           height: '100%',
           objectFit: 'cover',
           cursor: 'pointer',
-          display: 'block'
+          display: 'block',
+          zIndex: loaded ? 2 : 0
         }}
       />
     </div>
@@ -42,7 +48,7 @@ function PostImage({ src, alt, onClick }) {
 
 export default function Profile() {
 
-  // 1️⃣ ÉTAT POUR LA GESTION DE LA PHOTO DE PROFIL
+  //  ÉTAT POUR LA GESTION DE LA PHOTO DE PROFIL
   const [profileImage, setProfileImage] = useState(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [message, setMessage] = useState("");
@@ -134,7 +140,7 @@ export default function Profile() {
   const loadUserPosts = async (userId) => {
     setPostsLoading(true);
     try {
-      console.log("🔄 Chargement des posts de l'utilisateur...", userId);
+      console.log(" Chargement des posts de l'utilisateur...", userId);
       
       // Vérifier d'abord si l'utilisateur existe
       const { data: userCheck, error: userError } = await supabase
@@ -144,9 +150,9 @@ export default function Profile() {
         .single();
       
       if (userError) {
-        console.error('❌ Erreur vérification utilisateur:', userError);
+        console.error(' Erreur vérification utilisateur:', userError);
       } else {
-        console.log('✅ Utilisateur vérifié:', userCheck);
+        console.log(' Utilisateur vérifié:', userCheck);
       }
       
       const { data, error } = await supabase
@@ -585,16 +591,18 @@ export default function Profile() {
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {userPosts.map((post) => (
-                      <div key={post.id} className="aspect-square group relative">
+                      <div key={post.id} className="aspect-square group relative overflow-hidden rounded-lg bg-gray-200">
                         {post.image_url ? (
                           <>
-                            <PostImage
-                              src={post.image_url}
-                              alt={post.title || "Post"}
-                              onClick={() => console.log('Image cliquée:', post.image_url)}
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
-                              <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center">
+                            <div className="relative w-full h-full">
+                              <PostImage
+                                src={post.image_url}
+                                alt={post.title || "Post"}
+                                onClick={() => console.log('Image cliquée:', post.image_url)}
+                              />
+                            </div>
+                            <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-all duration-200 flex items-center justify-center z-10">
+                              <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center pointer-events-none">
                                 <p className="text-sm font-semibold">{post.title}</p>
                                 <p className="text-xs">{new Date(post.created_at).toLocaleDateString('fr-FR')}</p>
                               </div>
