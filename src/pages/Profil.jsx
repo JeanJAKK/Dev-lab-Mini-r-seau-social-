@@ -127,6 +127,10 @@ export default function Profile() {
 
         // Charger les posts de l'utilisateur
         await loadUserPosts(user.id);
+        // charger listes follow
+        await loadFollowersList(user.id);
+        await loadFollowingList(user.id);
+        // counts will be synced by effect below
       } catch (err) {
         console.error('Erreur:', err);
         setMessage("Erreur lors du chargement du profil.");
@@ -135,6 +139,55 @@ export default function Profile() {
 
     loadUserProfile();
   }, []);
+
+  // helpers for followers/following
+  const loadFollowersList = async (userId) => {
+    try {
+      // first grab follower IDs
+      const { data: idsData, error: idsError } = await supabase
+        .from('follows')
+        .select('follower_id')
+        .eq('following_id', userId);
+      if (idsError) throw idsError;
+      const ids = idsData.map(r => r.follower_id);
+      if (ids.length === 0) {
+        setFollowersList([]);
+        return;
+      }
+      // then fetch profiles
+      const { data: profiles, error: profError } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', ids);
+      if (profError) throw profError;
+      setFollowersList(profiles || []);
+    } catch (err) {
+      console.error('Erreur chargement followers', err);
+    }
+  };
+
+  const loadFollowingList = async (userId) => {
+    try {
+      const { data: idsData, error: idsError } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', userId);
+      if (idsError) throw idsError;
+      const ids = idsData.map(r => r.following_id);
+      if (ids.length === 0) {
+        setFollowingList([]);
+        return;
+      }
+      const { data: profiles, error: profError } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', ids);
+      if (profError) throw profError;
+      setFollowingList(profiles || []);
+    } catch (err) {
+      console.error('Erreur chargement following', err);
+    }
+  };
 
   // Charger les posts de l'utilisateur
   const loadUserPosts = async (userId) => {
@@ -201,6 +254,12 @@ export default function Profile() {
   const [userPosts, setUserPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [isEditingCover, setIsEditingCover] = useState(false);
+
+  // followers/following lists
+  const [followersList, setFollowersList] = useState([]);
+  const [followingList, setFollowingList] = useState([]);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
 
   // GESTION DE LA PHOTO DE PROFIL AVEC SUPABASE
   const sanitizeFileName = (name) => {
@@ -342,8 +401,7 @@ export default function Profile() {
     }
   };
 
-  const handleRemoveImage = async () => {
-    setLoading(true);
+  const handleRemoveImage = async () => {    setLoading(true);
     setMessage("");
 
     try {
@@ -380,6 +438,15 @@ export default function Profile() {
       setLoading(false);
     }
   };
+
+  // update profile counts when lists change
+  useEffect(() => {
+    setProfile(prev => ({
+      ...prev,
+      followers: followersList.length,
+      following: followingList.length,
+    }));
+  }, [followersList.length, followingList.length]);
 
   //RENDER
   return (
@@ -468,9 +535,73 @@ export default function Profile() {
                 {/* Stats */}
                 <div className="flex text-black gap-6 mt-3 text-sm">
                   <span><strong>{profile.postsCount}</strong> Publications</span>
-                  <span><strong>{profile.followers}</strong> Abonnés</span>
-                  <span><strong>{profile.following}</strong> Abonnements</span>
+                  <span
+                    className="cursor-pointer hover:underline"
+                    onClick={() => {
+                      setShowFollowers(!showFollowers);
+                      setShowFollowing(false);
+                    }}
+                  >
+                    <strong>{profile.followers}</strong> Abonnés
+                  </span>
+                  <span
+                    className="cursor-pointer hover:underline"
+                    onClick={() => {
+                      setShowFollowing(!showFollowing);
+                      setShowFollowers(false);
+                    }}
+                  >
+                    <strong>{profile.following}</strong> Abonnements
+                  </span>
                 </div>
+                {showFollowers && (
+                  <div className="mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg bg-gray-50">
+                    {followersList.length === 0 ? (
+                      <p className="text-gray-500">Aucun abonné</p>
+                    ) : (
+                      followersList.map((u) => (
+                        <div key={u.id} className="flex items-center gap-3 mb-2">
+                          {u.avatar_url ? (
+                            <img
+                              src={u.avatar_url}
+                              alt={u.name}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                              {u.name?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="text-sm">{u.name}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+                {showFollowing && (
+                  <div className="mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg bg-gray-50">
+                    {followingList.length === 0 ? (
+                      <p className="text-gray-500">Pas d'abonnement</p>
+                    ) : (
+                      followingList.map((u) => (
+                        <div key={u.id} className="flex items-center gap-3 mb-2">
+                          {u.avatar_url ? (
+                            <img
+                              src={u.avatar_url}
+                              alt={u.name}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                              {u.name?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="text-sm">{u.name}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
 
                 {/* Date d'inscription */}
                 <div className="flex items-center gap-2 mt-2 text-gray-500 text-sm">

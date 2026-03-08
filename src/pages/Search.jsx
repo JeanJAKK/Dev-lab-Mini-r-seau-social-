@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Search as SearchIcon, UserPlus } from "lucide-react";
 import supabase from "../services/supabase.js";
 import { useTheme } from "../context/ThemeContext";
+import { getUserId } from "../services/systemeLike/getUserId.js";
 import "../styles/Search.css";
 
 function Search() {
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [followingIds, setFollowingIds] = useState([]);
+  const [myId, setMyId] = useState(null);
   const { theme } = useTheme();
 
   const getUsers = async () => {
@@ -25,7 +28,50 @@ function Search() {
 
   useEffect(() => {
     getUsers();
+    loadFollowing();
   }, []);
+
+  const loadFollowing = async () => {
+    const me = await getUserId();
+    if (!me) return;
+    setMyId(me);
+    const { data, error } = await supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", me);
+    if (error) {
+      console.error("Erreur récupération follows", error);
+      return;
+    }
+    setFollowingIds(data.map((row) => row.following_id));
+  };
+
+  const toggleFollow = async (targetId) => {
+    const me = await getUserId();
+    if (!me) return;
+    if (followingIds.includes(targetId)) {
+      // unfollow
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .match({ follower_id: me, following_id: targetId });
+      if (!error) {
+        setFollowingIds((prev) => prev.filter((id) => id !== targetId));
+      } else {
+        console.error("Erreur unfollow", error);
+      }
+    } else {
+      // follow
+      const { error } = await supabase
+        .from("follows")
+        .insert([{ follower_id: me, following_id: targetId }]);
+      if (!error) {
+        setFollowingIds((prev) => [...prev, targetId]);
+      } else {
+        console.error("Erreur follow", error);
+      }
+    }
+  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -70,8 +116,10 @@ function Search() {
           ) : filteredUsers.length === 0 ? (
             <div className="empty-state">Aucun utilisateur trouvé</div>
           ) : (
-            filteredUsers.map((user) => (
-              <div key={user.id} className="user-item">
+            filteredUsers
+              .filter((u) => u.id !== myId)
+              .map((user) => (
+                <div key={user.id} className="user-item">
                 {/* Avatar */}
                 <div className="user-avatar">
                   {user.avatar_url ? (
@@ -93,9 +141,12 @@ function Search() {
                 </div>
 
                 {/* Follow Button */}
-                <button className="follow-button">
+                <button
+                  className={`follow-button ${followingIds.includes(user.id) ? "following" : ""}`}
+                  onClick={() => toggleFollow(user.id)}
+                >
                   <UserPlus size={14} />
-                  Suivre
+                  {followingIds.includes(user.id) ? "Abonné" : "Suivre"}
                 </button>
               </div>
             ))

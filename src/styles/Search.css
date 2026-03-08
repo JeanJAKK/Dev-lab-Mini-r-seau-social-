@@ -272,6 +272,16 @@
   color: white !important;
 }
 
+/* when already following */
+.follow-button.following {
+  background: #7c3aed;
+  color: white;
+}
+
+.follow-button.following:hover {
+  background: #5b21b6;
+}
+
 /* Skeleton Loaders */
 .skeleton {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
