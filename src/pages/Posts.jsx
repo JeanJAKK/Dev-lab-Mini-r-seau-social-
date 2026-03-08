@@ -10,25 +10,36 @@ import { sendComment } from "../services/gestionComments/SendComment";
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <div className="post-image-wrapper">
-      {!loaded && <div className="post-image-skeleton" />}
+    <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '14px', overflow: 'hidden', backgroundColor: '#f1f5f9', minHeight: '300px' }}>
+      {!loaded && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#e5e7eb',
+          zIndex: 1
+        }} />
+      )}
       <img
         src={src}
         alt={alt}
-        className="post-image"
         onClick={onClick}
-        onLoad={() => setLoaded(true)}
-        style={
-          loaded
-            ? { opacity: 1 }
-            : {
-                position: "absolute",
-                opacity: 0,
-                width: "1px",
-                height: "1px",
-                pointerEvents: "none",
-              }
-        }
+        onLoad={() => {
+          console.log('PostImage loaded:', src);
+          setLoaded(true);
+        }}
+        onError={() => console.error('PostImage failed to load:', src)}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          cursor: 'pointer',
+          display: 'block',
+          zIndex: loaded ? 2 : 0,
+          transition: 'opacity 0.2s ease'
+        }}
       />
     </div>
   );
@@ -43,25 +54,21 @@ export default function Posts() {
   const [openComments, setOpenComments] = useState({});
 
   const { theme } = useTheme();
-  const [user] = useState({
-    full_name: "Sophie Martin",
-    email: "sophie.martin@example.com",
-    avatar_url: "https://i.pravatar.cc/300",
-  });
 
-  const displayName = user.full_name;
-  const avatarUrl =
-    user.avatar_url ||
-    `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+  const getAvatarUrl = (profile) => {
+    if (!profile) return `https://ui-avatars.com/api/?name=Unknown&background=random`;
+    if (profile.avatar_url) return profile.avatar_url;
+    return `https://ui-avatars.com/api/?name=${profile.name || 'User'}&background=random`;
+  };
 
   useEffect(() => {
     const fetchPostsWithLikes = async () => {
       setLoading(true);
       try {
-        // 1️⃣ Récupérer tous les posts
+        // 1️⃣ Récupérer tous les posts avec les infos du profil
         const { data: postsData, error: postsError } = await supabase
           .from("posts")
-          .select("*, profiles!posts_user_id_fkey(name)")
+          .select("*, profiles!posts_user_id_fkey(name, avatar_url)")
           .order("created_at", { ascending: false });
 
         if (postsError) throw postsError;
@@ -126,8 +133,8 @@ export default function Posts() {
             <div className="post-header">
               <div className="user-avatar">
                 <img
-                  src={avatarUrl}
-                  alt="profile"
+                  src={getAvatarUrl(post.profiles)}
+                  alt={post.profiles?.name || "profile"}
                   className="w-10 h-10 rounded-full border-2 object-cover"
                 />
               </div>
