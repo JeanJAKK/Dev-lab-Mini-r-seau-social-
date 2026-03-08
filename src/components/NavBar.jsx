@@ -175,7 +175,7 @@ const normalClass = isDark
                     <p
                       className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}
                     >
-                      {user.email}
+                      {userProfile.email}
                     </p>
                   </div>
 
