@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../supabaseClient";
@@ -12,7 +13,7 @@ function Suggestions() {
   const getUsers = async () => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("name, avatar_url")
+      .select("id, name, avatar_url")
       .order("name", { ascending: true });
 
     if (error) {
@@ -37,8 +38,8 @@ function Suggestions() {
         <div className="suggestions-list">
           {usersName.map((user, index) => (
             <div key={index} className="suggestion-item">
-              {/* Avatar */}
-              <div className="user-avatar">
+              {/* Avatar + Info cliquables → profil */}
+              <Link to={`/home/profile/${user.id}`} className="user-avatar" style={{ textDecoration: "none" }}>
                 {user.avatar_url ? (
                   <img
                     src={user.avatar_url}
@@ -50,12 +51,12 @@ function Suggestions() {
                     {user.name?.charAt(0).toUpperCase() ?? "?"}
                   </div>
                 )}
-              </div>
+              </Link>
 
               {/* Info */}
-              <div className="user-info">
+              <Link to={`/home/profile/${user.id}`} className="user-info" style={{ textDecoration: "none" }}>
                 <p className="user-name">{user.name?.trim()}</p>
-              </div>
+              </Link>
 
               {/* Follow Button */}
               <button className="follow-button">

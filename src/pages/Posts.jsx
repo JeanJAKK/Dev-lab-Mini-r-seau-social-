@@ -1,11 +1,11 @@
 ﻿import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import supabase from "../services/supabase";
 import "../styles/Posts.css";
-import { User, Heart, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getUserId } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
-import { sendComment } from "../services/gestionComments/SendComment";
 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
@@ -46,12 +46,10 @@ function PostImage({ src, alt, onClick }) {
 }
 
 export default function Posts() {
-  const [comment, setComment] = useState("");
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [modalImage, setModalImage] = useState(null);
-  const [openComments, setOpenComments] = useState({});
+  const navigate = useNavigate();
 
   const { theme } = useTheme();
 
@@ -115,9 +113,6 @@ export default function Posts() {
 
   if (loading) return <p className="loading">Chargement...</p>;
 
-  const openModal = (imageUrl) => setModalImage(imageUrl);
-  const closeModal = () => setModalImage(null);
-
   return (
     <div className="posts-page" data-theme={theme}>
       <div className="posts-container">
@@ -131,15 +126,17 @@ export default function Posts() {
         {posts.map((post) => (
           <div className="post-card" key={post.id}>
             <div className="post-header">
-              <div className="user-avatar">
+              <Link to={`/home/profile/${post.user_id}`} className="user-avatar">
                 <img
                   src={getAvatarUrl(post.profiles)}
                   alt={post.profiles?.name || "profile"}
                   className="w-10 h-10 rounded-full border-2 object-cover"
                 />
-              </div>
+              </Link>
               <div className="post-meta">
-                <h3 className="post-username">{post.profiles?.name}</h3>
+                <Link to={`/home/profile/${post.user_id}`}>
+                  <h3 className="post-username" style={{ cursor: "pointer" }}>{post.profiles?.name}</h3>
+                </Link>
                 <span className="post-date">
                   {new Date(post.created_at).toLocaleString()}
                 </span>
@@ -150,7 +147,7 @@ export default function Posts() {
               <PostImage
                 src={post.image_url}
                 alt={post.title}
-                onClick={() => openModal(post.image_url)}
+                onClick={() => navigate(`/home/post/${post.id}`)}
               />
             )}
 
@@ -184,71 +181,20 @@ export default function Posts() {
                 J'aime <span>{post.likes}</span>
               </button>
               <button
-                className={`post-action-btn ${openComments[post.id] ? "active" : ""}`}
-                onClick={() =>
-                  setOpenComments((prev) => ({ ...prev, [post.id]: !prev[post.id] }))
-                }
+                className="post-action-btn"
+                onClick={() => navigate(`/home/post/${post.id}`)}
               >
                 <MessageCircle size={16} /> Commenter
+                {post.comments?.length > 0 && <span>{post.comments.length}</span>}
               </button>
               <button className="post-action-btn">
                 <Share2 size={16} /> Partager
               </button>
             </div>
 
-            {openComments[post.id] && (
-              <div className="zone-commentaires">
-                <div className="ecrire-commentaire">
-                  <input
-                    className="champ-commentaire"
-                    type="text"
-                    placeholder="Écrire un commentaire…"
-                    onChange={(e) => setComment(e.target.value)}
-                  />
-                  <button 
-                  className="bouton-envoyer"
-                  onClick={async()=>{
-                    const userId = await getUserId();
-                    sendComment(userId, post.id, comment)
-                  }}
-                  >Envoyer</button>
-                </div>
-              </div>
-            )}
           </div>
         ))}
 
-        {/* Modale */}
-        {modalImage && (
-          <div className="image-modal" onClick={closeModal}>
-            <img src={modalImage} alt="Agrandie" />
-            <button
-              className="download-btn"
-              onClick={async (e) => {
-                e.stopPropagation(); // empêcher la fermeture de la modale
-                try {
-                  const response = await fetch(modalImage);
-                  const blob = await response.blob();
-                  const url = URL.createObjectURL(blob);
-
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = "image.jpg"; // tu peux mettre le nom que tu veux
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-
-                  URL.revokeObjectURL(url); // libérer la mémoire
-                } catch (error) {
-                  console.error("Erreur lors du téléchargement :", error);
-                  alert("Impossible de télécharger l'image.");
-                }
-              }}
-            >
-              Télécharger
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

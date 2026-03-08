@@ -19,6 +19,8 @@ import Search from "./pages/Search";
 import Profil from "./pages/Profil";
 import Plus from "./pages/Plus";
 import Settings from "./pages/Settings.jsx";
+import PostDetail from "./pages/PostDetail";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   const [auth, setAuth] = useState(isAuthenticated());
@@ -44,6 +46,8 @@ function App() {
             <Route path="create-post" element={<CreatePost />} />
             <Route path="plus" element={<Plus />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="post/:postId" element={<PostDetail />} />
+            <Route path="profile/:userId" element={<UserProfile />} />
           </Route>
         ) : (
           <Route path="*" element={<Navigate to="/authPage" />} />
