@@ -39,6 +39,14 @@ export default function PostDetail() {
     return { mention: null, text: content };
   };
 
+  // Bloquer le scroll du body pendant l'affichage de la page détail
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
       .from("comments")
@@ -116,7 +124,7 @@ export default function PostDetail() {
   if (!post) return null;
 
   return (
-    <div className={`fixed! inset-0! z-50! flex! flex-col! ${isDark ? "bg-gray-900!" : "bg-white!"}`}>
+    <div className={`fixed! inset-0! z-50! flex! flex-col! overflow-hidden! ${isDark ? "bg-gray-900!" : "bg-white!"}`}>
 
       {/* ── Header mobile ── */}
       <div className={`md:hidden! flex! items-center! gap-3! px-4! h-14! border-b! shrink-0! ${isDark ? "bg-gray-900! border-gray-700!" : "bg-white! border-gray-200!"}`}>
@@ -213,7 +221,7 @@ export default function PostDetail() {
                   const { mention, text } = parseComment(c.content);
                   return (
                     <div key={c.id} className="flex! gap-3! items-start!">
-                      <Link to={`/home/profile/${c.user_id}`} className="shrink-0! mt-0.5!">
+                      <Link to={`/home/profile/${c.user_id}`} className="shrink-0! mt-1!">
                         <img
                           src={getAvatarUrl(c.profiles)}
                           alt={c.profiles?.name}

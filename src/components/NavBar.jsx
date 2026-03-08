@@ -216,13 +216,13 @@ const normalClass = isDark
 <nav
   className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow h-16 ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-200"}`}
 >
-        <ul className="relative flex justify-around items-center py-3 text-xs font-medium">
+        <ul className="relative flex justify-around items-center py-2 text-xs font-medium">
           <li>
             <NavLink
               to="."
               end
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
               }
             >
               <Home size={22} /> Accueil
@@ -232,7 +232,7 @@ const normalClass = isDark
             <NavLink
               to="search"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
               }
             >
               <Search size={22} /> Rechercher
@@ -250,7 +250,7 @@ const normalClass = isDark
             <NavLink
               to="notifications"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
               }
             >
               <Bell size={22} /> Notifications
@@ -260,7 +260,7 @@ const normalClass = isDark
             <NavLink
               to="messages"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
               }
             >
               <Mail size={22} /> Messages
