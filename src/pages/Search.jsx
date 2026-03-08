@@ -14,7 +14,7 @@ function Search() {
     setLoading(true);
     const { data, error } = await supabase
       .from("profiles")
-      .select(`name`)
+      .select(`id, name, avatar_url`)
       .order("name", { ascending: true });
 
     if (!error && data) {

@@ -1,29 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import supabase from "../services/supabase.js";
 import { User, Camera } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import Profile from "./Profil.jsx";
 
 export default function CreatePost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [user] = useState({
-    full_name: "Sophie Martin",
-    email: "sophie.martin@example.com",
-    avatar_url: "https://i.pravatar.cc/300",
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
 
-  const displayName = user.full_name;
-  const avatarUrl =
-    user.avatar_url ||
+  // Charger les données de l'utilisateur connecté
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          setCurrentUser(user);
+          
+          // Récupérer les infos du profil avec avatar
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('name, avatar_url')
+            .eq('id', user.id)
+            .single();
+          
+          if (profileData) {
+            setUserProfile(profileData);
+          }
+        }
+      } catch (err) {
+        console.error('Erreur chargement utilisateur:', err);
+      }
+    };
+    
+    loadUser();
+  }, []);
+
+  const displayName = userProfile?.name || currentUser?.email?.split('@')[0] || 'Utilisateur';
+  const avatarUrl = userProfile?.avatar_url || 
     `https://ui-avatars.com/api/?name=${displayName}&background=random`;
 
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  };
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagePreview(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleCreatePost = async (e) => {
@@ -128,6 +171,23 @@ export default function CreatePost() {
             </div>
           </div>
 
+          {/* Image Preview */}
+          {imagePreview && (
+            <div className={`mt-4! rounded-xl! overflow-hidden! border! ${isDark ? "border-purple-400!" : "border-gray-300!"}`}>
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full! h-auto! object-cover!"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="w-full! py-2! bg-red-500! text-white! font-semibold! hover:bg-red-600! transition!"
+              >
+                Supprimer l'image
+              </button>
+            </div>
+          )}
          
           <div
             className={`flex! items-center! justify-between! mt-4! pt-3! border-t! ${isDark ? "border-purple-200!" : "border-gray-300!"}`}
@@ -147,7 +207,7 @@ export default function CreatePost() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setImageFile(e.target.files[0])}
+                onChange={handleImageSelect}
                 className="hidden!"
               />
             </label>

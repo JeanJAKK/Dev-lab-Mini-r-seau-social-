@@ -14,6 +14,7 @@ import {
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../fakeAuth";
 import { useTheme } from "../context/ThemeContext";
+import supabase from "../services/supabase.js";
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -21,17 +22,39 @@ export default function NavBar() {
   const dropdownRef = useRef(null);
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
 
-  // ✅ Mock user frontend-only
-  const [user] = useState({
-    full_name: "Sophie Martin",
-    email: "sophie.martin@example.com",
-    avatar_url: "https://i.pravatar.cc/300",
-  });
+  // Charger les données de l'utilisateur connecté
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          setCurrentUser(user);
+          
+          // Récupérer les infos du profil avec avatar
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('name, avatar_url')
+            .eq('id', user.id)
+            .single();
+          
+          if (profileData) {
+            setUserProfile(profileData);
+          }
+        }
+      } catch (err) {
+        console.error('Erreur chargement utilisateur:', err);
+      }
+    };
+    
+    loadUser();
+  }, []);
 
-  const displayName = user.full_name;
-  const avatarUrl =
-    user.avatar_url ||
+  const displayName = userProfile?.name || currentUser?.email?.split('@')[0] || 'Utilisateur';
+  const avatarUrl = userProfile?.avatar_url || 
     `https://ui-avatars.com/api/?name=${displayName}&background=random`;
 
   // Fermer le dropdown si clic en dehors
