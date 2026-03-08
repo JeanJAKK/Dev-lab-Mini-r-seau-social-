@@ -3,8 +3,9 @@ import supabase from "../services/supabase";
 import "../styles/Posts.css";
 import { User, Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUser";
+import { getUserId } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
+import { sendComment } from "../services/gestionComments/SendComment";
 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
@@ -34,6 +35,7 @@ function PostImage({ src, alt, onClick }) {
 }
 
 export default function Posts() {
+  const [comment, setComment] = useState("");
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -71,19 +73,24 @@ export default function Posts() {
 
         if (likesError) throw likesError;
 
+        const {data: commentData, error: commentError} = await supabase
+          .from("comments")
+          .select("*")
+        if(commentError) throw commentError;
+
         const userId = await getUserId();
 
         // 3️⃣ Ajouter likes et liked à chaque post
         const postsWithLikes = postsData.map((post) => {
-          const postLikes = likesData.filter(
-            (like) => like.post_id === post.id,
-          );
+          const comments = commentData.filter((com) => com.post_id === post.id);
+          const postLikes = likesData.filter((like) => like.post_id === post.id,);
           const likesCount = postLikes.length;
           const userLiked = postLikes.some((like) => like.user_id === userId);
           return {
             ...post,
             likes: likesCount,
             liked: userLiked,
+            comments: comments,
           };
         });
 
@@ -189,8 +196,15 @@ export default function Posts() {
                     className="champ-commentaire"
                     type="text"
                     placeholder="Écrire un commentaire…"
+                    onChange={(e) => setComment(e.target.value)}
                   />
-                  <button className="bouton-envoyer">Envoyer</button>
+                  <button 
+                  className="bouton-envoyer"
+                  onClick={async()=>{
+                    const userId = await getUserId();
+                    sendComment(userId, post.id, comment)
+                  }}
+                  >Envoyer</button>
                 </div>
               </div>
             )}

@@ -58,7 +58,6 @@ function AuthPage({ setAuth }) {
         email,
         password,
       });
-      console.log(supabase.auth.getSession);
 
       if (error) {
         setMessage("Email ou mot de passe incorrect !");
