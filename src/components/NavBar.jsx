@@ -87,7 +87,7 @@ const normalClass = isDark
   <div className="max-w-7xl mx-auto px-6 w-full">
     <div className="flex items-center justify-between">
             {/* LOGO */}
-            <p className="text-xl md:w-44 text-center font-extrabold bg-linear-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent tracking-tight">
+            <p className="text-xl md:w-44 text-center font-extrabold bg-linear-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent tracking-tight pl-3!">
               SynapseLink
             </p>
 
