@@ -264,7 +264,7 @@
 /* Thème sombre */
 [data-theme="dark"] .follow-button {
   border-color: #7c3aed !important;
-  color: #7c3aed !important;
+  color: white !important;
 }
 
 [data-theme="dark"] .follow-button:hover {
@@ -353,7 +353,8 @@
 
 /* Animations */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -366,27 +367,27 @@
   .search-container {
     padding: 2rem 1.5rem;
   }
-  
+
   .search-input {
     padding-left: 3rem;
     padding-right: 1rem;
     font-size: 0.875rem;
   }
-  
+
   .tab-button {
     font-size: 0.875rem;
     padding: 0.75rem 0;
   }
-  
+
   .user-item {
     padding: 0.75rem 1rem;
   }
-  
+
   .user-avatar {
     width: 2.5rem;
     height: 2.5rem;
   }
-  
+
   .follow-button {
     padding: 0.375rem 0.75rem;
     font-size: 0.75rem;

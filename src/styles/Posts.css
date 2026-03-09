@@ -355,7 +355,7 @@
 /* Thème sombre */
 [data-theme="dark"] .posts-title {
   color: #e5e5ea !important;
-  border-bottom-color: #805ad5 !important;
+  border-bottom-color: #4b5563 !important;
 }
 
 [data-theme="dark"] .post-card {
@@ -382,7 +382,7 @@
 }
 
 [data-theme="dark"] .post-card:hover {
-  border-color: #805ad5 !important;
+  border-color: #6b7280 !important;
 }
 
 /* Zone commentaires - Thème sombre */
@@ -398,7 +398,7 @@
 
 [data-theme="dark"] .post-action-btn:hover {
   background: #374151 !important;
-  color: #805ad5 !important;
+  color: #6b7280 !important;
 }
 
 [data-theme="dark"] .post-action-btn.liked {
@@ -406,8 +406,8 @@
 }
 
 [data-theme="dark"] .post-action-btn.active {
-  color: #805ad5 !important;
-  background: #312e81 !important;
+  color: #6b7280 !important;
+  background: #374151 !important;
 }
 
 [data-theme="dark"] .champ-commentaire {
@@ -417,17 +417,17 @@
 }
 
 [data-theme="dark"] .champ-commentaire:focus {
-  border-color: #805ad5 !important;
+  border-color: #6b7280 !important;
   background: #4b5563 !important;
 }
 
 [data-theme="dark"] .bouton-envoyer {
-  background: #805ad5 !important;
+  background: #6b7280 !important;
   color: #ffffff !important;
 }
 
 [data-theme="dark"] .bouton-envoyer:hover {
-  background: #6d28d9 !important;
+  background: #4b5563 !important;
 }
 
 /* Image Modal - Thème sombre */

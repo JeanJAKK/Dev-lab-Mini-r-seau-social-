@@ -6,40 +6,43 @@
 
 import { useState, useEffect } from "react";
 import { Calendar, Settings } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 import supabase from "../services/supabase.js";
 
 // Composant PostImage ultra-simple comme dans Posts.jsx
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {!loaded && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#e5e7eb',
-          zIndex: 1
-        }} />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#e5e7eb",
+            zIndex: 1,
+          }}
+        />
       )}
       <img
         src={src}
         alt={alt}
         onClick={onClick}
         onLoad={() => {
-          console.log('Image loaded:', src);
+          console.log("Image loaded:", src);
           setLoaded(true);
         }}
-        onError={() => console.error('Image failed to load', src)}
+        onError={() => console.error("Image failed to load", src)}
         style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          cursor: 'pointer',
-          display: 'block',
-          zIndex: loaded ? 2 : 0
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          cursor: "pointer",
+          display: "block",
+          zIndex: loaded ? 2 : 0,
         }}
       />
     </div>
@@ -47,6 +50,8 @@ function PostImage({ src, alt, onClick }) {
 }
 
 export default function Profile() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   //  ÉTAT POUR LA GESTION DE LA PHOTO DE PROFIL
   const [profileImage, setProfileImage] = useState(null);
@@ -66,15 +71,17 @@ export default function Profile() {
     postsCount: 0,
     followers: 0,
     following: 0,
-    joinedAt: ""
+    joinedAt: "",
   });
 
   // Charger les données utilisateur au montage
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
         if (!user) {
           setMessage("Vous devez être connecté pour voir votre profil.");
           return;
@@ -84,13 +91,13 @@ export default function Profile() {
 
         // Récupérer les données du profil depuis la table profiles
         const { data: profileData, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
           .single();
 
-        if (error && error.code !== 'PGRST116') {
-          console.error('Erreur profil:', error);
+        if (error && error.code !== "PGRST116") {
+          console.error("Erreur profil:", error);
           setMessage("Erreur lors du chargement du profil.");
           return;
         }
@@ -98,29 +105,41 @@ export default function Profile() {
         if (profileData) {
           setProfile({
             id: profileData.id,
-            name: profileData.name || user.email?.split('@')[0] || 'Utilisateur',
-            username: profileData.username || '',
-            bio: profileData.bio || '',
+            name:
+              profileData.name || user.email?.split("@")[0] || "Utilisateur",
+            username: profileData.username || "",
+            bio: profileData.bio || "",
             avatar: profileData.avatar_url,
-            cover: profileData.cover_url || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+            cover:
+              profileData.cover_url ||
+              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
             postsCount: profileData.posts_count || 0,
             followers: profileData.followers_count || 0,
             following: profileData.following_count || 0,
-            joinedAt: profileData.created_at ? new Date(profileData.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : 'Date inconnue'
+            joinedAt: profileData.created_at
+              ? new Date(profileData.created_at).toLocaleDateString("fr-FR", {
+                  month: "long",
+                  year: "numeric",
+                })
+              : "Date inconnue",
           });
         } else {
           // Créer un profil par défaut si inexistant
           const defaultProfile = {
             id: user.id,
-            name: user.email?.split('@')[0] || 'Utilisateur',
-            username: '',
-            bio: '',
+            name: user.email?.split("@")[0] || "Utilisateur",
+            username: "",
+            bio: "",
             avatar: null,
-            cover: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+            cover:
+              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
             postsCount: 0,
             followers: 0,
             following: 0,
-            joinedAt: new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+            joinedAt: new Date().toLocaleDateString("fr-FR", {
+              month: "long",
+              year: "numeric",
+            }),
           };
           setProfile(defaultProfile);
         }
@@ -132,7 +151,7 @@ export default function Profile() {
         await loadFollowingList(user.id);
         // counts will be synced by effect below
       } catch (err) {
-        console.error('Erreur:', err);
+        console.error("Erreur:", err);
         setMessage("Erreur lors du chargement du profil.");
       }
     };
@@ -145,47 +164,47 @@ export default function Profile() {
     try {
       // first grab follower IDs
       const { data: idsData, error: idsError } = await supabase
-        .from('follows')
-        .select('follower_id')
-        .eq('following_id', userId);
+        .from("follows")
+        .select("follower_id")
+        .eq("following_id", userId);
       if (idsError) throw idsError;
-      const ids = idsData.map(r => r.follower_id);
+      const ids = idsData.map((r) => r.follower_id);
       if (ids.length === 0) {
         setFollowersList([]);
         return;
       }
       // then fetch profiles
       const { data: profiles, error: profError } = await supabase
-        .from('profiles')
-        .select('id, name, avatar_url')
-        .in('id', ids);
+        .from("profiles")
+        .select("id, name, avatar_url")
+        .in("id", ids);
       if (profError) throw profError;
       setFollowersList(profiles || []);
     } catch (err) {
-      console.error('Erreur chargement followers', err);
+      console.error("Erreur chargement followers", err);
     }
   };
 
   const loadFollowingList = async (userId) => {
     try {
       const { data: idsData, error: idsError } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', userId);
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", userId);
       if (idsError) throw idsError;
-      const ids = idsData.map(r => r.following_id);
+      const ids = idsData.map((r) => r.following_id);
       if (ids.length === 0) {
         setFollowingList([]);
         return;
       }
       const { data: profiles, error: profError } = await supabase
-        .from('profiles')
-        .select('id, name, avatar_url')
-        .in('id', ids);
+        .from("profiles")
+        .select("id, name, avatar_url")
+        .in("id", ids);
       if (profError) throw profError;
       setFollowingList(profiles || []);
     } catch (err) {
-      console.error('Erreur chargement following', err);
+      console.error("Erreur chargement following", err);
     }
   };
 
@@ -194,55 +213,57 @@ export default function Profile() {
     setPostsLoading(true);
     try {
       console.log(" Chargement des posts de l'utilisateur...", userId);
-      
+
       // Vérifier d'abord si l'utilisateur existe
       const { data: userCheck, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', userId)
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
         .single();
-      
+
       if (userError) {
-        console.error(' Erreur vérification utilisateur:', userError);
+        console.error(" Erreur vérification utilisateur:", userError);
       } else {
-        console.log(' Utilisateur vérifié:', userCheck);
+        console.log(" Utilisateur vérifié:", userCheck);
       }
-      
+
       const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .from("posts")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
       if (error) {
-        console.error(' Erreur chargement posts:', error);
-        console.error(' Détails erreur:', {
+        console.error(" Erreur chargement posts:", error);
+        console.error(" Détails erreur:", {
           code: error.code,
           message: error.message,
-          details: error.details
+          details: error.details,
         });
-        setMessage("Erreur lors du chargement des publications: " + error.message);
+        setMessage(
+          "Erreur lors du chargement des publications: " + error.message,
+        );
         return;
       }
 
       console.log("Posts récupérés:", data);
       console.log("Nombre de posts:", data?.length || 0);
-      
+
       if (data && data.length > 0) {
         data.forEach((post, index) => {
           console.log(`Post ${index + 1}:`, {
             id: post.id,
             title: post.title,
             image_url: post.image_url,
-            created_at: post.created_at
+            created_at: post.created_at,
           });
         });
       }
-      
+
       setUserPosts(data || []);
-      setProfile(prev => ({ ...prev, postsCount: data?.length || 0 }));
+      setProfile((prev) => ({ ...prev, postsCount: data?.length || 0 }));
     } catch (err) {
-      console.error(' Erreur générale loadUserPosts:', err);
+      console.error(" Erreur générale loadUserPosts:", err);
       setMessage("Erreur inattendue lors du chargement des posts.");
     } finally {
       setPostsLoading(false);
@@ -276,14 +297,18 @@ export default function Profile() {
 
     try {
       if (!currentUser) {
-        setMessage("Vous devez être connecté pour modifier votre photo de profil.");
+        setMessage(
+          "Vous devez être connecté pour modifier votre photo de profil.",
+        );
         setLoading(false);
         return;
       }
 
       // Uploader l'image dans le bucket avatars de Supabase
-      const fileName = sanitizeFileName(`${currentUser.id}_${Date.now()}_${file.name}`);
-      
+      const fileName = sanitizeFileName(
+        `${currentUser.id}_${Date.now()}_${file.name}`,
+      );
+
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(fileName, file);
@@ -302,13 +327,11 @@ export default function Profile() {
       const avatarUrl = urlData.publicUrl;
 
       // Mettre à jour la table profiles
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: currentUser.id,
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString()
-        });
+      const { error: updateError } = await supabase.from("profiles").upsert({
+        id: currentUser.id,
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString(),
+      });
 
       if (updateError) {
         setMessage("Erreur mise à jour : " + updateError.message);
@@ -317,12 +340,11 @@ export default function Profile() {
       }
 
       //Mettre à jour l'état local
-      setProfile(prev => ({ ...prev, avatar: avatarUrl }));
+      setProfile((prev) => ({ ...prev, avatar: avatarUrl }));
       setProfileImage(avatarUrl);
       setMessage("Photo de profil mise à jour avec succès !");
-      
     } catch (err) {
-      console.error('Erreur:', err);
+      console.error("Erreur:", err);
       setMessage("Erreur inattendue lors de l'upload.");
     } finally {
       setLoading(false);
@@ -339,7 +361,9 @@ export default function Profile() {
 
     try {
       if (!currentUser) {
-        setMessage("Vous devez être connecté pour modifier votre photo de couverture.");
+        setMessage(
+          "Vous devez être connecté pour modifier votre photo de couverture.",
+        );
         setLoading(false);
         return;
       }
@@ -347,8 +371,10 @@ export default function Profile() {
       console.log("🔄 Upload de la couverture...");
 
       // Uploader l'image dans le bucket avatars (temporairement, même bucket que profil)
-      const fileName = sanitizeFileName(`${currentUser.id}_cover_${Date.now()}_${file.name}`);
-      
+      const fileName = sanitizeFileName(
+        `${currentUser.id}_cover_${Date.now()}_${file.name}`,
+      );
+
       const { error: uploadError } = await supabase.storage
         .from("avatars") // Utiliser le bucket avatars qui existe déjà
         .upload(fileName, file);
@@ -371,13 +397,11 @@ export default function Profile() {
       console.log(" URL couverture générée:", coverUrl);
 
       // Mettre à jour la table profiles
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: currentUser.id,
-          cover_url: coverUrl,
-          updated_at: new Date().toISOString()
-        });
+      const { error: updateError } = await supabase.from("profiles").upsert({
+        id: currentUser.id,
+        cover_url: coverUrl,
+        updated_at: new Date().toISOString(),
+      });
 
       if (updateError) {
         console.error("❌ Erreur mise à jour couverture:", updateError);
@@ -387,38 +411,38 @@ export default function Profile() {
       }
 
       console.log("✅ Couverture mise à jour en base");
-      
+
       //Mettre à jour l'état local
-      setProfile(prev => ({ ...prev, cover: coverUrl }));
+      setProfile((prev) => ({ ...prev, cover: coverUrl }));
       setMessage("✅ Photo de couverture mise à jour avec succès !");
       setIsEditingCover(false);
-      
     } catch (err) {
-      console.error('❌ Erreur upload couverture:', err);
+      console.error("❌ Erreur upload couverture:", err);
       setMessage("Erreur inattendue lors de l'upload de la couverture.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRemoveImage = async () => {    setLoading(true);
+  const handleRemoveImage = async () => {
+    setLoading(true);
     setMessage("");
 
     try {
       if (!currentUser) {
-        setMessage("Vous devez être connecté pour modifier votre photo de profil.");
+        setMessage(
+          "Vous devez être connecté pour modifier votre photo de profil.",
+        );
         setLoading(false);
         return;
       }
 
       // Supprimer l'URL de la base de données
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: currentUser.id,
-          avatar_url: null,
-          updated_at: new Date().toISOString()
-        });
+      const { error: updateError } = await supabase.from("profiles").upsert({
+        id: currentUser.id,
+        avatar_url: null,
+        updated_at: new Date().toISOString(),
+      });
 
       if (updateError) {
         setMessage("Erreur suppression : " + updateError.message);
@@ -427,12 +451,11 @@ export default function Profile() {
       }
 
       //  Mettre à jour l'état local
-      setProfile(prev => ({ ...prev, avatar: null }));
+      setProfile((prev) => ({ ...prev, avatar: null }));
       setProfileImage(null);
       setMessage("✅ Photo de profil supprimée avec succès !");
-      
     } catch (err) {
-      console.error('Erreur:', err);
+      console.error("Erreur:", err);
       setMessage("Erreur inattendue lors de la suppression.");
     } finally {
       setLoading(false);
@@ -441,7 +464,7 @@ export default function Profile() {
 
   // update profile counts when lists change
   useEffect(() => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
       followers: followersList.length,
       following: followingList.length,
@@ -450,16 +473,19 @@ export default function Profile() {
 
   //RENDER
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center py-8 ">
-      <div className="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-
+    <div
+      className={`min-h-screen flex justify-center py-8 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
+    >
+      <div
+        className={`w-full max-w-5xl border rounded-2xl overflow-hidden shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+      >
         {/* ================= COVER IMAGE ================= */}
         <div className="relative">
           <div
             className="h-56 w-full bg-cover bg-center"
             style={{ backgroundImage: `url(${profile.cover})` }}
           />
-          
+
           {/* Bouton pour modifier la couverture */}
           <button
             onClick={() => setIsEditingCover(!isEditingCover)}
@@ -468,23 +494,29 @@ export default function Profile() {
             <Settings size={16} />
           </button>
         </div>
-        
+
         {/* Section édition de la couverture */}
         {isEditingCover && (
-          <div className="bg-gray-100 p-4 border-b border-gray-200">
+          <div
+            className={`p-4 border-b ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"}`}
+          >
             <div className="max-w-5xl mx-auto">
-              <h4 className="text-sm font-semibold mb-2">Modifier la photo de couverture</h4>
+              <h4
+                className={`text-sm font-semibold mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}
+              >
+                Modifier la photo de couverture
+              </h4>
               <div className="flex items-center gap-4">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleCoverUpload}
                   disabled={loading}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                  className={`block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? "file:bg-gray-600 file:text-gray-200 hover:file:bg-gray-500" : "file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"} disabled:opacity-50`}
                 />
                 <button
                   onClick={() => setIsEditingCover(false)}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                  className={`px-4 py-2 rounded-lg transition ${isDark ? "bg-gray-600 text-white hover:bg-gray-500" : "bg-gray-500 text-white hover:bg-gray-600"}`}
                 >
                   Annuler
                 </button>
@@ -494,33 +526,34 @@ export default function Profile() {
         )}
 
         <div className="max-w-5xl mx-auto px-4">
-
           {/* ================= HEADER PROFIL ================= */}
           <div className="relative flex flex-col md:flex-row md:items-end md:justify-between mt-6">
-
             {/* Avatar + Infos */}
             <div className="flex items-end gap-12">
-
               {/* Avatar */}
               <div className="relative">
                 {profile.avatar || profileImage ? (
                   <img
                     src={profile.avatar || profileImage}
                     alt="avatar"
-                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover -mt-16"
+                    className={`w-32 h-32 rounded-full border-4 shadow-lg object-cover -mt-16 ${isDark ? "border-gray-600" : "border-white"}`}
                   />
                 ) : (
-                  <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gray-300 -mt-16 flex items-center justify-center">
-                    <span className="text-gray-600 text-4xl font-bold">
+                  <div
+                    className={`w-32 h-32 rounded-full border-4 shadow-lg -mt-16 flex items-center justify-center ${isDark ? "border-gray-600 bg-gray-700" : "border-white bg-gray-300"}`}
+                  >
+                    <span
+                      className={`text-4xl font-bold ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                    >
                       {profile.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
-                
+
                 {/* Bouton pour ajouter/modifier la photo */}
                 <button
                   onClick={() => setIsEditingProfile(!isEditingProfile)}
-                  className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition shadow-lg"
+                  className={`absolute bottom-0 right-0 p-2 rounded-full transition shadow-lg ${isDark ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-500 text-white hover:bg-blue-600"}`}
                 >
                   <Settings size={16} />
                 </button>
@@ -528,13 +561,27 @@ export default function Profile() {
 
               {/* Nom + username + bio */}
               <div className="space-y-3">
-                <h1 className="text-2xl text-black font-bold">{profile.name}</h1>
-                <p className="text-gray-500">@{profile.username}</p>
-                <p className="mt-2 text-black">{profile.bio}</p>
+                <h1
+                  className={`mb-8! text-2xl font-bold ${isDark ? "text-gray-100" : "text-black"}`}
+                >
+                  @{profile.name}
+                </h1>
+                <p className={isDark ? "text-gray-400" : "text-gray-500"}>
+                  {/*@{profile.username}*/}
+                </p>
+                <p
+                  className={`mt-2 ${isDark ? "text-gray-200" : "text-black"}`}
+                >
+                  {profile.bio}
+                </p>
 
                 {/* Stats */}
-                <div className="flex text-black gap-6 mt-3 text-sm">
-                  <span><strong>{profile.postsCount}</strong> Publications</span>
+                <div
+                  className={`flex gap-6 mt-3 text-sm ${isDark ? "text-gray-200" : "text-black"}`}
+                >
+                  <span>
+                    <strong>{profile.postsCount}</strong> Publications
+                  </span>
                   <span
                     className="cursor-pointer hover:underline"
                     onClick={() => {
@@ -555,12 +602,19 @@ export default function Profile() {
                   </span>
                 </div>
                 {showFollowers && (
-                  <div className="mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg bg-gray-50">
+                  <div
+                    className={`mt-4! max-h-48! overflow-y-auto! border p-3 rounded-lg! ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                  >
                     {followersList.length === 0 ? (
-                      <p className="text-gray-500">Aucun abonné</p>
+                      <p className={isDark ? "text-gray-400" : "text-gray-500"}>
+                        Aucun abonné
+                      </p>
                     ) : (
                       followersList.map((u) => (
-                        <div key={u.id} className="flex items-center gap-3 mb-2">
+                        <div
+                          key={u.id}
+                          className="flex items-center gap-3 mb-2"
+                        >
                           {u.avatar_url ? (
                             <img
                               src={u.avatar_url}
@@ -568,23 +622,40 @@ export default function Profile() {
                               className="w-8 h-8 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                              {u.name?.charAt(0).toUpperCase()}
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-gray-600" : "bg-gray-300"}`}
+                            >
+                              <span
+                                className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                              >
+                                {u.name?.charAt(0).toUpperCase()}
+                              </span>
                             </div>
                           )}
-                          <span className="text-sm">{u.name}</span>
+                          <span
+                            className={`text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}
+                          >
+                            {u.name}
+                          </span>
                         </div>
                       ))
                     )}
                   </div>
                 )}
                 {showFollowing && (
-                  <div className="mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg bg-gray-50">
+                  <div
+                    className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                  >
                     {followingList.length === 0 ? (
-                      <p className="text-gray-500">Pas d'abonnement</p>
+                      <p className={isDark ? "text-gray-400" : "text-gray-500"}>
+                        Pas d'abonnement
+                      </p>
                     ) : (
                       followingList.map((u) => (
-                        <div key={u.id} className="flex items-center gap-3 mb-2">
+                        <div
+                          key={u.id}
+                          className="flex items-center gap-3 mb-2!"
+                        >
                           {u.avatar_url ? (
                             <img
                               src={u.avatar_url}
@@ -592,11 +663,21 @@ export default function Profile() {
                               className="w-8 h-8 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                              {u.name?.charAt(0).toUpperCase()}
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-gray-600" : "bg-gray-300"}`}
+                            >
+                              <span
+                                className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                              >
+                                {u.name?.charAt(0).toUpperCase()}
+                              </span>
                             </div>
                           )}
-                          <span className="text-sm">{u.name}</span>
+                          <span
+                            className={`text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}
+                          >
+                            {u.name}
+                          </span>
                         </div>
                       ))
                     )}
@@ -604,32 +685,32 @@ export default function Profile() {
                 )}
 
                 {/* Date d'inscription */}
-                <div className="flex items-center gap-2 mt-2 text-gray-500 text-sm">
+                <div
+                  className={`flex items-center gap-2 mt-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                >
                   <Calendar size={16} />
                   <span>Inscrit en {profile.joinedAt}</span>
                 </div>
               </div>
             </div>
-
-            {/* Bouton Modifier */}
-            <button 
-              onClick={() => setIsEditingProfile(!isEditingProfile)}
-              className="mt-4! md:mt-0 text-black flex items-center gap-2 border px-4! py-2! rounded-lg hover:bg-gray-50 transition"
-            >
-              <Settings size={16} />
-              {isEditingProfile ? 'Annuler' : 'Modifier le profil'}
-            </button>
-
           </div>
 
           {/* ================= SECTION ÉDITION PROFIL ================= */}
           {isEditingProfile && (
-            <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4">Gérer la photo de profil</h3>
-              
-              <div className="space-y-4">
+            <div
+              className={`mt-6! p-6! rounded-lg! border! ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+            >
+              <h3
+                className={`text-lg! font-semibold! mb-4! ${isDark ? "text-gray-200" : "text-gray-700"}`}
+              >
+                Gérer la photo de profil
+              </h3>
+
+              <div className="space-y-4!">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    className={`block text-sm font-medium mb-4! ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
                     Ajouter une photo de profil
                   </label>
                   <input
@@ -637,30 +718,36 @@ export default function Profile() {
                     accept="image/*"
                     onChange={handleImageUpload}
                     disabled={loading}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                    className={`block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? "file:bg-gray-600 file:text-gray-200 hover:file:bg-gray-500" : "file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"} disabled:opacity-50`}
                   />
                 </div>
-                
+
                 {(profile.avatar || profileImage) && (
                   <div className="flex items-center gap-4">
                     <img
                       src={profile.avatar || profileImage}
                       alt="Aperçu"
-                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+                      className={`w-20 h-20 rounded-full object-cover border-2 ${isDark ? "border-gray-600" : "border-gray-300"}`}
                     />
                     <button
                       onClick={handleRemoveImage}
                       disabled={loading}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50"
+                      className="px-4! py-2! rounded-lg! transition disabled:opacity-50!"
+                      style={{
+                        backgroundColor: isDark ? "#dc2626" : "#ef4444",
+                        color: "white",
+                      }}
                     >
-                      {loading ? 'Suppression...' : 'Supprimer la photo'}
+                      {loading ? "Suppression..." : "Supprimer la photo"}
                     </button>
                   </div>
                 )}
-                
+
                 {!profile.avatar && !profileImage && (
-                  <p className="text-gray-500 text-sm">
-                    Vous n'avez pas encore de photo de profil. Ajoutez-en une pour personnaliser votre profil !
+                  <p
+                    className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                  >
+                    Vous n'avez pas encore de photo de profil!
                   </p>
                 )}
               </div>
@@ -668,15 +755,22 @@ export default function Profile() {
           )}
 
           {/* ================= ONGLET ================= */}
-          <div className="mt-16! mb-6! px-6!"> {/* ⬅ marge plus grande pour détacher des infos du haut */}
-            <div className="bg-gray-200 text-black font-bold rounded-full p-1 flex">
-
+          <div className="mt-16! mb-6! px-6!">
+            {" "}
+            {/* ⬅ marge plus grande pour détacher des infos du haut */}
+            <div
+              className={`text-black font-bold rounded-full p-1 flex ${isDark ? "bg-gray-700 text-gray-200" : "bg-gray-200 text-black"}`}
+            >
               <button
                 onClick={() => setActiveTab("posts")}
                 className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
                   activeTab === "posts"
-                    ? "bg-white"
-                    : "hover:bg-gray-400"
+                    ? isDark
+                      ? "bg-gray-800 text-gray-100"
+                      : "bg-white text-black"
+                    : isDark
+                      ? "hover:bg-gray-600"
+                      : "hover:bg-gray-400"
                 }`}
               >
                 Publications
@@ -686,8 +780,12 @@ export default function Profile() {
                 onClick={() => setActiveTab("media")}
                 className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
                   activeTab === "media"
-                    ? "bg-white"
-                    : "hover:bg-gray-400"
+                    ? isDark
+                      ? "bg-gray-800 text-gray-100"
+                      : "bg-white text-black"
+                    : isDark
+                      ? "hover:bg-gray-600"
+                      : "hover:bg-gray-400"
                 }`}
               >
                 Médias
@@ -695,47 +793,65 @@ export default function Profile() {
 
               <button
                 onClick={() => setActiveTab("likes")}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
+                className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
                   activeTab === "likes"
-                    ? "bg-white"
-                    : "hover:bg-gray-400"
+                    ? isDark
+                      ? "bg-gray-800 text-gray-100"
+                      : "bg-white text-black"
+                    : isDark
+                      ? "hover:bg-gray-600"
+                      : "hover:bg-gray-400"
                 }`}
               >
-                J'aime
+                Likes
               </button>
             </div>
           </div>
 
           {/* ================= CONTENU ================= */}
           <div className="mt-6">
-
             {activeTab === "posts" && (
               <div>
                 {postsLoading ? (
                   <div className="text-center py-10">
-                    <p className="text-gray-500">Chargement des publications...</p>
+                    <p className="text-gray-500">
+                      Chargement des publications...
+                    </p>
                   </div>
                 ) : userPosts.length === 0 ? (
                   <div className="text-center py-10">
-                    <p className="text-gray-500">Aucune publication pour le moment.</p>
+                    <p className="text-gray-500">
+                      Aucune publication pour le moment.
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {userPosts.map((post) => (
-                      <div key={post.id} className="aspect-square group relative overflow-hidden rounded-lg bg-gray-200">
+                      <div
+                        key={post.id}
+                        className="aspect-square group relative overflow-hidden rounded-lg bg-gray-200"
+                      >
                         {post.image_url ? (
                           <>
                             <div className="relative w-full h-full">
                               <PostImage
                                 src={post.image_url}
                                 alt={post.title || "Post"}
-                                onClick={() => console.log('Image cliquée:', post.image_url)}
+                                onClick={() =>
+                                  console.log("Image cliquée:", post.image_url)
+                                }
                               />
                             </div>
                             <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-all duration-200 flex items-center justify-center z-10">
                               <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center pointer-events-none">
-                                <p className="text-sm font-semibold">{post.title}</p>
-                                <p className="text-xs">{new Date(post.created_at).toLocaleDateString('fr-FR')}</p>
+                                <p className="text-sm font-semibold">
+                                  {post.title}
+                                </p>
+                                <p className="text-xs">
+                                  {new Date(post.created_at).toLocaleDateString(
+                                    "fr-FR",
+                                  )}
+                                </p>
                               </div>
                             </div>
                           </>
@@ -762,11 +878,10 @@ export default function Profile() {
                 Aucun contenu aimé.
               </div>
             )}
-
           </div>
-
         </div>
-      </div> {/* FIN CONTAINER PRINCIPAL */}
+      </div>{" "}
+      {/* FIN CONTAINER PRINCIPAL */}
     </div>
   );
 }

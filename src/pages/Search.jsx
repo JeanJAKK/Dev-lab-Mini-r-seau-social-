@@ -120,36 +120,36 @@ function Search() {
               .filter((u) => u.id !== myId)
               .map((user) => (
                 <div key={user.id} className="user-item">
-                {/* Avatar */}
-                <div className="user-avatar">
-                  {user.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt={user.name}
-                      className="avatar-img"
-                    />
-                  ) : (
-                    <div className="avatar-placeholder">
-                      {user.name?.charAt(0).toUpperCase() ?? "?"}
-                    </div>
-                  )}
-                </div>
+                  {/* Avatar */}
+                  <div className="user-avatar">
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name}
+                        className="avatar-img"
+                      />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {user.name?.charAt(0).toUpperCase() ?? "?"}
+                      </div>
+                    )}
+                  </div>
 
-                {/* Info */}
-                <div className="user-info">
-                  <p className="user-name">{user.name}</p>
-                </div>
+                  {/* Info */}
+                  <div className="user-info">
+                    <p className="user-name">{user.name}</p>
+                  </div>
 
-                {/* Follow Button */}
-                <button
-                  className={`follow-button ${followingIds.includes(user.id) ? "following" : ""}`}
-                  onClick={() => toggleFollow(user.id)}
-                >
-                  <UserPlus size={14} />
-                  {followingIds.includes(user.id) ? "Abonné" : "Suivre"}
-                </button>
-              </div>
-            ))
+                  {/* Follow Button */}
+                  <button
+                    className={`follow-button ${followingIds.includes(user.id) ? "following" : ""}`}
+                    onClick={() => toggleFollow(user.id)}
+                  >
+                    <UserPlus size={14} />
+                    {followingIds.includes(user.id) ? "Suivi" : "Suivre"}
+                  </button>
+                </div>
+              ))
           )}
         </div>
       </div>
