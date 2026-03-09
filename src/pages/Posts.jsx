@@ -235,7 +235,23 @@ export default function Posts() {
                   <span>{post.comments.length}</span>
                 )}
               </button>
-              <button className="post-action-btn">
+              <button 
+                className="post-action-btn"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: post.title || 'Post',
+                      text: post.content,
+                      url: window.location.origin + `/home/post/${post.id}`
+                    }).catch(err => console.log('Erreur de partage:', err));
+                  } else {
+                    // Fallback: copier le lien dans le presse-papiers
+                    navigator.clipboard.writeText(window.location.origin + `/home/post/${post.id}`).then(() => {
+                      alert('Lien copié dans le presse-papiers !');
+                    }).catch(err => console.error('Erreur lors de la copie:', err));
+                  }
+                }}
+              >
                 <Share2 size={16} /> Partager
               </button>
             </div>

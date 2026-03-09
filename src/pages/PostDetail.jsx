@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Send, MoreHorizontal, CornerDownRight, X } from "lucide-react";
+import { ArrowLeft, Heart, Send, MoreHorizontal, CornerDownRight, X, Share2 } from "lucide-react";
 import supabase from "../services/supabase";
 import { useTheme } from "../context/ThemeContext";
 import { getUserId } from "../services/systemeLike/getUserId";
@@ -111,6 +111,21 @@ export default function PostDetail() {
     await fetchComments();
     setSubmitting(false);
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title || 'Post',
+        text: post.content,
+        url: window.location.origin + `/home/post/${post.id}`
+      }).catch(err => console.log('Erreur de partage:', err));
+    } else {
+      // Fallback: copier le lien dans le presse-papiers
+      navigator.clipboard.writeText(window.location.origin + `/home/post/${post.id}`).then(() => {
+        alert('Lien copié dans le presse-papiers !');
+      }).catch(err => console.error('Erreur lors de la copie:', err));
+    }
   };
 
   if (loading) {
@@ -308,22 +323,31 @@ export default function PostDetail() {
             )}
           </div>
 
-          {/* Actions — bouton j'aime */}
+          {/* Actions — boutons j'aime et partager */}
           <div className={`px-4! py-3! border-t! shrink-0! ${isDark ? "border-gray-700!" : "border-gray-200!"}`}>
-            <button
-              onClick={handleLike}
-              className="flex! items-center! gap-2! bg-transparent! border-none! cursor-pointer! p-0!"
-            >
-              <Heart
-                size={22}
-                fill={post.liked ? "#ef4444" : "none"}
-                stroke={post.liked ? "#ef4444" : isDark ? "#9ca3af" : "#6b7280"}
-                className="transition-transform! duration-100!"
-              />
-              <span className={`text-sm! font-semibold! ${isDark ? "text-gray-200!" : "text-gray-700!"}`}>
-                {post.likes} {post.likes <= 1 ? "j'aime" : "j'aimes"}
-              </span>
-            </button>
+            <div className="flex! items-center! gap-4!">
+              <button
+                onClick={handleLike}
+                className="flex! items-center! gap-2! bg-transparent! border-none! cursor-pointer! p-0!"
+              >
+                <Heart
+                  size={22}
+                  fill={post.liked ? "#ef4444" : "none"}
+                  stroke={post.liked ? "#ef4444" : isDark ? "#9ca3af" : "#6b7280"}
+                  className="transition-transform! duration-100!"
+                />
+                <span className={`text-sm! font-semibold! ${isDark ? "text-gray-200!" : "text-gray-700!"}`}>
+                  {post.likes} {post.likes <= 1 ? "j'aime" : "j'aimes"}
+                </span>
+              </button>
+              <button
+                onClick={handleShare}
+                className={`flex! items-center! gap-2! bg-transparent! border-none! cursor-pointer! p-0! ${isDark ? "text-gray-400! hover:text-gray-200!" : "text-gray-600! hover:text-gray-800!"}`}
+              >
+                <Share2 size={20} />
+                <span className="text-sm! font-semibold!">Partager</span>
+              </button>
+            </div>
           </div>
 
           {/* Bandeau de réponse à un commentaire */}
