@@ -20,32 +20,36 @@ export default function CreatePost() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
         if (user) {
           setCurrentUser(user);
-          
+
           // Récupérer les infos du profil avec avatar
           const { data: profileData } = await supabase
-            .from('profiles')
-            .select('name, avatar_url')
-            .eq('id', user.id)
+            .from("profiles")
+            .select("name, avatar_url")
+            .eq("id", user.id)
             .single();
-          
+
           if (profileData) {
             setUserProfile(profileData);
           }
         }
       } catch (err) {
-        console.error('Erreur chargement utilisateur:', err);
+        console.error("Erreur chargement utilisateur:", err);
       }
     };
-    
+
     loadUser();
   }, []);
 
-  const displayName = userProfile?.name || currentUser?.email?.split('@')[0] || 'Utilisateur';
-  const avatarUrl = userProfile?.avatar_url || 
+  const displayName =
+    userProfile?.name || currentUser?.email?.split("@")[0] || "Utilisateur";
+  const avatarUrl =
+    userProfile?.avatar_url ||
     `https://ui-avatars.com/api/?name=${displayName}&background=random`;
 
   const sanitizeFileName = (name) => {
@@ -136,7 +140,8 @@ export default function CreatePost() {
 
   return (
     <div
-      className={`${isDark ? "bg-gray-800! border-purple-400!" : "bg-white! border-gray-300!"} rounded-2xl! border! shadow-sm! mb-5! overflow-hidden!`}
+      className={`${isDark ? "bg-gray-800! border-gray-300" : "bg-white! border-gray-300!"} rounded-2xl! border! shadow-sm! mb-5! overflow-hidden!`}
+      style={{ borderColor: isDark ? "#374151" : "#e5e7eb" }}
     >
       <div className="px-5! pt-5! pb-4!">
         <form onSubmit={handleCreatePost}>
@@ -146,7 +151,7 @@ export default function CreatePost() {
               <img
                 src={avatarUrl}
                 alt="profile"
-                className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-400!" : "border-purple-100!"}`}
+                className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-gray-500!" : "border-gray-300!"}`}
               />
             </div>
 
@@ -158,7 +163,7 @@ export default function CreatePost() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className={`w-full! px-4! py-2.5! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition ${isDark ? "bg-gray-700! border-purple-400! text-gray-100! placeholder-gray-400! focus:ring-purple-400! focus:border-purple-300!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
+                className={`w-full! px-4! py-2.5! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition ${isDark ? "bg-gray-700! border-gray-600! text-gray-100! placeholder-gray-400! focus:ring-gray-400! focus:border-gray-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-gray-300! focus:border-gray-300!"}`}
               />
               <textarea
                 placeholder="Exprime-toi..."
@@ -166,14 +171,16 @@ export default function CreatePost() {
                 onChange={(e) => setContent(e.target.value)}
                 required
                 rows={3}
-                className={`w-full! px-4! py-3! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition resize-none! leading-relaxed! ${isDark ? "bg-gray-700! border-purple-600! text-gray-100! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-300!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-purple-300! focus:border-purple-400!"}`}
+                className={`w-full! px-4! py-3! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition resize-none! leading-relaxed! ${isDark ? "bg-gray-700! border-gray-600! text-gray-100! placeholder-gray-400! focus:ring-gray-400! focus:border-gray-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-gray-300! focus:border-gray-300!"}`}
               />
             </div>
           </div>
 
           {/* Image Preview */}
           {imagePreview && (
-            <div className={`mt-4! rounded-xl! overflow-hidden! border! ${isDark ? "border-purple-400!" : "border-gray-300!"}`}>
+            <div
+              className={`mt-4! rounded-xl! overflow-hidden! ${isDark ? "shadow-lg!" : "shadow-md!"}`}
+            >
               <img
                 src={imagePreview}
                 alt="Preview"
@@ -188,9 +195,9 @@ export default function CreatePost() {
               </button>
             </div>
           )}
-         
+
           <div
-            className={`flex! items-center! justify-between! mt-4! pt-3! border-t! ${isDark ? "border-purple-200!" : "border-gray-300!"}`}
+            className={`flex! items-center! justify-between! mt-6! pt-4! ${isDark ? "border-t border-gray-700!" : "border-t border-gray-200!"}`}
           >
             <label
               className={`flex! items-center! gap-2.5! px-4! py-2! rounded-xl! cursor-pointer! transition! group! ${isDark ? "bg-gray-700! hover:bg-purple-900!" : "bg-gray-50! hover:bg-purple-50!"}`}

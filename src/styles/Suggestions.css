@@ -19,9 +19,9 @@
 
 .suggestions-container:hover {
   box-shadow:
-    0 8px 28px rgba(109, 40, 217, 0.11),
+    0 8px 28px rgba(0, 0, 0, 0.08),
     0 2px 6px rgba(0, 0, 0, 0.06);
-  border-color: #7c3aed !important;
+  border-color: #9ca3af !important;
 }
 
 /* Thème sombre */
@@ -44,7 +44,7 @@
 /* Thème sombre */
 [data-theme="dark"] .suggestions-title {
   color: #e5e5ea !important;
-  border-bottom-color: #805ad5 !important;
+  border-bottom-color: #4b5563 !important;
 }
 
 /* Suggestions List */
@@ -137,9 +137,9 @@
   gap: 0.5rem;
   padding: 0.375rem 0.75rem;
   border-radius: 9999px;
-  border: 1px solid #7c3aed;
+  border: 1px solid #9ca3af;
   background: transparent;
-  color: #7c3aed;
+  color: #6b7280;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -148,19 +148,19 @@
 }
 
 .follow-button:hover {
-  background: #7c3aed;
+  background: #6b7280;
   color: white;
   transform: scale(1.05);
 }
 
 /* Thème sombre */
 [data-theme="dark"] .follow-button {
-  border-color: #7c3aed !important;
-  color: #7c3aed !important;
+  border-color: #6b7280 !important;
+  color: #9ca3af !important;
 }
 
 [data-theme="dark"] .follow-button:hover {
-  background: #7c3aed !important;
+  background: #6b7280 !important;
   color: white !important;
 }
 
