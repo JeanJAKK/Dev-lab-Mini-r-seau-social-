@@ -115,8 +115,55 @@ export default function PostDetail() {
 
   if (loading) {
     return (
-      <div className={`fixed! inset-0! z-50! flex! items-center! justify-center! ${isDark ? "bg-gray-900!" : "bg-white!"}`}>
-        <div className="w-10! h-10! border-4! border-purple-500! border-t-transparent! rounded-full! animate-spin!" />
+      <div className={`fixed! inset-0! z-50! flex! flex-col! overflow-hidden! ${isDark ? "bg-gray-900!" : "bg-white!"}`}>
+        {/* Header mobile skeleton */}
+        <div className={`flex! items-center! gap-3! px-4! h-14! border-b! shrink-0! ${isDark ? "border-gray-700!" : "border-gray-200!"}`}>
+          <div className="skeleton w-8 h-8 rounded-full shrink-0"></div>
+          <div className="skeleton h-4 w-28"></div>
+        </div>
+
+        <div className="flex! flex-col! md:flex-row! flex-1! overflow-hidden!">
+          {/* Image skeleton */}
+          <div className={`skeleton shrink-0! h-56! sm:h-72! md:h-auto! md:flex-1!`}></div>
+
+          {/* Panneau droit skeleton */}
+          <div className={`flex! flex-col! flex-1! md:flex-none! md:w-[380px]! overflow-hidden! ${isDark ? "bg-gray-900! border-l! border-gray-700!" : "bg-white! border-l! border-gray-200!"}`}>
+
+            {/* Auteur skeleton */}
+            <div className={`flex! items-center! gap-3! px-4! py-3! border-b! shrink-0! ${isDark ? "border-gray-700!" : "border-gray-100!"}`}>
+              <div className="skeleton w-10 h-10 rounded-full shrink-0"></div>
+              <div className="flex flex-col gap-2 flex-1">
+                <div className="skeleton h-3 w-24"></div>
+                <div className="skeleton h-3 w-16"></div>
+              </div>
+            </div>
+
+            {/* Contenu post skeleton */}
+            <div className={`flex! gap-3! px-4! py-3! border-b! shrink-0! ${isDark ? "border-gray-700!" : "border-gray-100!"}`}>
+              <div className="skeleton w-8 h-8 rounded-full shrink-0"></div>
+              <div className="flex flex-col gap-2 flex-1 mt-1">
+                <div className="skeleton h-3 w-full"></div>
+                <div className="skeleton h-3 w-4/5"></div>
+                <div className="skeleton h-3 w-2/3"></div>
+              </div>
+            </div>
+
+            {/* Commentaires skeleton */}
+            <div className="flex-1! overflow-y-auto! px-4! py-3! space-y-5!">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-3 items-start">
+                  <div className="skeleton w-8 h-8 rounded-full shrink-0 mt-1"></div>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <div className="skeleton h-3 w-20"></div>
+                    <div className="skeleton h-3 w-full"></div>
+                    <div className="skeleton h-3 w-3/4"></div>
+                    <div className="skeleton h-2 w-12 mt-1"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
