@@ -562,12 +562,12 @@ export default function Profile() {
               {/* Nom + username + bio */}
               <div className="space-y-3">
                 <h1
-                  className={`mb-8! text-2xl font-bold ${isDark ? "text-gray-100" : "text-black"}`}
+                  className={`mb-2! text-2xl font-bold ${isDark ? "text-gray-100" : "text-black"}`}
                 >
-                  @{profile.name}
+                  {profile.name}
                 </h1>
                 <p className={isDark ? "text-gray-400" : "text-gray-500"}>
-                  {/*@{profile.username}*/}
+                  @{profile.username}
                 </p>
                 <p
                   className={`mt-2 ${isDark ? "text-gray-200" : "text-black"}`}
@@ -644,7 +644,7 @@ export default function Profile() {
                 )}
                 {showFollowing && (
                   <div
-                    className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                    className={`mt-4! max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
                   >
                     {followingList.length === 0 ? (
                       <p className={isDark ? "text-gray-400" : "text-gray-500"}>
@@ -710,9 +710,7 @@ export default function Profile() {
                 <div>
                   <label
                     className={`block text-sm font-medium mb-4! ${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    Ajouter une photo de profil
-                  </label>
+                  ></label>
                   <input
                     type="file"
                     accept="image/*"

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import supabase from "../services/supabase.js";
 
 // ── Toggle de thème global (exemple d'utilisation du contexte) ──
 function ThemeToggle() {
@@ -29,6 +30,46 @@ function ThemeToggle() {
 function AccountCard() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    avatarUrl: "",
+  });
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) return;
+
+        // Charger le profil depuis la table profiles (comme dans NavBar)
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("name, username, avatar_url")
+          .eq("id", user.id)
+          .single();
+
+        const displayName =
+          profileData?.name || user.email?.split("@")[0] || "Utilisateur";
+        const avatarUrl =
+          profileData?.avatar_url ||
+          `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+
+        setUserData({
+          name: displayName,
+          email: user.email || "email@example.com",
+          avatarUrl: avatarUrl,
+        });
+      } catch (error) {
+        console.error("Erreur chargement données utilisateur:", error);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   return (
     <div
@@ -54,13 +95,10 @@ function AccountCard() {
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            width: "52px",
-            height: "52px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #b0b0b8, #6e6e73)",
-          }}
+        <img
+          src={userData.avatarUrl}
+          alt="profile"
+          className={`w-12 h-12 rounded-full border-2 object-cover ${isDark ? "border-purple-800" : "border-purple-100"}`}
         />
         <button
           onClick={() =>
@@ -128,7 +166,7 @@ function AccountCard() {
               textDecoration: "none",
             }}
           >
-            SophieMartin123
+            {userData.name}
           </NavLink>
         </div>
         <div
@@ -146,7 +184,7 @@ function AccountCard() {
               textDecoration: "none",
             }}
           >
-            sophie.martin@example.com
+            {userData.email}
           </NavLink>
         </div>
       </div>
@@ -297,6 +335,7 @@ function Reglage({
 
 // ── Parameter (page principale) ──
 export default function Parameter() {
+  const navigate = useNavigate();
   const [language, setLanguage] = useState("fr");
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -306,6 +345,12 @@ export default function Parameter() {
   const containerColor = isDark ? "#f2f2f7" : "#1c1c1e";
 
   const reglages = [
+    {
+      titre: "Paramètres du compte",
+      description: "Modifier votre profil et gérer vos publications.",
+      hasToggle: false,
+      onClick: () => navigate("/home/account-settings"),
+    },
     {
       titre: "Thèmes",
       description: "Activer pour mode sombre.",
