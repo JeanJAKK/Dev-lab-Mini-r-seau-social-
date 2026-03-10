@@ -1,4 +1,3 @@
-
 .regis {
   flex: 1;
   display: flex;
@@ -24,19 +23,21 @@
   border-radius: 6px;
   font-size: 15px;
   color: black;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .regis-form input:focus {
   border-color: #8a2be2;
   outline: none;
 }
-.policy{
+.policy {
   color: rgba(0, 0, 0, 0.596);
   font-size: 10px;
   margin-bottom: 17px;
 }
-.logo1{
+.logo1 {
   font-size: 40px;
   text-align: center;
   font-size: 48px;
@@ -45,10 +46,9 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-
 }
 
-.connect{
+.connect {
   color: black;
   font-size: 13px;
   font-weight: bold;
@@ -137,4 +137,72 @@
   .policy {
     font-size: 9px;
   }
+}
+
+/* ==========================
+   CASE À COCHER PERSONNALISÉE
+   ========================== */
+.checkbox-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 17px;
+}
+
+.checkbox-container input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #8a2be2;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  margin-top: 2px;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  transition: all 0.3s ease;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #8a2be2;
+  border-color: #8a2be2;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.596);
+  flex: 1;
+}
+
+.checkbox-container .text-blue-700 {
+  color: #8a2be2 !important;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.checkbox-container .text-blue-700:hover {
+  color: #c217d9 !important;
 }

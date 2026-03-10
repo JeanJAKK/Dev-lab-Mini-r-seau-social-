@@ -21,6 +21,8 @@ import Plus from "./pages/Plus";
 import Settings from "./pages/Settings.jsx";
 import PostDetail from "./pages/PostDetail";
 import UserProfile from "./pages/UserProfile";
+import AccountSettings from "./pages/AccountSettings";
+import Terms from "./pages/Terms";
 
 function App() {
   const [auth, setAuth] = useState(isAuthenticated());
@@ -32,6 +34,7 @@ function App() {
 
         <Route path="/authPage" element={<AuthPage setAuth={setAuth} />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/terms" element={<Terms />} />
 
         {auth ? (
           <Route path="/home" element={<Home />}>
@@ -46,6 +49,7 @@ function App() {
             <Route path="create-post" element={<CreatePost />} />
             <Route path="plus" element={<Plus />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="account-settings" element={<AccountSettings />} />
             <Route path="post/:postId" element={<PostDetail />} />
             <Route path="profile/:userId" element={<UserProfile />} />
           </Route>

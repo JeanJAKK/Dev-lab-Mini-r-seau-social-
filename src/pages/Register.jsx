@@ -12,9 +12,9 @@ function Register() {
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const navigate = useNavigate();
-
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -33,6 +33,10 @@ function Register() {
       setMessage("Le mot de passe doit contenir au moins 6 caractères.");
       return;
     }
+    if (!acceptTerms) {
+      setMessage("Vous devez accepter les conditions d'utilisation.");
+      return;
+    }
 
     setLoading(true);
 
@@ -42,10 +46,10 @@ function Register() {
         email,
         password,
         options: {
-    data: {
-      name: name.trim()
-    }
-  }
+          data: {
+            name: name.trim(),
+          },
+        },
       });
 
       if (error) {
@@ -62,9 +66,6 @@ function Register() {
         return;
       }
 
-
-       
-
       setIsSuccess(true);
       setMessage("✅ Inscription réussie !");
       setLoading(false);
@@ -79,7 +80,6 @@ function Register() {
     }
   };
 
-  
   return (
     <div className="bg-white h-screen w-full">
       <div className="logos">
@@ -119,12 +119,21 @@ function Register() {
           </div>
 
           <div className="policy">
-            <p>
-              En cliquant sur "S'inscrire", vous acceptez nos{" "}
-              <span className="text-blue-700">Conditions d'utilisation</span>, notre{" "}
-              <span className="text-blue-700">Politique de confidentialité</span> et notre{" "}
-              <span className="text-blue-700">Politique relatives aux cookies</span>.
-            </p>
+            <label className="checkbox-container">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                required
+              />
+              <span className="checkmark"></span>
+              <p>
+                J'accepte avoir lu les{" "}
+                <Link to="/terms" className="text-blue-700">
+                  conditions d'utilisation
+                </Link>
+              </p>
+            </label>
           </div>
 
           <button type="submit" className="login-btn" disabled={loading}>
@@ -132,7 +141,9 @@ function Register() {
           </button>
 
           {message && (
-            <p style={{ color: isSuccess ? "green" : "red", marginTop: "10px" }}>
+            <p
+              style={{ color: isSuccess ? "green" : "red", marginTop: "10px" }}
+            >
               {message}
             </p>
           )}
