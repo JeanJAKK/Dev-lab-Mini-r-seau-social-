@@ -140,30 +140,30 @@ export default function CreatePost() {
 
   return (
     <div
-      className={`${isDark ? "bg-gray-800! border-gray-300" : "bg-white! border-gray-300!"} rounded-2xl! border! shadow-sm! mb-5! overflow-hidden!`}
+      className={`${isDark ? "bg-gray-800 border-gray-300" : "bg-white border-gray-300"} rounded-2xl border shadow-sm mb-5 overflow-hidden`}
       style={{ borderColor: isDark ? "#374151" : "#e5e7eb" }}
     >
-      <div className="px-5! pt-5! pb-4!">
+      <div className="px-5 pt-5 pb-4">
         <form onSubmit={handleCreatePost}>
-          <div className="flex! gap-4!">
+          <div className="flex gap-4">
             {/* Avatar */}
-            <div className="shrink-0!">
+            <div className="shrink-0">
               <img
                 src={avatarUrl}
                 alt="profile"
-                className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-gray-500!" : "border-gray-300!"}`}
+                className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-gray-500" : "border-gray-300"}`}
               />
             </div>
 
             {/* Inputs */}
-            <div className="flex-1! flex! flex-col! gap-3!">
+            <div className="flex-1 flex flex-col gap-3">
               <input
                 type="text"
                 placeholder="Titre du post"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className={`w-full! px-4! py-2.5! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition ${isDark ? "bg-gray-700! border-gray-600! text-gray-100! placeholder-gray-400! focus:ring-gray-400! focus:border-gray-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-gray-300! focus:border-gray-300!"}`}
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm placeholder-gray-400 focus:outline-none focus:ring-1 transition ${isDark ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:ring-gray-400 focus:border-gray-500" : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:ring-gray-300 focus:border-gray-300"}`}
               />
               <textarea
                 placeholder="Exprime-toi..."
@@ -171,7 +171,7 @@ export default function CreatePost() {
                 onChange={(e) => setContent(e.target.value)}
                 required
                 rows={3}
-                className={`w-full! px-4! py-3! rounded-xl! border! text-sm! placeholder-gray-400 focus:outline-none focus:ring-1 transition resize-none! leading-relaxed! ${isDark ? "bg-gray-700! border-gray-600! text-gray-100! placeholder-gray-400! focus:ring-gray-400! focus:border-gray-500!" : "bg-gray-50! border-gray-200! text-gray-900! placeholder-gray-400! focus:ring-gray-300! focus:border-gray-300!"}`}
+                className={`w-full px-4 py-3 rounded-xl border text-sm placeholder-gray-400 focus:outline-none focus:ring-1 transition resize-none leading-relaxed ${isDark ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:ring-gray-400 focus:border-gray-500" : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:ring-gray-300 focus:border-gray-300"}`}
               />
             </div>
           </div>
@@ -179,17 +179,17 @@ export default function CreatePost() {
           {/* Image Preview */}
           {imagePreview && (
             <div
-              className={`mt-4! rounded-xl! overflow-hidden! ${isDark ? "shadow-lg!" : "shadow-md!"}`}
+              className={`mt-4 rounded-xl overflow-hidden ${isDark ? "shadow-lg" : "shadow-md"}`}
             >
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-full! h-auto! object-cover!"
+                className="w-full h-auto object-cover"
               />
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="w-full! py-2! bg-red-500! text-white! font-semibold! hover:bg-red-600! transition!"
+                className="w-full py-2 bg-red-500 text-white font-semibold hover:bg-red-600 transition"
               >
                 Supprimer l'image
               </button>
@@ -197,17 +197,17 @@ export default function CreatePost() {
           )}
 
           <div
-            className={`flex! items-center! justify-between! mt-6! pt-4! ${isDark ? "border-t border-gray-700!" : "border-t border-gray-200!"}`}
+            className={`flex items-center justify-between mt-6 pt-4 ${isDark ? "border-t border-gray-700" : "border-t border-gray-200"}`}
           >
             <label
-              className={`flex! items-center! gap-2.5! px-4! py-2! rounded-xl! cursor-pointer! transition! group! ${isDark ? "bg-gray-700! hover:bg-purple-900!" : "bg-gray-50! hover:bg-purple-50!"}`}
+              className={`flex items-center gap-2.5 px-4 py-2 rounded-xl cursor-pointer transition group ${isDark ? "bg-gray-700 hover:bg-purple-900" : "bg-gray-50 hover:bg-purple-50"}`}
             >
               <Camera
                 size={17}
-                className={`${isDark ? "text-gray-400! group-hover:text-purple-400!" : "text-gray-400! group-hover:text-purple-600!"} transition`}
+                className={`${isDark ? "text-gray-400 group-hover:text-purple-400" : "text-gray-400 group-hover:text-purple-600"} transition`}
               />
               <span
-                className={`text-sm! transition! max-w-40! truncate! ${isDark ? "text-gray-400! group-hover:text-purple-400!" : "text-gray-400! group-hover:text-purple-600!"}`}
+                className={`text-sm transition max-w-40 truncate ${isDark ? "text-gray-400 group-hover:text-purple-400" : "text-gray-400 group-hover:text-purple-600"}`}
               >
                 {imageFile ? imageFile.name : "Ajouter une image"}
               </span>
@@ -215,14 +215,14 @@ export default function CreatePost() {
                 type="file"
                 accept="image/*"
                 onChange={handleImageSelect}
-                className="hidden!"
+                className="hidden"
               />
             </label>
 
             <button
               type="submit"
               disabled={loading}
-              className="px-6! py-2.5! bg-linear-to-r from-blue-400 to-indigo-500 text-white! text-sm! font-semibold! rounded-xl! border-none! hover:from-blue-700 hover:to-indigo-600 active:scale-[0.97] disabled:opacity-60 transition-all! duration-200 shadow-sm!"
+              className="px-6 py-2.5 bg-linear-to-r from-blue-400 to-indigo-500 text-white text-sm font-semibold rounded-xl border-none hover:from-blue-700 hover:to-indigo-600 active:scale-[0.97] disabled:opacity-60 transition-all duration-200 shadow-sm"
             >
               {loading ? "Publication..." : "Publier"}
             </button>
@@ -231,7 +231,7 @@ export default function CreatePost() {
 
         {message && (
           <p
-            className={`mt-3! text-center! text-sm! font-medium! ${message.includes("✅") ? "text-green-600!" : "text-red-500!"}`}
+            className={`mt-3 text-center text-sm font-medium ${message.includes("✅") ? "text-green-600" : "text-red-500"}`}
           >
             {message}
           </p>

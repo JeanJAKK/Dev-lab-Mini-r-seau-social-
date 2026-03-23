@@ -29,7 +29,7 @@ export default function Terms() {
       >
         {/* Header */}
         <div
-          className={`p-6! border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
+          className={`p-6 border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
         >
           <div className="flex items-center gap-4">
             <button
@@ -57,7 +57,7 @@ export default function Terms() {
         </div>
 
         {/* Content avec scroll */}
-        <div className="p-6! overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div
             style={{ lineHeight: "1.6", fontSize: "14px", padding: "0 8px" }}
           >
