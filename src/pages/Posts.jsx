@@ -14,13 +14,30 @@ function PostImage({ src, alt, onClick }) {
       style={{
         position: "relative",
         width: "100%",
-        height: "100%",
+        aspectRatio: "16 / 10",
+        maxHeight: "420px",
         borderRadius: "14px",
         overflow: "hidden",
         backgroundColor: "#f1f5f9",
-        minHeight: "300px",
+        margin: "12px 0",
       }}
     >
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          filter: "blur(18px)",
+          transform: "scale(1.08)",
+          opacity: loaded ? 0.55 : 0,
+          transition: "opacity 0.25s ease",
+        }}
+      />
       {!loaded && (
         <div
           style={{
@@ -44,9 +61,11 @@ function PostImage({ src, alt, onClick }) {
         }}
         onError={() => console.error("PostImage failed to load:", src)}
         style={{
+          position: "relative",
           width: "100%",
           height: "100%",
           objectFit: "contain",
+          objectPosition: "center",
           cursor: "pointer",
           display: "block",
           zIndex: loaded ? 2 : 0,

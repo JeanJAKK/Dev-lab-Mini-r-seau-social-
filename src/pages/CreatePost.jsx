@@ -181,11 +181,19 @@ export default function CreatePost() {
             <div
               className={`mt-4 rounded-xl overflow-hidden ${isDark ? "shadow-lg" : "shadow-md"}`}
             >
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-full h-auto object-cover"
-              />
+              <div className={`relative w-full aspect-4/5 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}>
+                <img
+                  src={imagePreview}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50"
+                />
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="relative z-10 w-full h-full object-contain"
+                />
+              </div>
               <button
                 type="button"
                 onClick={handleRemoveImage}
