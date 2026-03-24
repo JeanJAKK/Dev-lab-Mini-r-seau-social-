@@ -16,7 +16,7 @@ import {
   Mail,
 } from "lucide-react";
 import supabase from "../services/supabase.js";
-import { getUser } from "../services/systemeLike/getUserId.js";
+import { getUser } from "../services/systemeLike/getUser.js";
 
 export default function AccountSettings() {
   // États pour les posts

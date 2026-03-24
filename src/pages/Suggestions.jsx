@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import supabase from "../services/supabase";
-import { getUserId } from "../services/systemeLike/getUserId";
+import { getUser } from "../services/systemeLike/getUser";
 import "../styles/Suggestions.css";
 
 function Suggestions() {
@@ -44,7 +44,7 @@ function Suggestions() {
   };
 
   const toggleFollow = async (targetId) => {
-    const me = await getUserId();
+    const me = await getUser().id;
     if (!me) return;
 
     if (followingIds.includes(targetId)) {
@@ -72,7 +72,7 @@ function Suggestions() {
 
   useEffect(() => {
     const init = async () => {
-      const me = await getUserId();
+      const me = await getUser().id;
       setMyId(me);
       await Promise.all([getUsers(me), loadFollowing(me)]);
     };

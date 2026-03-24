@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { Calendar, Settings } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import supabase from "../services/supabase.js";
+import { getUser } from "../services/systemeLike/getUser.js";
 
 // Composant PostImage ultra-simple comme dans Posts.jsx
 function PostImage({ src, alt, onClick }) {
@@ -78,9 +79,7 @@ export default function Profile() {
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const user = await getUser();
 
         if (!user) {
           setMessage("Vous devez être connecté pour voir votre profil.");

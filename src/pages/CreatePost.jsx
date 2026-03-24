@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import supabase from "../services/supabase.js";
 import { Camera } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { getUser } from "../services/systemeLike/getUser.js";
 
 export default function CreatePost() {
   const [title, setTitle] = useState("");
@@ -9,6 +10,7 @@ export default function CreatePost() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [message, setMessage] = useState("");
+  const [user, setUser] = useState();
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -19,9 +21,7 @@ export default function CreatePost() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        setUser(await getUser());
 
         if (user) {
           setCurrentUser(user);
@@ -83,10 +83,6 @@ export default function CreatePost() {
     setLoading(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
         setMessage("Vous devez être connecté pour publier.");
         setLoading(false);
