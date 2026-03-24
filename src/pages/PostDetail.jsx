@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Send, MoreHorizontal, CornerDownRight, X, Share2 } from "lucide-react";
+import { ArrowLeft, Heart, Send, MoreHorizontal, CornerDownRight, X, Share2, Download } from "lucide-react";
 import supabase from "../services/supabase";
 import { useTheme } from "../context/ThemeContext";
 import { getUserId } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
 import { sendComment } from "../services/gestionComments/SendComment";
+import { shareContent } from "../services/share";
 
 export default function PostDetail() {
   const { postId } = useParams();
@@ -14,12 +15,15 @@ export default function PostDetail() {
   const isDark = theme === "dark";
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const menuRef = useRef(null);
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [shareNotice, setShareNotice] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentProfile, setCurrentProfile] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null); // { id, nom } — commentaire ciblé par la réponse
 
@@ -45,6 +49,17 @@ export default function PostDetail() {
     return () => {
       document.body.style.overflow = "";
     };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const fetchComments = useCallback(async () => {
@@ -113,18 +128,38 @@ export default function PostDetail() {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: post.title || 'Post',
-        text: post.content,
-        url: window.location.origin + `/home/post/${post.id}`
-      }).catch(err => console.log('Erreur de partage:', err));
-    } else {
-      // Fallback: copier le lien dans le presse-papiers
-      navigator.clipboard.writeText(window.location.origin + `/home/post/${post.id}`).then(() => {
-        alert('Lien copié dans le presse-papiers !');
-      }).catch(err => console.error('Erreur lors de la copie:', err));
+  const handleShare = async () => {
+    const result = await shareContent({
+      title: post.title || "Post",
+      text: post.content,
+      url: `${window.location.origin}/home/post/${post.id}`,
+    });
+
+    if (result.ok && result.mode === "clipboard") {
+      setShareNotice("Lien copie dans le presse-papiers.");
+      setTimeout(() => setShareNotice(""), 2200);
+    }
+  };
+
+  const handleDownloadImage = () => {
+    if (!post?.image_url) {
+      setShareNotice("Aucune image a telecharger.");
+      setTimeout(() => setShareNotice(""), 2200);
+      return;
+    }
+
+    try {
+      const link = document.createElement("a");
+      link.href = post.image_url;
+      link.download = `${(post.title || "post-image").replace(/[^a-zA-Z0-9_-]/g, "-")}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setShareNotice("Telechargement lance.");
+      setTimeout(() => setShareNotice(""), 2200);
+    } catch {
+      setShareNotice("Impossible de telecharger cette image.");
+      setTimeout(() => setShareNotice(""), 2200);
     }
   };
 
@@ -225,7 +260,7 @@ export default function PostDetail() {
 
           {/* Bouton retour desktop (quand pas d'image) */}
           {!post.image_url && (
-            <div className={`hidden md:flex items-center gap-3 px-4 h-14 border-b shrink-0 ${isDark ? "border-gray-700" : "border-gray-200"}`}>
+            <div className={`hidden md:flex items-center gap-3 px-4 h-14 border-b justify-between shrink-0 ${isDark ? "border-gray-700" : "border-gray-200"}`}>
               <button
                 onClick={() => navigate(-1)}
                 className={`p-2 -ml-2 rounded-full border-none bg-transparent cursor-pointer transition ${isDark ? "text-white hover:bg-gray-800" : "text-gray-800 hover:bg-gray-100"}`}
@@ -255,9 +290,33 @@ export default function PostDetail() {
                 {new Date(post.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
               </p>
             </div>
-            <button className={`p-1.5 rounded-full border-none bg-transparent cursor-pointer transition ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}>
-              <MoreHorizontal size={18} className={isDark ? "text-gray-400" : "text-gray-500"} />
-            </button>
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+                className={`p-1.5 rounded-full border-none bg-transparent cursor-pointer transition ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}
+              >
+                <MoreHorizontal size={18} className={isDark ? "text-gray-400" : "text-gray-500"} />
+              </button>
+
+              {isMenuOpen && (
+                <div
+                  className={`absolute right-0 top-10 z-20 min-w-[190px] rounded-xl border shadow-lg py-1 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+                >
+                  {post.image_url && (
+                    <button
+                      onClick={() => {
+                        handleDownloadImage();
+                        setIsMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm border-none bg-transparent cursor-pointer transition ${isDark ? "text-gray-200 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"}`}
+                    >
+                      <Download size={16} />
+                      Telecharger
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Description du post */}
@@ -348,6 +407,11 @@ export default function PostDetail() {
                 <span className="text-sm font-semibold">Partager</span>
               </button>
             </div>
+            {shareNotice && (
+              <p className={`mt-2 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                {shareNotice}
+              </p>
+            )}
           </div>
 
           {/* Bandeau de réponse à un commentaire */}

@@ -6,6 +6,7 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getUserId } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
+import { shareContent } from "../services/share";
 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
@@ -256,18 +257,16 @@ export default function Posts() {
               </button>
               <button 
                 className="post-action-btn"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: post.title || 'Post',
-                      text: post.content,
-                      url: window.location.origin + `/home/post/${post.id}`
-                    }).catch(err => console.log('Erreur de partage:', err));
-                  } else {
-                    // Fallback: copier le lien dans le presse-papiers
-                    navigator.clipboard.writeText(window.location.origin + `/home/post/${post.id}`).then(() => {
-                      alert('Lien copié dans le presse-papiers !');
-                    }).catch(err => console.error('Erreur lors de la copie:', err));
+                onClick={async () => {
+                  const result = await shareContent({
+                    title: post.title || "Post",
+                    text: post.content,
+                    url: `${window.location.origin}/home/post/${post.id}`,
+                  });
+
+                  if (result.ok && result.mode === "clipboard") {
+                    setMessage("Lien copie dans le presse-papiers.");
+                    setTimeout(() => setMessage(""), 2200);
                   }
                 }}
               >

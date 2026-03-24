@@ -66,6 +66,7 @@ function AuthPage({ setAuth }) {
       }
 
       //  Connexion réussie
+      localStorage.setItem("isLogged", "true");
       setAuth(true);
       setMessage(" Connexion réussie !");
       setLoading(false);

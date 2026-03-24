@@ -178,7 +178,7 @@ function AccountCard() {
           }}
         >
           <NavLink
-            to="/home/Profil"
+            to="/home/profil"
             style={{
               color: isDark ? "#a78bfa" : "#007aff",
               textDecoration: "none",

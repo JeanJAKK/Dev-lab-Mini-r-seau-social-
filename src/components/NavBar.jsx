@@ -216,7 +216,7 @@ const normalClass = isDark
 <nav
   className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow h-16 ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-200"}`}
 >
-        <ul className="relative flex justify-around items-center py-2 text-xs font-medium">
+        <ul className="relative flex justify-around items-center py-2 text-[11px] font-medium">
           <li>
             <NavLink
               to="."
@@ -238,12 +238,12 @@ const normalClass = isDark
               <Search size={22} /> Rechercher
             </NavLink>
           </li>
-          <li className="relative flex flex-col items-center -translate-y-4">
+          <li className="relative flex flex-col items-center -translate-y-3">
             <NavLink
               to="plus"
-              className="flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-2xl hover:bg-blue-700 transition duration-300 rotate-45"
+              className="flex items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-xl shadow-xl hover:bg-blue-700 transition duration-300 rotate-45"
             >
-              <Plus size={28} className="rotate-45" />
+              <Plus size={24} className="rotate-45" />
             </NavLink>
           </li>
           <li>
