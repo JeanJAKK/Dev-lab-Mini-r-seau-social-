@@ -1,7 +1,5 @@
 // ===============================
 // Profile.jsx
-// Composant 100% Frontend (Mock Data)
-// Le backend pourra remplacer les données plus tard
 // ===============================
 
 import { useState, useEffect } from "react";
@@ -472,7 +470,8 @@ export default function Profile() {
   //RENDER
   return (
     <div
-      className={`min-h-screen flex justify-center py-8 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
+      className={`flex justify-center py-4 px-4 sm:px-6 lg:px-8 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
+      style={{ minHeight: "calc(100vh - 70px)" }}
     >
       <div
         className={`w-full max-w-5xl border rounded-2xl overflow-hidden shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
@@ -776,20 +775,7 @@ export default function Profile() {
                 Publications
               </button>
 
-              <button
-                onClick={() => setActiveTab("media")}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
-                  activeTab === "media"
-                    ? isDark
-                      ? "bg-gray-800 text-gray-100"
-                      : "bg-white text-black"
-                    : isDark
-                      ? "hover:bg-gray-600"
-                      : "hover:bg-gray-400"
-                }`}
-              >
-                Médias
-              </button>
+  
 
               <button
                 onClick={() => setActiveTab("likes")}
@@ -867,11 +853,6 @@ export default function Profile() {
               </div>
             )}
 
-            {activeTab === "media" && (
-              <div className="text-center text-gray-500 py-10">
-                Aucun média disponible.
-              </div>
-            )}
 
             {activeTab === "likes" && (
               <div className="text-center text-gray-500 py-10">

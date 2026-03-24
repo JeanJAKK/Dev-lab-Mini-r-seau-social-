@@ -214,56 +214,56 @@ const normalClass = isDark
 
 {/* NAVBAR MOBILE */}
 <nav
-  className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow h-16 ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-200"}`}
+  className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg h-[72px] pb-[safe] mb-0 ${isDark ? "bg-gray-900/95 border-gray-800" : "bg-white/95 border-gray-100"}`}
 >
-        <ul className="relative flex justify-around items-center py-2 text-[11px] font-medium">
+        <ul className="relative flex justify-around items-center h-full text-[12px] font-medium">
           <li>
             <NavLink
               to="."
               end
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
               }
             >
-              <Home size={22} /> Accueil
+              <Home size={24} /> Accueil
             </NavLink>
           </li>
           <li>
             <NavLink
               to="search"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
               }
             >
-              <Search size={22} /> Rechercher
+              <Search size={24} /> Rechercher
             </NavLink>
           </li>
-          <li className="relative flex flex-col items-center -translate-y-3">
+          <li className="relative flex flex-col items-center -translate-y-5">
             <NavLink
               to="plus"
-              className="flex items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-xl shadow-xl hover:bg-blue-700 transition duration-300 rotate-45"
+              className={`flex items-center justify-center w-14 h-14 rounded-2xl rotate-45 shadow-lg transition duration-300 transform hover:scale-105 active:scale-95 ${isDark ? "bg-purple-600 text-white shadow-purple-900/50" : "bg-linear-to-r from-purple-600 to-indigo-600 text-white shadow-purple-500/40"}`}
             >
-              <Plus size={24} className="rotate-45" />
+              <Plus size={28}  className="rotate-45"/>
             </NavLink>
           </li>
           <li>
             <NavLink
               to="notifications"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
               }
             >
-              <Bell size={22} /> Notifications
+              <Bell size={24} /> Actions
             </NavLink>
           </li>
           <li>
             <NavLink
               to="messages"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`
+                `flex flex-col items-center gap-1 ${isActive ? activeClass : normalClass}`
               }
             >
-              <Mail size={22} /> Messages
+              <Mail size={24} /> Messages
             </NavLink>
           </li>
         </ul>
