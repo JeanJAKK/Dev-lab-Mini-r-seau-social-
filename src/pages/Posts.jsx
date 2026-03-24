@@ -6,6 +6,7 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getUserId } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
+import { addNotification } from '../services/notificationService';
 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
@@ -60,9 +61,9 @@ function PostImage({ src, alt, onClick }) {
 export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-
   const { theme } = useTheme();
 
   const getAvatarUrl = (profile) => {
@@ -72,11 +73,21 @@ export default function Posts() {
     return `https://ui-avatars.com/api/?name=${profile.name || "User"}&background=random`;
   };
 
+  // Charger l'utilisateur courant au montage
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      const userId = await getUserId();
+      setCurrentUserId(userId);
+    };
+    loadCurrentUser();
+  }, []);
+
+  // Charger les posts avec leurs likes et commentaires
   useEffect(() => {
     const fetchPostsWithLikes = async () => {
       setLoading(true);
       try {
-        // 1️⃣ Récupérer tous les posts avec les infos du profil
+        // Récupérer tous les posts avec les infos du profil
         const { data: postsData, error: postsError } = await supabase
           .from("posts")
           .select("*, profiles!posts_user_id_fkey(name, avatar_url)")
@@ -84,21 +95,23 @@ export default function Posts() {
 
         if (postsError) throw postsError;
 
-        // 2️⃣ Récupérer tous les likes pour tous les posts
+        // Récupérer tous les likes
         const { data: likesData, error: likesError } = await supabase
           .from("likes")
-          .select("*"); // on prend post_id et user_id
+          .select("*");
 
         if (likesError) throw likesError;
 
+        // Récupérer tous les commentaires
         const { data: commentData, error: commentError } = await supabase
           .from("comments")
           .select("*");
+          
         if (commentError) throw commentError;
 
         const userId = await getUserId();
 
-        // 3️⃣ Ajouter likes et liked à chaque post
+        // Ajouter likes, liked et commentaires à chaque post
         const postsWithLikes = postsData.map((post) => {
           const comments = commentData.filter((com) => com.post_id === post.id);
           const postLikes = likesData.filter(
@@ -126,7 +139,85 @@ export default function Posts() {
     fetchPostsWithLikes();
   }, []);
 
-  if (loading)
+  // Gestionnaire de like avec notification
+  const handleLike = async (post) => {
+    const userId = await getUserId();
+    if (!userId) return;
+
+    const newCount = await like(post.id, userId, post.liked);
+
+    // Notification pour le like (seulement si ce n'était pas déjà liké)
+    if (!post.liked && userId !== post.user_id) {
+      await addNotification(
+        userId,
+        post.user_id,
+        'like',
+        post.id,
+        'a aimé votre publication.'
+      );
+    }
+
+    // Mettre à jour l'état local
+    setPosts((prevPosts) =>
+      prevPosts.map((p) =>
+        p.id === post.id
+          ? { ...p, likes: newCount, liked: !p.liked }
+          : p,
+      )
+    );
+  };
+
+  // Gestionnaire de partage avec notification
+  const handleShare = async (post) => {
+    const userId = await getUserId();
+    
+    // Logique de partage native
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.title || 'Post',
+          text: post.content,
+          url: window.location.origin + `/home/post/${post.id}`
+        });
+        
+        // Notification pour le partage
+        if (userId && userId !== post.user_id) {
+          await addNotification(
+            userId,
+            post.user_id,
+            'share',
+            post.id,
+            'a partagé votre publication.'
+          );
+        }
+      } catch (err) {
+        console.log('Partage annulé ou erreur:', err);
+      }
+    } else {
+      // Fallback: copier le lien
+      try {
+        await navigator.clipboard.writeText(
+          window.location.origin + `/home/post/${post.id}`
+        );
+        alert('Lien copié dans le presse-papiers !');
+        
+        // Notification pour le partage (même si c'est une copie)
+        if (userId && userId !== post.user_id) {
+          await addNotification(
+            userId,
+            post.user_id,
+            'share',
+            post.id,
+            'a partagé votre publication.'
+          );
+        }
+      } catch (err) {
+        console.error('Erreur lors de la copie:', err);
+      }
+    }
+  };
+
+  if (loading) {
     return (
       <div className="posts-page" data-theme={theme}>
         <div className="posts-container">
@@ -148,6 +239,7 @@ export default function Posts() {
         </div>
       </div>
     );
+  }
 
   return (
     <div className="posts-page" data-theme={theme}>
@@ -161,6 +253,7 @@ export default function Posts() {
 
         {posts.map((post) => (
           <div className="post-card" key={post.id}>
+            {/* En-tête du post avec avatar et nom */}
             <div className="post-header">
               <Link
                 to={`/home/profile/${post.user_id}`}
@@ -187,6 +280,7 @@ export default function Posts() {
               </div>
             </div>
 
+            {/* Image du post si elle existe */}
             {post.image_url && (
               <PostImage
                 src={post.image_url}
@@ -195,29 +289,22 @@ export default function Posts() {
               />
             )}
 
+            {/* Contenu textuel du post */}
             <p className="post-content">{post.content}</p>
 
+            {/* Affichage du nombre de likes */}
             {post.likes > 0 && (
               <div className="post-likes">
                 ❤️ <span>{post.likes}</span>
               </div>
             )}
 
+            {/* Boutons d'action */}
             <div className="post-actions">
+              {/* Bouton J'aime */}
               <button
                 className={`post-action-btn ${post.liked ? "liked" : ""}`}
-                onClick={async () => {
-                  const userId = await getUserId();
-                  const newCount = await like(post.id, userId, post.liked);
-
-                  setPosts((prevPosts) =>
-                    prevPosts.map((p) =>
-                      p.id === post.id
-                        ? { ...p, likes: newCount, liked: !p.liked }
-                        : p,
-                    ),
-                  );
-                }}
+                onClick={() => handleLike(post)}
               >
                 <Heart
                   size={16}
@@ -226,6 +313,8 @@ export default function Posts() {
                 />
                 J'aime <span>{post.likes}</span>
               </button>
+
+              {/* Bouton Commenter */}
               <button
                 className="post-action-btn"
                 onClick={() => navigate(`/home/post/${post.id}`)}
@@ -235,22 +324,11 @@ export default function Posts() {
                   <span>{post.comments.length}</span>
                 )}
               </button>
+
+              {/* Bouton Partager */}
               <button 
                 className="post-action-btn"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: post.title || 'Post',
-                      text: post.content,
-                      url: window.location.origin + `/home/post/${post.id}`
-                    }).catch(err => console.log('Erreur de partage:', err));
-                  } else {
-                    // Fallback: copier le lien dans le presse-papiers
-                    navigator.clipboard.writeText(window.location.origin + `/home/post/${post.id}`).then(() => {
-                      alert('Lien copié dans le presse-papiers !');
-                    }).catch(err => console.error('Erreur lors de la copie:', err));
-                  }
-                }}
+                onClick={() => handleShare(post)}
               >
                 <Share2 size={16} /> Partager
               </button>

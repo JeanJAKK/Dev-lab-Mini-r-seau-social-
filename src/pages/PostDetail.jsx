@@ -6,6 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 import { getUserId } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
 import { sendComment } from "../services/gestionComments/SendComment";
+import { addNotification } from '../services/notificationService';
 
 export default function PostDetail() {
   const { postId } = useParams();
@@ -21,6 +22,7 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [currentProfile, setCurrentProfile] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null); // { id, nom } — commentaire ciblé par la réponse
 
   const getAvatarUrl = (profile) => {
@@ -29,7 +31,7 @@ export default function PostDetail() {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || "U")}&background=7c3aed&color=fff`;
   };
 
-  // Tabulation comme séparateur — introuvable sur un clavier classique, impossible à injecter
+  // Tabulation comme séparateur
   const buildReplyContent = (name, text) => `@${name}\t${text}`;
   const parseComment = (content) => {
     const tabIdx = content.indexOf("\t");
@@ -39,7 +41,7 @@ export default function PostDetail() {
     return { mention: null, text: content };
   };
 
-  // Bloquer le scroll du body pendant l'affichage de la page détail
+  // Bloquer le scroll du body
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -47,6 +49,7 @@ export default function PostDetail() {
     };
   }, []);
 
+  // Charger les commentaires
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
       .from("comments")
@@ -56,37 +59,61 @@ export default function PostDetail() {
     setComments(data || []);
   }, [postId]);
 
+  // Charger les données initiales
   useEffect(() => {
     const init = async () => {
       setLoading(true);
+      
+      // Récupérer l'utilisateur courant
+      const userId = await getUserId();
+      setCurrentUserId(userId);
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
           .from("profiles").select("name, avatar_url").eq("id", user.id).single();
         setCurrentProfile(profile);
       }
-      const userId = await getUserId();
+      
+      // Récupérer le post
       const { data: postData, error } = await supabase
         .from("posts")
         .select("*, profiles!posts_user_id_fkey(id, name, avatar_url)")
         .eq("id", postId).single();
+        
       if (!error && postData) {
         const { data: likesData } = await supabase.from("likes").select("*").eq("post_id", postId);
         const liked = likesData?.some((l) => l.user_id === userId) || false;
         setPost({ ...postData, likes: likesData?.length || 0, liked });
       }
+      
       await fetchComments();
       setLoading(false);
     };
     init();
   }, [postId, fetchComments]);
 
+  // Gestionnaire de like avec notification
   const handleLike = async () => {
-    const userId = await getUserId();
-    const newCount = await like(postId, userId, post.liked);
+    if (!currentUserId || !post) return;
+    
+    const newCount = await like(postId, currentUserId, post.liked);
+    
+    // Notification pour le like (seulement si ce n'était pas déjà liké)
+    if (!post.liked && currentUserId !== post.user_id) {
+      await addNotification(
+        currentUserId,
+        post.user_id,
+        'like',
+        postId,
+        'a aimé votre publication.'
+      );
+    }
+    
     setPost((p) => ({ ...p, likes: newCount, liked: !p.liked }));
   };
 
+  // Gestionnaire de réponse à un commentaire
   const handleReply = (comment) => {
     setReplyingTo({ id: comment.id, name: comment.profiles?.name || "Utilisateur" });
     setCommentText("");
@@ -98,14 +125,29 @@ export default function PostDetail() {
     setCommentText("");
   };
 
+  // Gestionnaire d'envoi de commentaire avec notification
   const handleSubmit = async () => {
-    if (!commentText.trim() || submitting) return;
+    if (!commentText.trim() || submitting || !currentUserId) return;
+    
     setSubmitting(true);
-    const userId = await getUserId();
+    
     const content = replyingTo
       ? buildReplyContent(replyingTo.name, commentText.trim())
       : commentText.trim();
-    await sendComment(userId, postId, content);
+      
+    const commentData = await sendComment(currentUserId, postId, content);
+    
+    // Notification pour le commentaire
+    if (currentUserId !== post.user_id) {
+      await addNotification(
+        currentUserId,
+        post.user_id,
+        'comment',
+        postId,
+        'a commenté votre publication.'
+      );
+    }
+
     setCommentText("");
     setReplyingTo(null);
     await fetchComments();
@@ -113,18 +155,52 @@ export default function PostDetail() {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
-  const handleShare = () => {
+  // Gestionnaire de partage avec notification
+  const handleShare = async () => {
+    if (!currentUserId || !post) return;
+    
     if (navigator.share) {
-      navigator.share({
-        title: post.title || 'Post',
-        text: post.content,
-        url: window.location.origin + `/home/post/${post.id}`
-      }).catch(err => console.log('Erreur de partage:', err));
+      try {
+        await navigator.share({
+          title: post.title || 'Post',
+          text: post.content,
+          url: window.location.origin + `/home/post/${post.id}`
+        });
+        
+        // Notification pour le partage
+        if (currentUserId !== post.user_id) {
+          await addNotification(
+            currentUserId,
+            post.user_id,
+            'share',
+            post.id,
+            'a partagé votre publication.'
+          );
+        }
+      } catch (err) {
+        console.log('Partage annulé ou erreur:', err);
+      }
     } else {
-      // Fallback: copier le lien dans le presse-papiers
-      navigator.clipboard.writeText(window.location.origin + `/home/post/${post.id}`).then(() => {
+      // Fallback: copier le lien
+      try {
+        await navigator.clipboard.writeText(
+          window.location.origin + `/home/post/${post.id}`
+        );
         alert('Lien copié dans le presse-papiers !');
-      }).catch(err => console.error('Erreur lors de la copie:', err));
+        
+        // Notification pour le partage
+        if (currentUserId !== post.user_id) {
+          await addNotification(
+            currentUserId,
+            post.user_id,
+            'share',
+            post.id,
+            'a partagé votre publication.'
+          );
+        }
+      } catch (err) {
+        console.error('Erreur lors de la copie:', err);
+      }
     }
   };
 
@@ -143,7 +219,6 @@ export default function PostDetail() {
 
           {/* Panneau droit skeleton */}
           <div className={`flex! flex-col! flex-1! md:flex-none! md:w-[380px]! overflow-hidden! ${isDark ? "bg-gray-900! border-l! border-gray-700!" : "bg-white! border-l! border-gray-200!"}`}>
-
             {/* Auteur skeleton */}
             <div className={`flex! items-center! gap-3! px-4! py-3! border-b! shrink-0! ${isDark ? "border-gray-700!" : "border-gray-100!"}`}>
               <div className="skeleton w-10 h-10 rounded-full shrink-0"></div>
@@ -382,7 +457,7 @@ export default function PostDetail() {
               placeholder={replyingTo ? `Répondre à @${replyingTo.name}…` : "Ajouter un commentaire…"}
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
               className={`flex-1! bg-transparent! text-sm! outline-none! border-none! shadow-none! ring-0! placeholder-gray-400! ${isDark ? "text-gray-100!" : "text-gray-800!"}`}
             />
             {commentText.trim() && (
