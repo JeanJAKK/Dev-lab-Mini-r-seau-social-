@@ -6,6 +6,7 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getUser } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
+import { shareContent } from "../services/share";
 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
@@ -14,13 +15,30 @@ function PostImage({ src, alt, onClick }) {
       style={{
         position: "relative",
         width: "100%",
-        height: "100%",
+        aspectRatio: "16 / 10",
+        maxHeight: "420px",
         borderRadius: "14px",
         overflow: "hidden",
         backgroundColor: "#f1f5f9",
-        minHeight: "300px",
+        margin: "12px 0",
       }}
     >
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          filter: "blur(18px)",
+          transform: "scale(1.08)",
+          opacity: loaded ? 0.55 : 0,
+          transition: "opacity 0.25s ease",
+        }}
+      />
       {!loaded && (
         <div
           style={{
@@ -44,9 +62,11 @@ function PostImage({ src, alt, onClick }) {
         }}
         onError={() => console.error("PostImage failed to load:", src)}
         style={{
+          position: "relative",
           width: "100%",
           height: "100%",
           objectFit: "contain",
+          objectPosition: "center",
           cursor: "pointer",
           display: "block",
           zIndex: loaded ? 2 : 0,
@@ -237,18 +257,16 @@ export default function Posts() {
               </button>
               <button 
                 className="post-action-btn"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: post.title || 'Post',
-                      text: post.content,
-                      url: window.location.origin + `/home/post/${post.id}`
-                    }).catch(err => console.log('Erreur de partage:', err));
-                  } else {
-                    // Fallback: copier le lien dans le presse-papiers
-                    navigator.clipboard.writeText(window.location.origin + `/home/post/${post.id}`).then(() => {
-                      alert('Lien copié dans le presse-papiers !');
-                    }).catch(err => console.error('Erreur lors de la copie:', err));
+                onClick={async () => {
+                  const result = await shareContent({
+                    title: post.title || "Post",
+                    text: post.content,
+                    url: `${window.location.origin}/home/post/${post.id}`,
+                  });
+
+                  if (result.ok && result.mode === "clipboard") {
+                    setMessage("Lien copie dans le presse-papiers.");
+                    setTimeout(() => setMessage(""), 2200);
                   }
                 }}
               >

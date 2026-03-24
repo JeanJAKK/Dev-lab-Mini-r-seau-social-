@@ -270,14 +270,14 @@ export default function AccountSettings() {
 
   return (
     <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} py-8! flex items-center justify-center`}
+      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} py-8 flex items-center justify-center`}
     >
       <div
         className={`w-full max-w-4xl mx-auto ${isDark ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg overflow-hidden border ${isDark ? "border-gray-700" : "border-gray-200"}`}
       >
         {/* Header */}
         <div
-          className={`p-6! border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
+          className={`p-6 border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
         >
           <div className="flex items-center gap-3">
             <Settings
@@ -311,7 +311,7 @@ export default function AccountSettings() {
 
         {/* Section Profil */}
         <div
-          className={`p-6! border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
+          className={`p-6 border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
         >
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -336,7 +336,7 @@ export default function AccountSettings() {
                   });
                 }
               }}
-              className={`px-4! py-2! mb-2! rounded-lg transition ${
+              className={`px-4 py-2 mb-2 rounded-lg transition ${
                 isDark
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-blue-500 text-white hover:bg-blue-600"
@@ -347,9 +347,9 @@ export default function AccountSettings() {
           </div>
 
           {!isEditingProfile ? (
-            <div className="space-y-6!">
+            <div className="space-y-6">
               <div
-                className={`p-4! rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                className={`p-4 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
               >
                 <p
                   className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
@@ -363,7 +363,7 @@ export default function AccountSettings() {
                 </p>
               </div>
               <div
-                className={`p-4! rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                className={`p-4 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
               >
                 <p
                   className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
@@ -377,7 +377,7 @@ export default function AccountSettings() {
                 </p>
               </div>
               <div
-                className={`p-4! rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                className={`p-4 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
               >
                 <p
                   className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
@@ -391,7 +391,7 @@ export default function AccountSettings() {
                 </p>
               </div>
               <div
-                className={`p-4! rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                className={`p-4 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
               >
                 <p
                   className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
@@ -409,7 +409,7 @@ export default function AccountSettings() {
             <form onSubmit={handleProfileUpdate} className="space-y-4">
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2! ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
                 >
                   Nom
                 </label>
@@ -422,7 +422,7 @@ export default function AccountSettings() {
                       name: e.target.value,
                     }))
                   }
-                  className={`w-full px-4! py-2! rounded-lg border ${
+                  className={`w-full px-4 py-2 rounded-lg border ${
                     isDark
                       ? "bg-gray-700 border-gray-600 text-gray-200 focus:border-blue-500"
                       : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
@@ -433,7 +433,7 @@ export default function AccountSettings() {
               </div>
               <div>
                 <label
-                  className={`block text-sm font-medium my-2! ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium my-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
                 >
                   Nom d'utilisateur
                 </label>
@@ -446,7 +446,7 @@ export default function AccountSettings() {
                       username: e.target.value.replace(/\s/g, ""),
                     }))
                   }
-                  className={`w-full px-4! py-2! rounded-lg border ${
+                  className={`w-full px-4 py-2 rounded-lg border ${
                     isDark
                       ? "bg-gray-700 border-gray-600 text-gray-200 focus:border-blue-500"
                       : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
@@ -459,7 +459,7 @@ export default function AccountSettings() {
               </div>
               <div>
                 <label
-                  className={`block text-sm font-medium my-2! ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium my-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
                 >
                   Bio
                 </label>
@@ -469,7 +469,7 @@ export default function AccountSettings() {
                     setProfileForm((prev) => ({ ...prev, bio: e.target.value }))
                   }
                   rows={3}
-                  className={`w-full px-4! py-2! rounded-lg border ${
+                  className={`w-full px-4 py-2 rounded-lg border ${
                     isDark
                       ? "bg-gray-700 border-gray-600 text-gray-200 focus:border-blue-500"
                       : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
@@ -477,11 +477,11 @@ export default function AccountSettings() {
                   placeholder="Décrivez-vous..."
                 />
               </div>
-              <div className="flex gap-3 mt-4!">
+              <div className="flex gap-3 mt-4">
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`px-6! py-2! rounded-lg transition ${
+                  className={`px-6 py-2 rounded-lg transition ${
                     isDark
                       ? "bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
                       : "bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
@@ -499,7 +499,7 @@ export default function AccountSettings() {
                       bio: profile.bio,
                     });
                   }}
-                  className={`px-6! py-2! rounded-lg transition ${
+                  className={`px-6 py-2 rounded-lg transition ${
                     isDark
                       ? "bg-gray-600 text-white hover:bg-gray-700"
                       : "bg-gray-500 text-white hover:bg-gray-600"
@@ -513,8 +513,8 @@ export default function AccountSettings() {
         </div>
 
         {/* Section Posts */}
-        <div className="p-6!">
-          <div className="flex items-center gap-3 mb-6!">
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-6">
             <Edit
               className={isDark ? "text-gray-400" : "text-gray-600"}
               size={20}
@@ -527,28 +527,28 @@ export default function AccountSettings() {
           </div>
 
           {postsLoading ? (
-            <div className="text-center py-8!">
+            <div className="text-center py-8">
               <p className={isDark ? "text-gray-400" : "text-gray-600"}>
                 Chargement...
               </p>
             </div>
           ) : userPosts.length === 0 ? (
             <div
-              className={`text-center! py-8! ${isDark ? "bg-gray-700" : "bg-gray-50"} rounded-lg`}
+              className={`text-center py-8 ${isDark ? "bg-gray-700" : "bg-gray-50"} rounded-lg`}
             >
               <p className={isDark ? "text-gray-400" : "text-gray-600"}>
                 Vous n'avez aucune publication
               </p>
             </div>
           ) : (
-            <div className="space-y-6!">
+            <div className="space-y-6">
               {userPosts.map((post) => (
                 <div
                   key={post.id}
-                  className={`p-4! rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                  className={`p-4 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
                 >
                   {editingPost?.id === post.id ? (
-                    <form onSubmit={handlePostUpdate} className="space-y-3!">
+                    <form onSubmit={handlePostUpdate} className="space-y-3">
                       <input
                         type="text"
                         value={editingPost.title}
@@ -558,7 +558,7 @@ export default function AccountSettings() {
                             title: e.target.value,
                           }))
                         }
-                        className={`w-full px-3! py-2! rounded-lg! border ${
+                        className={`w-full px-3 py-2 rounded-lg border ${
                           isDark
                             ? "bg-gray-600 border-gray-500 text-gray-200 focus:border-blue-500"
                             : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
@@ -575,7 +575,7 @@ export default function AccountSettings() {
                           }))
                         }
                         rows={3}
-                        className={`w-full px-3! py-2! rounded-lg border ${
+                        className={`w-full px-3 py-2 rounded-lg border ${
                           isDark
                             ? "bg-gray-600 border-gray-500 text-gray-200 focus:border-blue-500"
                             : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
@@ -583,11 +583,11 @@ export default function AccountSettings() {
                         required
                         placeholder="Contenu de la publication"
                       />
-                      <div className="flex gap-2!">
+                      <div className="flex gap-2">
                         <button
                           type="submit"
                           disabled={loading}
-                          className={`px-4! py-1! text-sm rounded-lg transition ${
+                          className={`px-4 py-1 text-sm rounded-lg transition ${
                             isDark
                               ? "bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
                               : "bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
@@ -598,7 +598,7 @@ export default function AccountSettings() {
                         <button
                           type="button"
                           onClick={() => setEditingPost(null)}
-                          className={`px-4! py-1! text-sm rounded-lg transition ${
+                          className={`px-4 py-1 text-sm rounded-lg transition ${
                             isDark
                               ? "bg-gray-600 text-white hover:bg-gray-700"
                               : "bg-gray-500 text-white hover:bg-gray-600"
@@ -611,12 +611,12 @@ export default function AccountSettings() {
                   ) : (
                     <div>
                       <h3
-                        className={`font-semibold mb-2! ${isDark ? "text-gray-100" : "text-gray-900"}`}
+                        className={`font-semibold mb-2 ${isDark ? "text-gray-100" : "text-gray-900"}`}
                       >
                         {post.title}
                       </h3>
                       <p
-                        className={`text-sm mb-3! ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                        className={`text-sm mb-3 ${isDark ? "text-gray-300" : "text-gray-700"}`}
                       >
                         {post.content}
                       </p>
@@ -634,7 +634,7 @@ export default function AccountSettings() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handlePostEdit(post)}
-                            className={`px-3! py-1! text-sm rounded-lg transition ${
+                            className={`px-3 py-1 text-sm rounded-lg transition ${
                               isDark
                                 ? "bg-blue-600 text-white hover:bg-blue-700"
                                 : "bg-blue-500 text-white hover:bg-blue-600"
@@ -645,7 +645,7 @@ export default function AccountSettings() {
                           <button
                             onClick={() => handlePostDelete(post.id)}
                             disabled={loading}
-                            className={`px-3! py-1! text-sm rounded-lg transition ${
+                            className={`px-3 py-1 text-sm rounded-lg transition ${
                               isDark
                                 ? "bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                                 : "bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"

@@ -153,6 +153,12 @@
   transform: scale(1.05);
 }
 
+.follow-button.following {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
 /* Thème sombre */
 [data-theme="dark"] .follow-button {
   border-color: #6b7280 !important;
@@ -162,6 +168,12 @@
 [data-theme="dark"] .follow-button:hover {
   background: #6b7280 !important;
   color: white !important;
+}
+
+[data-theme="dark"] .follow-button.following {
+  background: #6b7280 !important;
+  color: white !important;
+  border-color: #6b7280 !important;
 }
 
 /* Responsive mobile */
