@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Heart, Send, MoreHorizontal, CornerDownRight, X, Share2 } from "lucide-react";
 import supabase from "../services/supabase";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUserId";
+import { getUser } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
 import { sendComment } from "../services/gestionComments/SendComment";
 
@@ -59,13 +59,13 @@ export default function PostDetail() {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getUser()
       if (user) {
         const { data: profile } = await supabase
           .from("profiles").select("name, avatar_url").eq("id", user.id).single();
         setCurrentProfile(profile);
       }
-      const userId = await getUserId();
+      const userId = await getUser().id;
       const { data: postData, error } = await supabase
         .from("posts")
         .select("*, profiles!posts_user_id_fkey(id, name, avatar_url)")
@@ -82,7 +82,7 @@ export default function PostDetail() {
   }, [postId, fetchComments]);
 
   const handleLike = async () => {
-    const userId = await getUserId();
+    const userId = await getUser().id;
     const newCount = await like(postId, userId, post.liked);
     setPost((p) => ({ ...p, likes: newCount, liked: !p.liked }));
   };
@@ -101,7 +101,7 @@ export default function PostDetail() {
   const handleSubmit = async () => {
     if (!commentText.trim() || submitting) return;
     setSubmitting(true);
-    const userId = await getUserId();
+    const userId = await getUser().id;
     const content = replyingTo
       ? buildReplyContent(replyingTo.name, commentText.trim())
       : commentText.trim();

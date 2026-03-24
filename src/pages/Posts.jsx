@@ -4,7 +4,7 @@ import supabase from "../services/supabase";
 import "../styles/Posts.css";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUserId";
+import { getUser } from "../services/systemeLike/getUserId";
 import { like } from "../services/systemeLike/Like";
 
 function PostImage({ src, alt, onClick }) {
@@ -96,7 +96,7 @@ export default function Posts() {
           .select("*");
         if (commentError) throw commentError;
 
-        const userId = await getUserId();
+        const userId = await getUser().id;
 
         // 3️⃣ Ajouter likes et liked à chaque post
         const postsWithLikes = postsData.map((post) => {
@@ -207,7 +207,7 @@ export default function Posts() {
               <button
                 className={`post-action-btn ${post.liked ? "liked" : ""}`}
                 onClick={async () => {
-                  const userId = await getUserId();
+                  const userId = await getUser().id;
                   const newCount = await like(post.id, userId, post.liked);
 
                   setPosts((prevPosts) =>
@@ -224,7 +224,7 @@ export default function Posts() {
                   fill={post.liked ? "#ef4444" : "none"}
                   stroke={post.liked ? "#ef4444" : "currentColor"}
                 />
-                J'aime <span>{post.likes}</span>
+                J'aime
               </button>
               <button
                 className="post-action-btn"

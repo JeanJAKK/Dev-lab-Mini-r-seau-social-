@@ -43,6 +43,7 @@ export default function NavBar() {
           
           if (profileData) {
             setUserProfile(profileData);
+            console.log(userProfile);
           }
         }
       } catch (err) {

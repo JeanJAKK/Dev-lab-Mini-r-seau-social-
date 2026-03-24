@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search as SearchIcon, UserPlus } from "lucide-react";
 import supabase from "../services/supabase.js";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUserId.js";
+import { getUser } from "../services/systemeLike/getUserId.js";
 import "../styles/Search.css";
 
 function Search() {
@@ -32,7 +32,7 @@ function Search() {
   }, []);
 
   const loadFollowing = async () => {
-    const me = await getUserId();
+    const me = await getUser().id;
     if (!me) return;
     setMyId(me);
     const { data, error } = await supabase
@@ -47,7 +47,7 @@ function Search() {
   };
 
   const toggleFollow = async (targetId) => {
-    const me = await getUserId();
+    const me = await getUser().id;
     if (!me) return;
     if (followingIds.includes(targetId)) {
       // unfollow

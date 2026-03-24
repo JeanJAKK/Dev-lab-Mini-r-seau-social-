@@ -16,20 +16,9 @@ import {
   Mail,
 } from "lucide-react";
 import supabase from "../services/supabase.js";
+import { getUser } from "../services/systemeLike/getUserId.js";
 
 export default function AccountSettings() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
-  // États pour les informations du profil
-  const [profile, setProfile] = useState({
-    name: "",
-    username: "",
-    bio: "",
-    email: "",
-    updated_at: "",
-  });
-
   // États pour les posts
   const [userPosts, setUserPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
@@ -39,6 +28,7 @@ export default function AccountSettings() {
   const [editingPost, setEditingPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [user, setUser] = useState(null); // ✅ null par défaut
 
   // Formulaire d'édition du profil
   const [profileForm, setProfileForm] = useState({
@@ -47,18 +37,35 @@ export default function AccountSettings() {
     bio: "",
   });
 
-  // Charger les données au montage
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  // États pour les informations du profil
+  const [profile, setProfile] = useState({
+    username: "",
+    bio: "",
+    updated_at: "",
+  });
+
+  // ✅ Chargement de l'utilisateur au montage
   useEffect(() => {
-    loadProfileData();
-    loadUserPosts();
+    const init = async () => {
+      const currentUser = await getUser();
+      setUser(currentUser);
+    };
+    init();
   }, []);
+
+  // ✅ Chargement des données une fois l'utilisateur disponible
+  useEffect(() => {
+    if (user) {
+      loadProfileData();
+      loadUserPosts();
+    }
+  }, [user]);
 
   const loadProfileData = async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
         setMessage("Vous devez être connecté pour accéder aux paramètres.");
         return;
@@ -97,10 +104,6 @@ export default function AccountSettings() {
   const loadUserPosts = async () => {
     setPostsLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) return;
 
       const { data, error } = await supabase
@@ -130,10 +133,6 @@ export default function AccountSettings() {
     setMessage("");
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
         setMessage("Vous devez être connecté.");
         setLoading(false);
@@ -429,7 +428,7 @@ export default function AccountSettings() {
                       : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
                   } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
                   required
-                  placeholder={isDark ? "Votre nom" : "Votre nom"}
+                  placeholder="Votre nom"
                 />
               </div>
               <div>
@@ -455,7 +454,7 @@ export default function AccountSettings() {
                   required
                   pattern="[a-zA-Z0-9_]+"
                   title="Lettres, chiffres et underscore uniquement"
-                  placeholder={isDark ? "nom_utilisateur" : "nom_utilisateur"}
+                  placeholder="nom_utilisateur"
                 />
               </div>
               <div>
@@ -475,7 +474,7 @@ export default function AccountSettings() {
                       ? "bg-gray-700 border-gray-600 text-gray-200 focus:border-blue-500"
                       : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
                   } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                  placeholder={isDark ? "Décrivez-vous..." : "Décrivez-vous..."}
+                  placeholder="Décrivez-vous..."
                 />
               </div>
               <div className="flex gap-3 mt-4!">
@@ -565,11 +564,7 @@ export default function AccountSettings() {
                             : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
                         } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
                         required
-                        placeholder={
-                          isDark
-                            ? "Titre de la publication"
-                            : "Titre de la publication"
-                        }
+                        placeholder="Titre de la publication"
                       />
                       <textarea
                         value={editingPost.content}
@@ -586,11 +581,7 @@ export default function AccountSettings() {
                             : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
                         } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
                         required
-                        placeholder={
-                          isDark
-                            ? "Contenu de la publication"
-                            : "Contenu de la publication"
-                        }
+                        placeholder="Contenu de la publication"
                       />
                       <div className="flex gap-2!">
                         <button
