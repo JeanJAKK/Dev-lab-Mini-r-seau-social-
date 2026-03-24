@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Heart, Send, MoreHorizontal, CornerDownRight, X, Share2, Download } from "lucide-react";
 import supabase from "../services/supabase";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUserId";
+import { getUser } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/Like";
 import { sendComment } from "../services/gestionComments/SendComment";
 import { shareContent } from "../services/share";
@@ -24,6 +24,7 @@ export default function PostDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [shareNotice, setShareNotice] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState();
   const [currentProfile, setCurrentProfile] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null); // { id, nom } — commentaire ciblé par la réponse
 
@@ -74,13 +75,13 @@ export default function PostDetail() {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      setUser(await getUser());
       if (user) {
         const { data: profile } = await supabase
           .from("profiles").select("name, avatar_url").eq("id", user.id).single();
         setCurrentProfile(profile);
       }
-      const userId = await getUserId();
+      const userId = user.id;
       const { data: postData, error } = await supabase
         .from("posts")
         .select("*, profiles!posts_user_id_fkey(id, name, avatar_url)")
@@ -97,7 +98,7 @@ export default function PostDetail() {
   }, [postId, fetchComments]);
 
   const handleLike = async () => {
-    const userId = await getUserId();
+    const userId = user.id;
     const newCount = await like(postId, userId, post.liked);
     setPost((p) => ({ ...p, likes: newCount, liked: !p.liked }));
   };
@@ -116,7 +117,7 @@ export default function PostDetail() {
   const handleSubmit = async () => {
     if (!commentText.trim() || submitting) return;
     setSubmitting(true);
-    const userId = await getUserId();
+    const userId = user.id;
     const content = replyingTo
       ? buildReplyContent(replyingTo.name, commentText.trim())
       : commentText.trim();

@@ -3,12 +3,8 @@ import CreatePost from './CreatePost'
 import Posts from './Posts'
 import { useTheme } from '../context/ThemeContext'
 import Suggestions from './Suggestions'
-import { getUser } from '../services/gestionComments/getUser'
 
 function Acceuil() {
-    useEffect(() =>{
-        getUser();
-    },[]);
     const { theme } = useTheme()
     const isDark = theme === 'dark'
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { getUser } from "../services/systemeLike/getUser.js";
 import supabase from "../services/supabase.js";
 
 // ── Toggle de thème global (exemple d'utilisation du contexte) ──
@@ -39,9 +40,7 @@ function AccountCard() {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const user = await getUser();
 
         if (!user) return;
 

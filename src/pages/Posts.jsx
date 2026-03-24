@@ -4,7 +4,7 @@ import supabase from "../services/supabase";
 import "../styles/Posts.css";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUserId";
+import { getUser } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/Like";
 import { shareContent } from "../services/share";
 
@@ -81,6 +81,7 @@ export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [user, setUser] = useState();
   const navigate = useNavigate();
 
   const { theme } = useTheme();
@@ -96,7 +97,7 @@ export default function Posts() {
     const fetchPostsWithLikes = async () => {
       setLoading(true);
       try {
-        // 1️⃣ Récupérer tous les posts avec les infos du profil
+        // 1️ Récupérer tous les posts avec les infos du profil
         const { data: postsData, error: postsError } = await supabase
           .from("posts")
           .select("*, profiles!posts_user_id_fkey(name, avatar_url)")
@@ -104,7 +105,7 @@ export default function Posts() {
 
         if (postsError) throw postsError;
 
-        // 2️⃣ Récupérer tous les likes pour tous les posts
+        // 2️ Récupérer tous les likes pour tous les posts
         const { data: likesData, error: likesError } = await supabase
           .from("likes")
           .select("*"); // on prend post_id et user_id
@@ -115,17 +116,16 @@ export default function Posts() {
           .from("comments")
           .select("*");
         if (commentError) throw commentError;
-
-        const userId = await getUserId();
-
-        // 3️⃣ Ajouter likes et liked à chaque post
+        const user = await getUser()
+        setUser(user);
+        // 3️ Ajouter likes et liked à chaque post
         const postsWithLikes = postsData.map((post) => {
           const comments = commentData.filter((com) => com.post_id === post.id);
           const postLikes = likesData.filter(
             (like) => like.post_id === post.id,
           );
           const likesCount = postLikes.length;
-          const userLiked = postLikes.some((like) => like.user_id === userId);
+          const userLiked = postLikes.some((like) => like.user_id === user.id);
           return {
             ...post,
             likes: likesCount,
@@ -227,8 +227,7 @@ export default function Posts() {
               <button
                 className={`post-action-btn ${post.liked ? "liked" : ""}`}
                 onClick={async () => {
-                  const userId = await getUserId();
-                  const newCount = await like(post.id, userId, post.liked);
+                  const newCount = await like(post.id, user.id, post.liked);
 
                   setPosts((prevPosts) =>
                     prevPosts.map((p) =>
@@ -244,7 +243,7 @@ export default function Posts() {
                   fill={post.liked ? "#ef4444" : "none"}
                   stroke={post.liked ? "#ef4444" : "currentColor"}
                 />
-                J'aime <span>{post.likes}</span>
+                J'aime
               </button>
               <button
                 className="post-action-btn"
