@@ -126,7 +126,7 @@ export default function CreatePost() {
         return;
       }
 
-      setMessage("✅ Post publié avec succès !");
+      setMessage(" Post publié avec succès !");
       setTitle("");
       setContent("");
       setImageFile(null);

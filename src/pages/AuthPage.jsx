@@ -16,7 +16,7 @@ function AuthPage({ setAuth }) {
   const navigate = useNavigate();
 
   // useEffect(() => {
-  //   // 1️⃣ Vérifie si la session existe
+  //   //  Vérifie si la session existe
   //   const checkUser = async () => {
   //     const { data } = await supabase.auth.getSession();
   //     setUser(data.session?.user ?? null);
@@ -24,7 +24,7 @@ function AuthPage({ setAuth }) {
 
   //   checkUser();
 
-  //   // 2️⃣ Écoute les changements de session
+  //   //  Écoute les changements de session
   //   const { data: listener } = supabase.auth.onAuthStateChange(
   //     (event, session) => {
   //       setUser(session?.user ?? null);
