@@ -151,7 +151,7 @@ export default function Posts() {
     return (
       <div className="posts-page" data-theme={theme}>
         <div className="posts-container">
-          <h2 className="posts-title">Fil d'actualité</h2>
+          
           {[...Array(4)].map((_, i) => (
             <div key={i} className="post-card">
               <div className="flex w-full flex-col gap-4">
