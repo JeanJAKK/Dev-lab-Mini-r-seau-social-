@@ -21,16 +21,17 @@ export default function CreatePost() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        setUser(await getUser());
+        const fetchedUser = await getUser();
+        setUser(fetchedUser);
 
-        if (user) {
-          setCurrentUser(user);
+        if (fetchedUser) {
+          setCurrentUser(fetchedUser);
 
           // Récupérer les infos du profil avec avatar
           const { data: profileData } = await supabase
             .from("profiles")
             .select("name, avatar_url")
-            .eq("id", user.id)
+            .eq("id", fetchedUser.id)
             .single();
 
           if (profileData) {

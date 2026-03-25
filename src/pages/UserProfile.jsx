@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Grid3x3, ImageOff, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Grid3x3, ImageOff, MessageCircle, X } from "lucide-react";
 import supabase from "../services/supabase";
 import { useTheme } from "../context/ThemeContext";
 
@@ -13,6 +13,7 @@ export default function UserProfile() {
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
   const avatarUrl = profile?.avatar_url || null;
   const userInitial = (profile?.name || "U").charAt(0).toUpperCase();
 
@@ -58,31 +59,20 @@ export default function UserProfile() {
   return (
     <div className={`min-h-screen pb-24 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
 
-      {/* ── Header sticky ── */}
-      <div className={`flex items-center gap-3 px-4 h-14 border-b sticky top-[76px] z-40 backdrop-blur-md ${isDark ? "bg-gray-900/90 border-gray-700/60" : "bg-white/90 border-gray-200"}`}>
+      {/* ── Cover simple ── */}
+      <div className="relative h-32 sm:h-48 md:h-56 w-full overflow-hidden">
+        {/* ── Flèche retour ── */}
         <button
           onClick={() => navigate(-1)}
-          className={`p-2 -ml-2 rounded-full border-none bg-transparent cursor-pointer transition ${isDark ? "hover:bg-gray-800 text-white" : "hover:bg-gray-100 text-gray-800"}`}
+          className="absolute top-4 left-4 z-40 p-2 sm:p-2.5 rounded-full bg-black/40 text-white hover:bg-black/60 transition shadow-md backdrop-blur-md cursor-pointer border-none"
         >
           <ArrowLeft size={20} />
         </button>
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className={`font-bold text-base truncate ${isDark ? "text-white" : "text-gray-900"}`}>
-            {profile.name || "Profil"}
-          </span>
-          {posts.length > 0 && (
-            <span className={`text-xs font-medium shrink-0 px-2 py-0.5 rounded-full ${isDark ? "bg-gray-700 text-gray-300" : "bg-gray-100 text-gray-500"}`}>
-              {posts.length}
-            </span>
-          )}
-        </div>
-      </div>
 
-      {/* ── Cover simple ── */}
-      <div className="relative h-32 sm:h-48 md:h-56 w-full overflow-hidden">
         {profile.cover_url ? (
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            onClick={() => setFullscreenImage(profile.cover_url)}
+            className="absolute inset-0 bg-cover bg-center cursor-pointer transition-transform hover:scale-[1.02]"
             style={{ backgroundImage: `url(${profile.cover_url})` }}
           />
         ) : (
@@ -107,11 +97,12 @@ export default function UserProfile() {
               <img
                 src={avatarUrl}
                 alt={profile.name}
-                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 ${isDark ? "border-gray-900 bg-gray-900" : "border-gray-50 bg-white"}`}
+                onClick={() => setFullscreenImage(avatarUrl)}
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover cursor-pointer shadow-md"
               />
             ) : (
               <div
-                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 flex items-center justify-center ${isDark ? "border-gray-900 bg-gray-800" : "border-gray-50 bg-gray-200"}`}
+                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-md flex items-center justify-center ${isDark ? "bg-gray-800" : "bg-gray-200"}`}
               >
                 <span className={`font-bold text-3xl sm:text-4xl ${isDark ? "text-gray-500" : "text-gray-400"}`}>{userInitial}</span>
               </div>
@@ -227,6 +218,28 @@ export default function UserProfile() {
         </div>
 
       </div>
+
+      {/* ── Modal Image Plein Écran ── */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white hover:bg-black/50 rounded-full p-2"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImage} 
+            alt="Plein écran" 
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()} 
+          />
+        </div>
+      )}
+
     </div>
   );
 }

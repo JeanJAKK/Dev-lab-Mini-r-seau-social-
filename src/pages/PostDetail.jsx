@@ -86,9 +86,10 @@ export default function PostDetail() {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      setUser(await getUser());
+      const userData = await getUser();
+      setUser(userData);
       
-      const userId = user.id;
+      const userId = userData.id;
       const { data: postData, error } = await supabase
         .from("posts")
         .select("*, profiles!posts_user_id_fkey(id, name, avatar_url)")
