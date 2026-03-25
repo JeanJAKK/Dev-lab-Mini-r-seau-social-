@@ -376,12 +376,12 @@ export default function CentreNotifications() {
 const styles = {
   page: { 
     background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)', 
-    minHeight: 'calc(100vh - 100px)', 
+    minHeight: 'calc(80vh - 70px)', 
     padding: '24px', 
     fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
   },
   conteneur: { 
-    maxWidth: '800px', 
+    maxWidth: '100%', 
     margin: '0 auto',
     background: '#fff',
     borderRadius: '28px',

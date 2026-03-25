@@ -15,7 +15,6 @@ import { useTheme } from "../context/ThemeContext";
 import { getUser } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/Like";
 import { sendComment } from "../services/gestionComments/SendComment";
-import { addNotification } from '../services/notificationService';
 import { shareContent } from "../services/share";
 
 export default function PostDetail() {
