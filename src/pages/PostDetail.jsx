@@ -89,21 +89,9 @@ export default function PostDetail() {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
+      setUser(await getUser());
       
-      // Récupérer l'utilisateur courant
-      const userData = await getUser();
-      setCurrentUserId(userData?.id || null);
-      
-      if (userData) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("name, avatar_url")
-          .eq("id", userData.id)
-          .single();
-        setCurrentProfile(profile);
-      }
-      
-      // Récupérer le post
+      const userId = user.id;
       const { data: postData, error } = await supabase
         .from("posts")
         .select("*, profiles!posts_user_id_fkey(id, name, avatar_url)")

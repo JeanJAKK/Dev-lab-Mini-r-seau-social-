@@ -3,7 +3,8 @@
 // ===============================
 
 import { useState, useEffect } from "react";
-import { Calendar, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Calendar, X, Camera, ArrowLeft } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import supabase from "../services/supabase.js";
 import { getUser } from "../services/systemeLike/getUser.js";
@@ -51,6 +52,7 @@ function PostImage({ src, alt, onClick }) {
 export default function Profile() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const navigate = useNavigate();
 
   //  ÉTAT POUR LA GESTION DE LA PHOTO DE PROFIL
   const [profileImage, setProfileImage] = useState(null);
@@ -270,6 +272,7 @@ export default function Profile() {
   const [userPosts, setUserPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [isEditingCover, setIsEditingCover] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   // followers/following lists
   const [followersList, setFollowersList] = useState([]);
@@ -469,16 +472,30 @@ export default function Profile() {
   //RENDER
   return (
     <div
-      className={`flex justify-center py-4 px-4 sm:px-6 lg:px-8 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
-      style={{ minHeight: "calc(100vh - 70px)" }}
+      className={`min-h-screen pb-24 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
     >
       <div
-        className={`w-full max-w-5xl border rounded-2xl overflow-hidden shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+        className={`w-full max-w-2xl mx-auto ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
       >
+        {message && (
+          <div className="bg-blue-500/10 border-b border-blue-500/20 text-blue-600 px-4 py-2 text-center text-sm font-medium">
+            {message}
+          </div>
+        )}
+
         {/* ================= COVER IMAGE ================= */}
-        <div className="relative">
+        <div className="relative h-32 sm:h-48 md:h-56 w-full overflow-hidden">
+          {/* ── Flèche retour ── */}
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-4 left-4 z-40 p-2 sm:p-2.5 rounded-full bg-black/40 text-white hover:bg-black/60 transition shadow-md backdrop-blur-md cursor-pointer border-none"
+          >
+            <ArrowLeft size={20} />
+          </button>
+
           <div
-            className="h-56 w-full bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center cursor-pointer transition-transform hover:scale-[1.02]"
+            onClick={() => profile.cover ? setFullscreenImage(profile.cover) : null}
             style={{
               backgroundImage: profile.cover
                 ? `url(${profile.cover})`
@@ -489,9 +506,9 @@ export default function Profile() {
           {/* Bouton pour modifier la couverture */}
           <button
             onClick={() => setIsEditingCover(!isEditingCover)}
-            className="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-lg hover:bg-opacity-70 transition"
+            className="absolute top-4 right-4 bg-black/40 text-white p-2 sm:p-2.5 rounded-full hover:bg-black/60 transition shadow-md backdrop-blur-sm border-none cursor-pointer"
           >
-            <Settings size={16} />
+            <Camera size={20} />
           </button>
         </div>
 
@@ -525,83 +542,101 @@ export default function Profile() {
           </div>
         )}
 
-        <div className="max-w-5xl mx-auto px-4">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 relative">
           {/* ================= HEADER PROFIL ================= */}
-          <div className="relative flex flex-col md:flex-row md:items-end md:justify-between mt-6">
-            {/* Avatar + Infos */}
-            <div className="flex items-end gap-12">
-              {/* Avatar */}
-              <div className="relative">
-                {profile.avatar || profileImage ? (
-                  <img
-                    src={profile.avatar || profileImage}
-                    alt="avatar"
-                    className={`w-32 h-32 rounded-full border-4 shadow-lg object-cover -mt-16 ${isDark ? "border-gray-600" : "border-white"}`}
-                  />
-                ) : (
-                  <div
-                    className={`w-32 h-32 rounded-full border-4 shadow-lg -mt-16 flex items-center justify-center ${isDark ? "border-gray-600 bg-gray-700" : "border-white bg-gray-300"}`}
-                  >
-                    <span
-                      className={`text-4xl font-bold ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                    >
-                      {profile.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-
-                {/* Bouton pour ajouter/modifier la photo */}
-                <button
-                  onClick={() => setIsEditingProfile(!isEditingProfile)}
-                  className={`absolute bottom-0 right-0 p-2 rounded-full transition shadow-lg ${isDark ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-500 text-white hover:bg-blue-600"}`}
-                >
-                  <Settings size={16} />
-                </button>
-              </div>
-
-              {/* Nom + username + bio */}
-              <div className="space-y-3">
-                <h1
-                  className={`mb-2 text-2xl font-bold ${isDark ? "text-gray-100" : "text-black"}`}
-                >
-                  {profile.name}
-                </h1>
-                <p className={isDark ? "text-gray-400" : "text-gray-500"}>
-                  @{profile.username}
-                </p>
-                <p
-                  className={`mt-2 ${isDark ? "text-gray-200" : "text-black"}`}
-                >
-                  {profile.bio}
-                </p>
-
-                {/* Stats */}
+          <div className="flex items-end justify-between -mt-12 sm:-mt-16 mb-4">
+            {/* Avatar */}
+            <div className="relative shrink-0 z-10">
+              {profile.avatar || profileImage ? (
+                <img
+                  src={profile.avatar || profileImage}
+                  alt="avatar"
+                  onClick={() => setFullscreenImage(profile.avatar || profileImage)}
+                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover cursor-pointer shadow-md"
+                />
+              ) : (
                 <div
-                  className={`flex gap-6 mt-3 text-sm ${isDark ? "text-gray-200" : "text-black"}`}
+                  className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-md flex items-center justify-center ${isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-600"}`}
                 >
-                  <span>
-                    <strong>{profile.postsCount}</strong> Publications
-                  </span>
-                  <span
-                    className="cursor-pointer hover:underline"
-                    onClick={() => {
-                      setShowFollowers(!showFollowers);
-                      setShowFollowing(false);
-                    }}
-                  >
-                    <strong>{profile.followers}</strong> Abonnés
-                  </span>
-                  <span
-                    className="cursor-pointer hover:underline"
-                    onClick={() => {
-                      setShowFollowing(!showFollowing);
-                      setShowFollowers(false);
-                    }}
-                  >
-                    <strong>{profile.following}</strong> Abonnements
+                  <span className="text-4xl sm:text-5xl font-bold">
+                    {profile.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                {showFollowers && (
+              )}
+            </div>
+            
+            {/* Bouton pour modifier la photo / profil */}
+            <button
+              onClick={() => setIsEditingProfile(!isEditingProfile)}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition shadow-md mb-2 sm:mb-4"
+            >
+              <Camera size={16} />
+              <span className="hidden sm:inline">Modifier</span>
+            </button>
+          </div>
+
+          {/* Nom + username + bio */}
+          <div className="mb-5">
+            <h1
+              className={`text-xl sm:text-2xl font-bold leading-tight ${isDark ? "text-white" : "text-gray-900"}`}
+            >
+              {profile.name}
+            </h1>
+            {profile.username && (
+              <p className="text-purple-400 text-sm font-medium mt-0.5">
+                @{profile.username}
+              </p>
+            )}
+            {profile.bio && (
+              <p
+                className={`mt-3 text-sm leading-relaxed max-w-md ${isDark ? "text-gray-300" : "text-gray-600"}`}
+              >
+                {profile.bio}
+              </p>
+            )}
+
+            {/* Date d'inscription */}
+            <div
+              className={`flex items-center gap-1.5 mt-2.5 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+            >
+              <Calendar size={12} className="text-purple-400" />
+              <span>Membre depuis {profile.joinedAt}</span>
+            </div>
+          </div>
+
+          {/* Stats : publications / abonnés / abonnements */}
+          <div className={`flex gap-0 rounded-2xl overflow-hidden mb-6 border ${isDark ? "border-gray-700/60 bg-gray-800/50" : "border-gray-200 bg-white"}`}>
+            <div className="flex-1 flex flex-col items-center py-3 gap-0.5">
+              <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile.postsCount}</span>
+              <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Publications</span>
+            </div>
+            <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
+            
+            <div 
+              className="flex-1 flex flex-col items-center py-3 gap-0.5 cursor-pointer hover:opacity-80"
+              onClick={() => {
+                setShowFollowers(!showFollowers);
+                setShowFollowing(false);
+              }}
+            >
+              <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile.followers}</span>
+              <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnés</span>
+            </div>
+            <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
+            
+            <div 
+              className="flex-1 flex flex-col items-center py-3 gap-0.5 cursor-pointer hover:opacity-80"
+              onClick={() => {
+                setShowFollowing(!showFollowing);
+                setShowFollowers(false);
+              }}
+            >
+              <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile.following}</span>
+              <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnements</span>
+            </div>
+          </div>
+
+          {showFollowers && (
                   <div
                     className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
                   >
@@ -684,17 +719,6 @@ export default function Profile() {
                   </div>
                 )}
 
-                {/* Date d'inscription */}
-                <div
-                  className={`flex items-center gap-2 mt-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
-                >
-                  <Calendar size={16} />
-                  <span>Inscrit en {profile.joinedAt}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* ================= SECTION ÉDITION PROFIL ================= */}
           {isEditingProfile && (
             <div
@@ -753,8 +777,7 @@ export default function Profile() {
           )}
 
           {/* ================= ONGLET ================= */}
-          <div className="mt-16 mb-6 px-6">
-            {" "}
+          <div className="mt-8 sm:mt-12 mb-6 px-2 sm:px-6">
             {/* ⬅ marge plus grande pour détacher des infos du haut */}
             <div
               className={`text-black font-bold rounded-full p-1 flex ${isDark ? "bg-gray-700 text-gray-200" : "bg-gray-200 text-black"}`}
@@ -794,7 +817,7 @@ export default function Profile() {
           </div>
 
           {/* ================= CONTENU ================= */}
-          <div className="mt-6">
+          <div className="mt-6 pb-24">
             {activeTab === "posts" && (
               <div>
                 {postsLoading ? (
@@ -860,8 +883,29 @@ export default function Profile() {
             )}
           </div>
         </div>
-      </div>{" "}
+      </div>
       {/* FIN CONTAINER PRINCIPAL */}
+
+      {/* ── Modal Image Plein Écran ── */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white hover:bg-black/50 rounded-full p-2"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImage} 
+            alt="Plein écran" 
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()} 
+          />
+        </div>
+      )}
     </div>
   );
 }
