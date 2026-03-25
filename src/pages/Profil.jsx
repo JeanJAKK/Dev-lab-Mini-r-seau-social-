@@ -1,13 +1,12 @@
 // ===============================
 // Profile.jsx
-// Composant 100% Frontend (Mock Data)
-// Le backend pourra remplacer les données plus tard
 // ===============================
 
 import { useState, useEffect } from "react";
 import { Calendar, Settings } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import supabase from "../services/supabase.js";
+import { getUser } from "../services/systemeLike/getUser.js";
 
 // Composant PostImage ultra-simple comme dans Posts.jsx
 function PostImage({ src, alt, onClick }) {
@@ -67,7 +66,7 @@ export default function Profile() {
     username: "",
     bio: "",
     avatar: null,
-    cover: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    cover: "",
     postsCount: 0,
     followers: 0,
     following: 0,
@@ -78,9 +77,7 @@ export default function Profile() {
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const user = await getUser();
 
         if (!user) {
           setMessage("Vous devez être connecté pour voir votre profil.");
@@ -111,8 +108,7 @@ export default function Profile() {
             bio: profileData.bio || "",
             avatar: profileData.avatar_url,
             cover:
-              profileData.cover_url ||
-              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+              profileData.cover_url || null,
             postsCount: profileData.posts_count || 0,
             followers: profileData.followers_count || 0,
             following: profileData.following_count || 0,
@@ -131,8 +127,7 @@ export default function Profile() {
             username: "",
             bio: "",
             avatar: null,
-            cover:
-              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+            cover: null,
             postsCount: 0,
             followers: 0,
             following: 0,
@@ -474,7 +469,8 @@ export default function Profile() {
   //RENDER
   return (
     <div
-      className={`min-h-screen flex justify-center py-8 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
+      className={`flex justify-center py-4 px-4 sm:px-6 lg:px-8 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
+      style={{ minHeight: "calc(100vh - 70px)" }}
     >
       <div
         className={`w-full max-w-5xl border rounded-2xl overflow-hidden shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
@@ -483,7 +479,11 @@ export default function Profile() {
         <div className="relative">
           <div
             className="h-56 w-full bg-cover bg-center"
-            style={{ backgroundImage: `url(${profile.cover})` }}
+            style={{
+              backgroundImage: profile.cover
+                ? `url(${profile.cover})`
+                : "linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #4f46e5 100%)",
+            }}
           />
 
           {/* Bouton pour modifier la couverture */}
@@ -562,7 +562,7 @@ export default function Profile() {
               {/* Nom + username + bio */}
               <div className="space-y-3">
                 <h1
-                  className={`mb-2! text-2xl font-bold ${isDark ? "text-gray-100" : "text-black"}`}
+                  className={`mb-2 text-2xl font-bold ${isDark ? "text-gray-100" : "text-black"}`}
                 >
                   {profile.name}
                 </h1>
@@ -603,7 +603,7 @@ export default function Profile() {
                 </div>
                 {showFollowers && (
                   <div
-                    className={`mt-4! max-h-48! overflow-y-auto! border p-3 rounded-lg! ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                    className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
                   >
                     {followersList.length === 0 ? (
                       <p className={isDark ? "text-gray-400" : "text-gray-500"}>
@@ -644,7 +644,7 @@ export default function Profile() {
                 )}
                 {showFollowing && (
                   <div
-                    className={`mt-4! max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+                    className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
                   >
                     {followingList.length === 0 ? (
                       <p className={isDark ? "text-gray-400" : "text-gray-500"}>
@@ -654,7 +654,7 @@ export default function Profile() {
                       followingList.map((u) => (
                         <div
                           key={u.id}
-                          className="flex items-center gap-3 mb-2!"
+                          className="flex items-center gap-3 mb-2"
                         >
                           {u.avatar_url ? (
                             <img
@@ -698,18 +698,18 @@ export default function Profile() {
           {/* ================= SECTION ÉDITION PROFIL ================= */}
           {isEditingProfile && (
             <div
-              className={`mt-6! p-6! rounded-lg! border! ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+              className={`mt-6 p-6 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
             >
               <h3
-                className={`text-lg! font-semibold! mb-4! ${isDark ? "text-gray-200" : "text-gray-700"}`}
+                className={`text-lg font-semibold mb-4 ${isDark ? "text-gray-200" : "text-gray-700"}`}
               >
                 Gérer la photo de profil
               </h3>
 
-              <div className="space-y-4!">
+              <div className="space-y-4">
                 <div>
                   <label
-                    className={`block text-sm font-medium mb-4! ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    className={`block text-sm font-medium mb-4 ${isDark ? "text-gray-300" : "text-gray-700"}`}
                   ></label>
                   <input
                     type="file"
@@ -730,7 +730,7 @@ export default function Profile() {
                     <button
                       onClick={handleRemoveImage}
                       disabled={loading}
-                      className="px-4! py-2! rounded-lg! transition disabled:opacity-50!"
+                      className="px-4 py-2 rounded-lg transition disabled:opacity-50"
                       style={{
                         backgroundColor: isDark ? "#dc2626" : "#ef4444",
                         color: "white",
@@ -745,7 +745,7 @@ export default function Profile() {
                   <p
                     className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
                   >
-                    Vous n'avez pas encore de photo de profil!
+                    Vous n'avez pas encore de photo de profil.
                   </p>
                 )}
               </div>
@@ -753,7 +753,7 @@ export default function Profile() {
           )}
 
           {/* ================= ONGLET ================= */}
-          <div className="mt-16! mb-6! px-6!">
+          <div className="mt-16 mb-6 px-6">
             {" "}
             {/* ⬅ marge plus grande pour détacher des infos du haut */}
             <div
@@ -761,7 +761,7 @@ export default function Profile() {
             >
               <button
                 onClick={() => setActiveTab("posts")}
-                className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
+                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
                   activeTab === "posts"
                     ? isDark
                       ? "bg-gray-800 text-gray-100"
@@ -774,24 +774,11 @@ export default function Profile() {
                 Publications
               </button>
 
-              <button
-                onClick={() => setActiveTab("media")}
-                className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
-                  activeTab === "media"
-                    ? isDark
-                      ? "bg-gray-800 text-gray-100"
-                      : "bg-white text-black"
-                    : isDark
-                      ? "hover:bg-gray-600"
-                      : "hover:bg-gray-400"
-                }`}
-              >
-                Médias
-              </button>
+  
 
               <button
                 onClick={() => setActiveTab("likes")}
-                className={`flex-1 py-2! rounded-full text-sm font-medium transition ${
+                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
                   activeTab === "likes"
                     ? isDark
                       ? "bg-gray-800 text-gray-100"
@@ -865,11 +852,6 @@ export default function Profile() {
               </div>
             )}
 
-            {activeTab === "media" && (
-              <div className="text-center text-gray-500 py-10">
-                Aucun média disponible.
-              </div>
-            )}
 
             {activeTab === "likes" && (
               <div className="text-center text-gray-500 py-10">

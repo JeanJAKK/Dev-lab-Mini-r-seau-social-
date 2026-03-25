@@ -4,7 +4,7 @@ import supabase from "../services/supabase";
 import "../styles/Posts.css";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUserId";
+import { getUser } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/Like";
 import { addNotification } from '../services/notificationService';
 
@@ -15,13 +15,30 @@ function PostImage({ src, alt, onClick }) {
       style={{
         position: "relative",
         width: "100%",
-        height: "100%",
+        aspectRatio: "16 / 10",
+        maxHeight: "420px",
         borderRadius: "14px",
         overflow: "hidden",
         backgroundColor: "#f1f5f9",
-        minHeight: "300px",
+        margin: "12px 0",
       }}
     >
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          filter: "blur(18px)",
+          transform: "scale(1.08)",
+          opacity: loaded ? 0.55 : 0,
+          transition: "opacity 0.25s ease",
+        }}
+      />
       {!loaded && (
         <div
           style={{
@@ -45,9 +62,11 @@ function PostImage({ src, alt, onClick }) {
         }}
         onError={() => console.error("PostImage failed to load:", src)}
         style={{
+          position: "relative",
           width: "100%",
           height: "100%",
           objectFit: "contain",
+          objectPosition: "center",
           cursor: "pointer",
           display: "block",
           zIndex: loaded ? 2 : 0,
@@ -63,6 +82,7 @@ export default function Posts() {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [message, setMessage] = useState("");
+  const [user, setUser] = useState();
   const navigate = useNavigate();
   const { theme } = useTheme();
 
@@ -87,7 +107,7 @@ export default function Posts() {
     const fetchPostsWithLikes = async () => {
       setLoading(true);
       try {
-        // Récupérer tous les posts avec les infos du profil
+        // 1️ Récupérer tous les posts avec les infos du profil
         const { data: postsData, error: postsError } = await supabase
           .from("posts")
           .select("*, profiles!posts_user_id_fkey(name, avatar_url)")
@@ -95,7 +115,7 @@ export default function Posts() {
 
         if (postsError) throw postsError;
 
-        // Récupérer tous les likes
+        // 2️ Récupérer tous les likes pour tous les posts
         const { data: likesData, error: likesError } = await supabase
           .from("likes")
           .select("*");
@@ -108,17 +128,16 @@ export default function Posts() {
           .select("*");
           
         if (commentError) throw commentError;
-
-        const userId = await getUserId();
-
-        // Ajouter likes, liked et commentaires à chaque post
+        const user = await getUser()
+        setUser(user);
+        // 3️ Ajouter likes et liked à chaque post
         const postsWithLikes = postsData.map((post) => {
           const comments = commentData.filter((com) => com.post_id === post.id);
           const postLikes = likesData.filter(
             (like) => like.post_id === post.id,
           );
           const likesCount = postLikes.length;
-          const userLiked = postLikes.some((like) => like.user_id === userId);
+          const userLiked = postLikes.some((like) => like.user_id === user.id);
           return {
             ...post,
             likes: likesCount,
@@ -304,14 +323,24 @@ export default function Posts() {
               {/* Bouton J'aime */}
               <button
                 className={`post-action-btn ${post.liked ? "liked" : ""}`}
-                onClick={() => handleLike(post)}
+                onClick={async () => {
+                  const newCount = await like(post.id, user.id, post.liked);
+
+                  setPosts((prevPosts) =>
+                    prevPosts.map((p) =>
+                      p.id === post.id
+                        ? { ...p, likes: newCount, liked: !p.liked }
+                        : p,
+                    ),
+                  );
+                }}
               >
                 <Heart
                   size={16}
                   fill={post.liked ? "#ef4444" : "none"}
                   stroke={post.liked ? "#ef4444" : "currentColor"}
                 />
-                J'aime <span>{post.likes}</span>
+                J'aime
               </button>
 
               {/* Bouton Commenter */}
@@ -328,7 +357,18 @@ export default function Posts() {
               {/* Bouton Partager */}
               <button 
                 className="post-action-btn"
-                onClick={() => handleShare(post)}
+                onClick={async () => {
+                  const result = await shareContent({
+                    title: post.title || "Post",
+                    text: post.content,
+                    url: `${window.location.origin}/home/post/${post.id}`,
+                  });
+
+                  if (result.ok && result.mode === "clipboard") {
+                    setMessage("Lien copie dans le presse-papiers.");
+                    setTimeout(() => setMessage(""), 2200);
+                  }
+                }}
               >
                 <Share2 size={16} /> Partager
               </button>

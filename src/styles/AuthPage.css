@@ -226,14 +226,15 @@
 }
 
 /* ===== RESET ===== */
-* {
+.auth-container,
+.auth-container * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body, #root {
-  height: 100%;
+.auth-container {
+  min-height: 100%;
   width: 100%;
   background: var(--page-bg);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;

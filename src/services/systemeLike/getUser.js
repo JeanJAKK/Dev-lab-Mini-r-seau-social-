@@ -1,6 +1,6 @@
 import supabase from "../supabase";
 
-export async function getUserId() {
+export async function getUser() {
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error) {
@@ -9,7 +9,8 @@ export async function getUserId() {
   }
 
   if (user) {
-    return user.id;
+    return user;
+    console.log(user);
   } else {
     console.log("Utilisateur non connecté");
     return null;

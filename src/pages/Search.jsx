@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search as SearchIcon, UserPlus } from "lucide-react";
 import supabase from "../services/supabase.js";
 import { useTheme } from "../context/ThemeContext";
-import { getUserId } from "../services/systemeLike/getUserId.js";
+import { getUser } from "../services/systemeLike/getUser.js";
 import "../styles/Search.css";
 
 function Search() {
@@ -26,15 +26,14 @@ function Search() {
     setLoading(false);
   };
 
-  useEffect(() => {
+  useEffect( async () => {
+    const me = await getUser().id;
+    setMyId(me);
     getUsers();
     loadFollowing();
   }, []);
 
-  const loadFollowing = async () => {
-    const me = await getUserId();
-    if (!me) return;
-    setMyId(me);
+  const loadFollowing = async () => {  
     const { data, error } = await supabase
       .from("follows")
       .select("following_id")
@@ -47,14 +46,12 @@ function Search() {
   };
 
   const toggleFollow = async (targetId) => {
-    const me = await getUserId();
-    if (!me) return;
     if (followingIds.includes(targetId)) {
       // unfollow
       const { error } = await supabase
         .from("follows")
         .delete()
-        .match({ follower_id: me, following_id: targetId });
+        .match({ follower_id: myId, following_id: targetId });
       if (!error) {
         setFollowingIds((prev) => prev.filter((id) => id !== targetId));
       } else {
@@ -64,7 +61,7 @@ function Search() {
       // follow
       const { error } = await supabase
         .from("follows")
-        .insert([{ follower_id: me, following_id: targetId }]);
+        .insert([{ follower_id: myId, following_id: targetId }]);
       if (!error) {
         setFollowingIds((prev) => [...prev, targetId]);
       } else {

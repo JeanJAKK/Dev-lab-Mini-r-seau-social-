@@ -14,8 +14,9 @@ export default function Home() {
   style={{
     minHeight: "calc(100vh - 80px)",
     background: isDark ? "#111827" : "#f8fafc",
-    marginTop: "76px",
+    marginTop: "70px",
   }}
+  className="w-full flex-1 overflow-y-auto"
 >
   <Outlet />
 </div>
