@@ -24,7 +24,7 @@ export default function PostDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [shareNotice, setShareNotice] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(3);
   const [currentProfile, setCurrentProfile] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null); // { id, nom } — commentaire ciblé par la réponse
 

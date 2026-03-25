@@ -24,6 +24,9 @@ export default function NavBar() {
   const isDark = theme === "dark";
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  
+  //  État pour les notifications non lues
+  const [notificationsNonLues, setNotificationsNonLues] = useState((5));
 
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
@@ -44,6 +47,25 @@ export default function NavBar() {
           if (profileData) {
             setUserProfile(profileData);
           }
+          
+          //  CHARGER LE NOMBRE DE NOTIFICATIONS NON LUES
+          // ================================================
+          // À DÉCOMMENTER APRÈS CRÉATION DE LA TABLE 'notifications'
+          // ================================================
+          /*
+          const { data: notifications, error } = await supabase
+            .from('notifications')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('is_read', false);
+            
+          if (!error && notifications) {
+            setNotificationsNonLues(notifications.length);
+          }
+          */
+          
+          // VERSION MOCKÉE POUR LE TEST (À SUPPRIMER APRÈS)
+          setNotificationsNonLues(3); // Valeur de test
         }
       } catch (err) {
         console.error('Erreur chargement utilisateur:', err);
@@ -51,6 +73,40 @@ export default function NavBar() {
     };
     
     loadUser();
+    
+    //   LES CHANGEMENTS EN TEMPS RÉEL
+    // ================================================
+    // À DÉCOMMENTER APRÈS CRÉATION DE LA TABLE
+    // ================================================
+    /*
+    const subscription = supabase
+      .channel('notifications-count')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'notifications',
+          filter: `user_id=eq.${currentUser?.id}`
+        },
+        () => {
+          // Recharger le compteur quand une notification change
+          const refreshCount = async () => {
+            const { data: notifications } = await supabase
+              .from('notifications')
+              .select('id')
+              .eq('user_id', currentUser?.id)
+              .eq('is_read', false);
+            setNotificationsNonLues(notifications?.length || 0);
+          };
+          refreshCount();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
+    */
   }, []);
 
   const displayName = userProfile?.name || currentUser?.email?.split('@')[0] || 'Utilisateur';
@@ -73,19 +129,36 @@ export default function NavBar() {
     navigate("/authPage", { replace: true });
   };
 
-const activeClass = "text-purple-600 font-bold";
-const normalClass = isDark
-  ? "text-gray-300 hover:text-purple-400 transition"
-  : "text-gray-600 hover:text-purple-600 transition";
+  const activeClass = "text-purple-600 font-bold";
+  const normalClass = isDark
+    ? "text-gray-300 hover:text-purple-400 transition"
+    : "text-gray-600 hover:text-purple-600 transition";
+
+  //  Style du badge de notification
+  const badgeStyle = {
+    position: 'absolute',
+    top: '-8px',
+    right: '-12px',
+    backgroundColor: '#ef4444',
+    color: 'white',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    padding: '2px 6px',
+    borderRadius: '20px',
+    minWidth: '18px',
+    textAlign: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+    zIndex: 10
+  };
 
   return (
     <>
-{/* NAVBAR DESKTOP */}
-<nav
-  className={`w-full h-19 flex items-center border-b fixed top-0 left-0 right-0 z-50 shadow-sm backdrop-blur-md ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-100"}`}
->
-  <div className="max-w-7xl mx-auto px-6 w-full">
-    <div className="flex items-center justify-between">
+      {/* NAVBAR DESKTOP */}
+      <nav
+        className={`w-full h-19 flex items-center border-b fixed top-0 left-0 right-0 z-50 shadow-sm backdrop-blur-md ${isDark ? "bg-gray-900/95 border-gray-700" : "bg-white/95 border-gray-100"}`}
+      >
+        <div className="max-w-7xl mx-auto px-6 w-full">
+          <div className="flex items-center justify-between">
             {/* LOGO */}
             <p className="text-xl md:w-44 text-center font-extrabold bg-linear-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent tracking-tight pl-3">
               SynapseLink
@@ -114,7 +187,7 @@ const normalClass = isDark
                   <Search size={18} /> Rechercher
                 </NavLink>
               </li>
-              <li>
+              <li className="relative">
                 <NavLink
                   to="notifications"
                   className={({ isActive }) =>
@@ -122,6 +195,12 @@ const normalClass = isDark
                   }
                 >
                   <Bell size={18} /> Notifications
+                  {/* 🔔 BADGE DES NOTIFICATIONS NON LUES */}
+                  {notificationsNonLues > 0 && (
+                    <span style={badgeStyle}>
+                      {notificationsNonLues > 99 ? '99+' : notificationsNonLues}
+                    </span>
+                  )}
                 </NavLink>
               </li>
               <li>
@@ -138,15 +217,15 @@ const normalClass = isDark
 
             {/* PROFILE DROPDOWN */}
             <div className="relative" ref={dropdownRef}>
-<button
-  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-  className={`flex items-center gap-3 p-2 rounded-full transition focus:outline-none ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
->
-<img
-  src={avatarUrl}
-  alt="profile"
-  className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-800" : "border-purple-100"}`}
-/>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className={`flex items-center gap-3 p-2 rounded-full transition focus:outline-none ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
+              >
+                <img
+                  src={avatarUrl}
+                  alt="profile"
+                  className={`w-10 h-10 rounded-full border-2 object-cover ${isDark ? "border-purple-800" : "border-purple-100"}`}
+                />
                 <div className="hidden md:flex flex-col items-start text-sm">
                   <span
                     className={`font-semibold text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}
@@ -175,7 +254,7 @@ const normalClass = isDark
                     <p
                       className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}
                     >
-                      {userProfile.email}
+                      {currentUser?.email}
                     </p>
                   </div>
 
@@ -212,10 +291,10 @@ const normalClass = isDark
         </div>
       </nav>
 
-{/* NAVBAR MOBILE */}
-<nav
-  className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg h-[72px] pb-[safe] mb-0 ${isDark ? "bg-gray-900/95 border-gray-800" : "bg-white/95 border-gray-100"}`}
->
+      {/* NAVBAR MOBILE */}
+      <nav
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg h-[72px] pb-[safe] mb-0 ${isDark ? "bg-gray-900/95 border-gray-800" : "bg-white/95 border-gray-100"}`}
+      >
         <ul className="relative flex justify-around items-center h-full text-[12px] font-medium">
           <li>
             <NavLink
@@ -243,10 +322,10 @@ const normalClass = isDark
               to="plus"
               className={`flex items-center justify-center w-14 h-14 rounded-2xl rotate-45 shadow-lg transition duration-300 transform hover:scale-105 active:scale-95 ${isDark ? "bg-purple-600 text-white shadow-purple-900/50" : "bg-linear-to-r from-purple-600 to-indigo-600 text-white shadow-purple-500/40"}`}
             >
-              <Plus size={28}  className="rotate-45"/>
+              <Plus size={28} className="rotate-45" />
             </NavLink>
           </li>
-          <li>
+          <li className="relative">
             <NavLink
               to="notifications"
               className={({ isActive }) =>
@@ -254,6 +333,19 @@ const normalClass = isDark
               }
             >
               <Bell size={24} /> Actions
+              {/* 🔔 BADGE MOBILE */}
+              {notificationsNonLues > 0 && (
+                <span style={{
+                  ...badgeStyle,
+                  top: '-4px',
+                  right: '-8px',
+                  fontSize: '9px',
+                  padding: '1px 4px',
+                  minWidth: '14px'
+                }}>
+                  {notificationsNonLues > 99 ? '99+' : notificationsNonLues}
+                </span>
+              )}
             </NavLink>
           </li>
           <li>
