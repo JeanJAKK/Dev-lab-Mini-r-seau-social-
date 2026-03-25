@@ -78,57 +78,56 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {/* ── Cover avec overlay dégradé ── */}
-      <div className="relative h-40 sm:h-52 md:h-64 w-full overflow-hidden">
+      {/* ── Cover simple ── */}
+      <div className="relative h-32 sm:h-48 md:h-56 w-full overflow-hidden">
         {profile.cover_url ? (
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${profile.cover_url})` }}
           />
         ) : (
-          <div className="absolute inset-0 bg-linear-to-br from-indigo-600 via-violet-600 to-fuchsia-600">
-            <div className="absolute inset-0 bg-black/10" />
-            <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white/90 text-xs font-semibold tracking-wide uppercase">
-              <ImageOff size={14} />
+          <div className={`absolute inset-0 ${isDark ? "bg-gray-800" : "bg-gray-300"}`}>
+            <div className={`absolute inset-0 flex items-center justify-center gap-2 text-sm font-medium ${isDark ? "text-gray-600" : "text-gray-500"}`}>
+              <ImageOff size={18} />
               <span>Aucune couverture</span>
             </div>
           </div>
         )}
-        {/* Dégradé bas pour assurer la transition vers le fond de page */}
-        <div className={`absolute inset-0 ${isDark ? "bg-linear-to-t from-gray-900 via-gray-900/30 to-transparent" : "bg-linear-to-t from-gray-50 via-transparent to-transparent"}`} />
       </div>
 
       {/* ── Contenu principal ── */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 relative">
 
         {/* Avatar + bouton message */}
-        <div className="flex items-end justify-between -mt-14 sm:-mt-16 mb-5">
+        <div className="flex items-end justify-between -mt-12 sm:-mt-16 mb-4">
 
-          {/* Avatar entouré d'un anneau dégradé violet */}
-          <div className="relative shrink-0">
-            <div className="p-1 rounded-full bg-linear-to-br from-purple-500 to-indigo-500">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={profile.name}
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-3 ${isDark ? "border-gray-900" : "border-gray-50"}`}
-                />
-              ) : (
-                <div
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-3 flex items-center justify-center bg-linear-to-br from-indigo-500 to-fuchsia-500 ${isDark ? "border-gray-900" : "border-gray-50"}`}
-                >
-                  <span className="text-white font-extrabold text-xl sm:text-2xl">{userInitial}</span>
-                </div>
-              )}
-            </div>
+          {/* Avatar minimaliste */}
+          <div className="relative shrink-0 z-10">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={profile.name}
+                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 ${isDark ? "border-gray-900 bg-gray-900" : "border-gray-50 bg-white"}`}
+              />
+            ) : (
+              <div
+                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 flex items-center justify-center ${isDark ? "border-gray-900 bg-gray-800" : "border-gray-50 bg-gray-200"}`}
+              >
+                <span className={`font-bold text-3xl sm:text-4xl ${isDark ? "text-gray-500" : "text-gray-400"}`}>{userInitial}</span>
+              </div>
+            )}
           </div>
 
-          {/* Bouton message */}
+          {/* Bouton message neutre */}
           <button
             onClick={() => navigate("/home/messages")}
-            className="flex items-center gap-2 px-4 py-2 rounded-full border-none cursor-pointer font-semibold text-sm transition bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-500/25 mb-2"
+            className={`flex items-center gap-2 px-5 py-2 rounded-full border transition font-medium text-sm mb-2 sm:mb-4 ${
+              isDark 
+                ? "bg-gray-100 hover:bg-gray-200 text-gray-900 border-transparent" 
+                : "bg-gray-900 hover:bg-gray-800 text-white border-transparent"
+            }`}
           >
-            <MessageCircle size={15} />
+            <MessageCircle size={16} />
             <span className="hidden sm:inline">Message</span>
           </button>
         </div>

@@ -140,7 +140,7 @@ export default function CreatePost() {
 
   return (
     <div
-      className={`${isDark ? "bg-gray-800 border-gray-300" : "bg-white border-gray-300"} rounded-none sm:rounded-2xl border-y sm:border shadow-sm mb-4 sm:mb-5 overflow-hidden w-full`}
+      className={`${isDark ? "bg-gray-800 border-gray-300" : "bg-white border-gray-300"} rounded-none sm:rounded-[5px] border-y sm:border shadow-sm mb-4 sm:mb-5 overflow-hidden w-full`}
       style={{ borderColor: isDark ? "#374151" : "#e5e7eb" }}
     >
       <div className="p-2 sm:p-4 md:px-5 md:pt-5 md:pb-4">

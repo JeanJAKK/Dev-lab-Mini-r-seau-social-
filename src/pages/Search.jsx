@@ -26,18 +26,23 @@ function Search() {
     setLoading(false);
   };
 
-  useEffect( async () => {
-    const me = await getUser().id;
-    setMyId(me);
-    getUsers();
-    loadFollowing();
+  useEffect(() => {
+    const init = async () => {
+      const user = await getUser();
+      if (user && user.id) {
+        setMyId(user.id);
+        loadFollowing(user.id);
+      }
+      getUsers();
+    };
+    init();
   }, []);
 
-  const loadFollowing = async () => {  
+  const loadFollowing = async (userId) => {  
     const { data, error } = await supabase
       .from("follows")
       .select("following_id")
-      .eq("follower_id", me);
+      .eq("follower_id", userId);
     if (error) {
       console.error("Erreur récupération follows", error);
       return;
