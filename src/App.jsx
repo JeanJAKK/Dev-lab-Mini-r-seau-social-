@@ -23,41 +23,44 @@ import PostDetail from "./pages/PostDetail";
 import UserProfile from "./pages/UserProfile";
 import AccountSettings from "./pages/AccountSettings";
 import Terms from "./pages/Terms";
+import { FollowProvider } from "./context/FollowContext";
 
 function App() {
   const [auth, setAuth] = useState(isAuthenticated());
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/authPage" />} />
+    <FollowProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/authPage" />} />
 
-        <Route path="/authPage" element={<AuthPage setAuth={setAuth} />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/terms" element={<Terms />} />
+          <Route path="/authPage" element={<AuthPage setAuth={setAuth} />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/terms" element={<Terms />} />
 
-        {auth ? (
-          <Route path="/home" element={<Home />}>
-            <Route index element={<Acceuil />} />
+          {auth ? (
+            <Route path="/home" element={<Home />}>
+              <Route index element={<Acceuil />} />
 
-            <Route path="profil" element={<Profil />} />
-            <Route path="acceuil" element={<Acceuil />} />
-            <Route path="posts" element={<Posts />} />
-            <Route path="search" element={<Search />} />
-            <Route path="messages" element={<Messages />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="create-post" element={<CreatePost />} />
-            <Route path="plus" element={<Plus />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="account-settings" element={<AccountSettings />} />
-            <Route path="post/:postId" element={<PostDetail />} />
-            <Route path="profile/:userId" element={<UserProfile />} />
-          </Route>
-        ) : (
-          <Route path="*" element={<Navigate to="/authPage" />} />
-        )}
-      </Routes>
-    </BrowserRouter>
+              <Route path="profil" element={<Profil />} />
+              <Route path="acceuil" element={<Acceuil />} />
+              <Route path="posts" element={<Posts />} />
+              <Route path="search" element={<Search />} />
+              <Route path="messages" element={<Messages />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="create-post" element={<CreatePost />} />
+              <Route path="plus" element={<Plus />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="account-settings" element={<AccountSettings />} />
+              <Route path="post/:postId" element={<PostDetail />} />
+              <Route path="profile/:userId" element={<UserProfile />} />
+            </Route>
+          ) : (
+            <Route path="*" element={<Navigate to="/authPage" />} />
+          )}
+        </Routes>
+      </BrowserRouter>
+    </FollowProvider>
   );
 }
 

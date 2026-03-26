@@ -19,18 +19,66 @@ export default function UserProfile() {
 
   useEffect(() => {
     const load = async () => {
+      // Charger le profil
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
-      setProfile(profileData || null);
-
+      
+      // Charger les posts
       const { data: postsData } = await supabase
         .from("posts")
         .select("id, title, image_url, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
+      
+      // Calculer les compteurs si les colonnes n'existent pas
+      let followersCount = profileData?.followers_count || 0;
+      let followingCount = profileData?.following_count || 0;
+      
+      // Si les compteurs sont à 0, essayer de les calculer depuis les tables follows
+      if (followersCount === 0 || followingCount === 0) {
+        try {
+          // Compter les followers (personnes qui suivent cet utilisateur)
+          const { count: followersCountResult } = await supabase
+            .from("follows")
+            .select("*", { count: "exact", head: true })
+            .eq("following_id", userId);
+          
+          // Compter les following (personnes que cet utilisateur suit)
+          const { count: followingCountResult } = await supabase
+            .from("follows")
+            .select("*", { count: "exact", head: true })
+            .eq("follower_id", userId);
+          
+          followersCount = followersCountResult || 0;
+          followingCount = followingCountResult || 0;
+          
+          // Mettre à jour le profil avec les vrais compteurs
+          if (profileData) {
+            await supabase
+              .from("profiles")
+              .update({
+                followers_count: followersCount,
+                following_count: followingCount,
+                posts_count: postsData?.length || 0
+              })
+              .eq("id", userId);
+          }
+        } catch (error) {
+          console.log("Table follows non existante ou erreur:", error);
+        }
+      }
+      
+      // Mettre à jour le profil avec les compteurs
+      setProfile({
+        ...profileData,
+        followers_count: followersCount,
+        following_count: followingCount,
+        posts_count: postsData?.length || 0
+      });
+      
       setPosts(postsData || []);
       setLoading(false);
     };
@@ -154,12 +202,12 @@ export default function UserProfile() {
           </div>
           <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
           <div className="flex-1 flex flex-col items-center py-3 gap-0.5">
-            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>—</span>
+            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile?.followers_count || 0}</span>
             <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnés</span>
           </div>
           <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
           <div className="flex-1 flex flex-col items-center py-3 gap-0.5">
-            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>—</span>
+            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile?.following_count || 0}</span>
             <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnements</span>
           </div>
         </div>
