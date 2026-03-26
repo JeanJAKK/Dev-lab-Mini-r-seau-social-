@@ -47,7 +47,7 @@ export default function AccountSettings() {
     updated_at: "",
   });
 
-  // ✅ Chargement de l'utilisateur au montage
+  // Chargement de l'utilisateur au montage
   useEffect(() => {
     const init = async () => {
       const currentUser = await getUser();
@@ -56,7 +56,7 @@ export default function AccountSettings() {
     init();
   }, []);
 
-  // ✅ Chargement des données une fois l'utilisateur disponible
+  // Chargement des données une fois l'utilisateur disponible
   useEffect(() => {
     if (user) {
       loadProfileData();
@@ -178,7 +178,7 @@ export default function AccountSettings() {
         updated_at: new Date().toISOString(),
       }));
 
-      setMessage("✅ Profil mis à jour avec succès !");
+      setMessage("Profil mis à jour avec succès !");
       setIsEditingProfile(false);
     } catch (err) {
       console.error("Erreur:", err);
@@ -230,7 +230,7 @@ export default function AccountSettings() {
         ),
       );
 
-      setMessage("✅ Post mis à jour avec succès !");
+      setMessage(" Post mis à jour avec succès !");
       setEditingPost(null);
     } catch (err) {
       console.error("Erreur:", err);
@@ -259,7 +259,7 @@ export default function AccountSettings() {
 
       // Mettre à jour l'état local
       setUserPosts((prev) => prev.filter((post) => post.id !== postId));
-      setMessage("✅ Post supprimé avec succès !");
+      setMessage(" Post supprimé avec succès !");
     } catch (err) {
       console.error("Erreur:", err);
       setMessage("Erreur inattendue lors de la suppression.");
@@ -296,7 +296,7 @@ export default function AccountSettings() {
         {message && (
           <div
             className={`p-4 text-center text-sm font-medium ${
-              message.includes("✅")
+              message.includes("")
                 ? isDark
                   ? "text-green-400 bg-green-900/20"
                   : "text-green-600 bg-green-50"
