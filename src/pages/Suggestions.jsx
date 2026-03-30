@@ -9,10 +9,13 @@ import "../styles/Suggestions.css";
 function Suggestions() {
   const { theme } = useTheme();
 
+  // États locaux exactement comme dans Search.jsx
   const [usersName, setUsersName] = useState([]);
   const [followingIds, setFollowingIds] = useState([]);
   const [myId, setMyId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Fonctions exactement comme dans Search.jsx
   const getUsers = async (me) => {
     const { data, error } = await supabase
       .from("profiles")
@@ -30,24 +33,24 @@ function Suggestions() {
     setUsersName(randomUsers);
   };
 
-  const loadFollowing = async (me) => {
-    if (!me) return;
+  const loadFollowing = async (userId) => {  
     const { data, error } = await supabase
       .from("follows")
       .select("following_id")
-      .eq("follower_id", me);
+      .eq("follower_id", userId);
     if (error) {
       console.error("Erreur récupération follows", error);
       return;
     }
-    setFollowingIds((data || []).map((row) => row.following_id));
+    setFollowingIds(data.map((row) => row.following_id));
   };
 
   const toggleFollow = async (targetId) => {
-    const me = await getUser().id;
+    const me = myId; // Utiliser myId de l'état local
     if (!me) return;
 
     if (followingIds.includes(targetId)) {
+      // unfollow
       const { error } = await supabase
         .from("follows")
         .delete()
@@ -57,24 +60,27 @@ function Suggestions() {
       } else {
         console.error("Erreur unfollow", error);
       }
-      return;
-    }
-
-    const { error } = await supabase
-      .from("follows")
-      .insert([{ follower_id: me, following_id: targetId }]);
-    if (!error) {
-      setFollowingIds((prev) => [...prev, targetId]);
     } else {
-      console.error("Erreur follow", error);
+      // follow
+      const { error } = await supabase
+        .from("follows")
+        .insert([{ follower_id: me, following_id: targetId }]);
+      if (!error) {
+        setFollowingIds((prev) => [...prev, targetId]);
+      } else {
+        console.error("Erreur follow", error);
+      }
     }
   };
 
   useEffect(() => {
     const init = async () => {
-      const me = await getUser().id;
-      setMyId(me);
-      await Promise.all([getUsers(me), loadFollowing(me)]);
+      const user = await getUser();
+      if (user && user.id) {
+        setMyId(user.id);
+        await loadFollowing(user.id);
+        await getUsers(user.id);
+      }
     };
     init();
   }, []);

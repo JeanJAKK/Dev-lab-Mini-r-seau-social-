@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Grid3x3, ImageOff, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Grid3x3, ImageOff, MessageCircle, X } from "lucide-react";
 import supabase from "../services/supabase";
 import { useTheme } from "../context/ThemeContext";
 
@@ -13,23 +13,72 @@ export default function UserProfile() {
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
   const avatarUrl = profile?.avatar_url || null;
   const userInitial = (profile?.name || "U").charAt(0).toUpperCase();
 
   useEffect(() => {
     const load = async () => {
+      // Charger le profil
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
-      setProfile(profileData || null);
-
+      
+      // Charger les posts
       const { data: postsData } = await supabase
         .from("posts")
         .select("id, title, image_url, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
+      
+      // Calculer les compteurs si les colonnes n'existent pas
+      let followersCount = profileData?.followers_count || 0;
+      let followingCount = profileData?.following_count || 0;
+      
+      // Si les compteurs sont à 0, essayer de les calculer depuis les tables follows
+      if (followersCount === 0 || followingCount === 0) {
+        try {
+          // Compter les followers (personnes qui suivent cet utilisateur)
+          const { count: followersCountResult } = await supabase
+            .from("follows")
+            .select("*", { count: "exact", head: true })
+            .eq("following_id", userId);
+          
+          // Compter les following (personnes que cet utilisateur suit)
+          const { count: followingCountResult } = await supabase
+            .from("follows")
+            .select("*", { count: "exact", head: true })
+            .eq("follower_id", userId);
+          
+          followersCount = followersCountResult || 0;
+          followingCount = followingCountResult || 0;
+          
+          // Mettre à jour le profil avec les vrais compteurs
+          if (profileData) {
+            await supabase
+              .from("profiles")
+              .update({
+                followers_count: followersCount,
+                following_count: followingCount,
+                posts_count: postsData?.length || 0
+              })
+              .eq("id", userId);
+          }
+        } catch (error) {
+          console.log("Table follows non existante ou erreur:", error);
+        }
+      }
+      
+      // Mettre à jour le profil avec les compteurs
+      setProfile({
+        ...profileData,
+        followers_count: followersCount,
+        following_count: followingCount,
+        posts_count: postsData?.length || 0
+      });
+      
       setPosts(postsData || []);
       setLoading(false);
     };
@@ -58,77 +107,66 @@ export default function UserProfile() {
   return (
     <div className={`min-h-screen pb-24 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
 
-      {/* ── Header sticky ── */}
-      <div className={`flex items-center gap-3 px-4 h-14 border-b sticky top-[76px] z-40 backdrop-blur-md ${isDark ? "bg-gray-900/90 border-gray-700/60" : "bg-white/90 border-gray-200"}`}>
+      {/* ── Cover simple ── */}
+      <div className="relative h-32 sm:h-48 md:h-56 w-full overflow-hidden">
+        {/* ── Flèche retour ── */}
         <button
           onClick={() => navigate(-1)}
-          className={`p-2 -ml-2 rounded-full border-none bg-transparent cursor-pointer transition ${isDark ? "hover:bg-gray-800 text-white" : "hover:bg-gray-100 text-gray-800"}`}
+          className="absolute top-4 left-4 z-40 p-2 sm:p-2.5 rounded-full bg-black/40 text-white hover:bg-black/60 transition shadow-md backdrop-blur-md cursor-pointer border-none"
         >
           <ArrowLeft size={20} />
         </button>
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className={`font-bold text-base truncate ${isDark ? "text-white" : "text-gray-900"}`}>
-            {profile.name || "Profil"}
-          </span>
-          {posts.length > 0 && (
-            <span className={`text-xs font-medium shrink-0 px-2 py-0.5 rounded-full ${isDark ? "bg-gray-700 text-gray-300" : "bg-gray-100 text-gray-500"}`}>
-              {posts.length}
-            </span>
-          )}
-        </div>
-      </div>
 
-      {/* ── Cover avec overlay dégradé ── */}
-      <div className="relative h-40 sm:h-52 md:h-64 w-full overflow-hidden">
         {profile.cover_url ? (
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            onClick={() => setFullscreenImage(profile.cover_url)}
+            className="absolute inset-0 bg-cover bg-center cursor-pointer transition-transform hover:scale-[1.02]"
             style={{ backgroundImage: `url(${profile.cover_url})` }}
           />
         ) : (
-          <div className="absolute inset-0 bg-linear-to-br from-indigo-600 via-violet-600 to-fuchsia-600">
-            <div className="absolute inset-0 bg-black/10" />
-            <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white/90 text-xs font-semibold tracking-wide uppercase">
-              <ImageOff size={14} />
+          <div className={`absolute inset-0 ${isDark ? "bg-gray-800" : "bg-gray-300"}`}>
+            <div className={`absolute inset-0 flex items-center justify-center gap-2 text-sm font-medium ${isDark ? "text-gray-600" : "text-gray-500"}`}>
+              <ImageOff size={18} />
               <span>Aucune couverture</span>
             </div>
           </div>
         )}
-        {/* Dégradé bas pour assurer la transition vers le fond de page */}
-        <div className={`absolute inset-0 ${isDark ? "bg-linear-to-t from-gray-900 via-gray-900/30 to-transparent" : "bg-linear-to-t from-gray-50 via-transparent to-transparent"}`} />
       </div>
 
       {/* ── Contenu principal ── */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 relative">
 
         {/* Avatar + bouton message */}
-        <div className="flex items-end justify-between -mt-14 sm:-mt-16 mb-5">
+        <div className="flex items-end justify-between -mt-12 sm:-mt-16 mb-4">
 
-          {/* Avatar entouré d'un anneau dégradé violet */}
-          <div className="relative shrink-0">
-            <div className="p-1 rounded-full bg-linear-to-br from-purple-500 to-indigo-500">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={profile.name}
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-3 ${isDark ? "border-gray-900" : "border-gray-50"}`}
-                />
-              ) : (
-                <div
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-3 flex items-center justify-center bg-linear-to-br from-indigo-500 to-fuchsia-500 ${isDark ? "border-gray-900" : "border-gray-50"}`}
-                >
-                  <span className="text-white font-extrabold text-xl sm:text-2xl">{userInitial}</span>
-                </div>
-              )}
-            </div>
+          {/* Avatar minimaliste */}
+          <div className="relative shrink-0 z-10">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={profile.name}
+                onClick={() => setFullscreenImage(avatarUrl)}
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover cursor-pointer shadow-md"
+              />
+            ) : (
+              <div
+                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-md flex items-center justify-center ${isDark ? "bg-gray-800" : "bg-gray-200"}`}
+              >
+                <span className={`font-bold text-3xl sm:text-4xl ${isDark ? "text-gray-500" : "text-gray-400"}`}>{userInitial}</span>
+              </div>
+            )}
           </div>
 
-          {/* Bouton message */}
+          {/* Bouton message neutre */}
           <button
             onClick={() => navigate("/home/messages")}
-            className="flex items-center gap-2 px-4 py-2 rounded-full border-none cursor-pointer font-semibold text-sm transition bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-500/25 mb-2"
+            className={`flex items-center gap-2 px-5 py-2 rounded-full border transition font-medium text-sm mb-2 sm:mb-4 ${
+              isDark 
+                ? "bg-gray-100 hover:bg-gray-200 text-gray-900 border-transparent" 
+                : "bg-gray-900 hover:bg-gray-800 text-white border-transparent"
+            }`}
           >
-            <MessageCircle size={15} />
+            <MessageCircle size={16} />
             <span className="hidden sm:inline">Message</span>
           </button>
         </div>
@@ -164,12 +202,12 @@ export default function UserProfile() {
           </div>
           <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
           <div className="flex-1 flex flex-col items-center py-3 gap-0.5">
-            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>—</span>
+            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile?.followers_count || 0}</span>
             <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnés</span>
           </div>
           <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
           <div className="flex-1 flex flex-col items-center py-3 gap-0.5">
-            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>—</span>
+            <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile?.following_count || 0}</span>
             <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnements</span>
           </div>
         </div>
@@ -228,6 +266,28 @@ export default function UserProfile() {
         </div>
 
       </div>
+
+      {/* ── Modal Image Plein Écran ── */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white hover:bg-black/50 rounded-full p-2"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImage} 
+            alt="Plein écran" 
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()} 
+          />
+        </div>
+      )}
+
     </div>
   );
 }

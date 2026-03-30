@@ -50,7 +50,7 @@
 /* Post Card */
 .post-card {
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 5px;
   border: 1px solid #d1d5db;
   padding: 20px 22px 14px;
   margin-bottom: 16px;
@@ -316,7 +316,7 @@
   }
   .post-card {
     padding: 16px 16px 10px;
-    border-radius: 16px;
+    border-radius: 5px;
     margin-bottom: 12px;
   }
   .post-username {

@@ -6,8 +6,8 @@ import { useTheme } from "../context/ThemeContext";
 import { getUser } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/like-a-post";
 import { shareContent } from "../services/share";
-import { fetchPostsWithLikes } from "../services/post/post";
-
+import SuggestionsCarousel from "../components/SuggestionsCarousel";
+import {fetchPostsWithLikes} from "../services/post/post" 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -109,7 +109,7 @@ export default function Posts() {
     return (
       <div className="posts-page" data-theme={theme}>
         <div className="posts-container">
-          <h2 className="posts-title">Fil d'actualité</h2>
+          
           {[...Array(4)].map((_, i) => (
             <div key={i} className="post-card">
               <div className="flex w-full flex-col gap-4">
@@ -131,20 +131,20 @@ export default function Posts() {
   return (
     <div className="posts-page" data-theme={theme}>
       <div className="posts-container">
-        <h2 className="posts-title">Fil d'actualité</h2>
-
+        
         {message && <p className="message">{message}</p>}
         {posts.length === 0 && (
           <p className="empty-message">Aucun post pour le moment.</p>
         )}
 
-        {posts.map((post) => (
-          <div className="post-card" key={post.id}>
-            <div className="post-header">
-              <Link
-                to={`/home/profile/${post.user_id}`}
-                className="user-avatar"
-              >
+        {posts.map((post, index) => (
+          <div key={post.id}>
+            <div className="post-card">
+              <div className="post-header">
+                <Link
+                  to={`/home/profile/${post.user_id}`}
+                  className="user-avatar"
+                >
                 <img
                   src={getAvatarUrl(post.profiles)}
                   alt={post.profiles?.name || "profile"}
@@ -231,6 +231,10 @@ export default function Posts() {
                 <Share2 size={16} /> Partager
               </button>
             </div>
+          </div>
+          
+          {/* suggestions sur mobile après index+1 post */}
+          {index === 4 && <SuggestionsCarousel />}
           </div>
         ))}
       </div>

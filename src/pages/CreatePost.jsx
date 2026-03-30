@@ -21,16 +21,17 @@ export default function CreatePost() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        setUser(await getUser());
+        const fetchedUser = await getUser();
+        setUser(fetchedUser);
 
-        if (user) {
-          setCurrentUser(user);
+        if (fetchedUser) {
+          setCurrentUser(fetchedUser);
 
           // Récupérer les infos du profil avec avatar
           const { data: profileData } = await supabase
             .from("profiles")
             .select("name, avatar_url")
-            .eq("id", user.id)
+            .eq("id", fetchedUser.id)
             .single();
 
           if (profileData) {
@@ -126,7 +127,7 @@ export default function CreatePost() {
         return;
       }
 
-      setMessage("✅ Post publié avec succès !");
+      setMessage(" Post publié avec succès !");
       setTitle("");
       setContent("");
       setImageFile(null);
@@ -140,7 +141,7 @@ export default function CreatePost() {
 
   return (
     <div
-      className={`${isDark ? "bg-gray-800 border-gray-300" : "bg-white border-gray-300"} rounded-none sm:rounded-2xl border-y sm:border shadow-sm mb-4 sm:mb-5 overflow-hidden w-full`}
+      className={`${isDark ? "bg-gray-800 border-gray-300" : "bg-white border-gray-300"} rounded-none sm:rounded-[5px] border-y sm:border shadow-sm mb-4 sm:mb-5 overflow-hidden w-full`}
       style={{ borderColor: isDark ? "#374151" : "#e5e7eb" }}
     >
       <div className="p-2 sm:p-4 md:px-5 md:pt-5 md:pb-4">
