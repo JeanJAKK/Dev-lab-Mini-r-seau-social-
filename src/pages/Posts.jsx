@@ -1,12 +1,12 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import supabase from "../services/supabase";
 import "../styles/Posts.css";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getUser } from "../services/systemeLike/getUser";
-import { like } from "../services/systemeLike/Like";
+import { like } from "../services/systemeLike/like-a-post";
 import { shareContent } from "../services/share";
+import { fetchPostsWithLikes } from "../services/post/post";
 
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
@@ -94,56 +94,15 @@ export default function Posts() {
   };
 
   useEffect(() => {
-    const fetchPostsWithLikes = async () => {
+    async function fetchPosts() {
       setLoading(true);
-      try {
-        // 1️ Récupérer tous les posts avec les infos du profil
-        const { data: postsData, error: postsError } = await supabase
-          .from("posts")
-          .select("*, profiles!posts_user_id_fkey(name, avatar_url)")
-          .order("created_at", { ascending: false });
-
-        if (postsError) throw postsError;
-
-        // 2️ Récupérer tous les likes pour tous les posts
-        const { data: likesData, error: likesError } = await supabase
-          .from("likes")
-          .select("*"); // on prend post_id et user_id
-
-        if (likesError) throw likesError;
-
-        const { data: commentData, error: commentError } = await supabase
-          .from("comments")
-          .select("*");
-        if (commentError) throw commentError;
-        const user = await getUser()
-        setUser(user);
-        // 3️ Ajouter likes et liked à chaque post
-        const postsWithLikes = postsData.map((post) => {
-          const comments = commentData.filter((com) => com.post_id === post.id);
-          const postLikes = likesData.filter(
-            (like) => like.post_id === post.id,
-          );
-          const likesCount = postLikes.length;
-          const userLiked = postLikes.some((like) => like.user_id === user.id);
-          return {
-            ...post,
-            likes: likesCount,
-            liked: userLiked,
-            comments: comments,
-          };
-        });
-
-        setPosts(postsWithLikes);
-      } catch (err) {
-        console.error(err);
-        setMessage("❌ Erreur lors du chargement des posts");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPostsWithLikes();
+      const response = await fetchPostsWithLikes();
+      setPosts(response);
+      const user = await getUser();
+      setUser(user);
+      setLoading(false);
+    }
+    fetchPosts();
   }, []);
 
   if (loading)
@@ -254,7 +213,7 @@ export default function Posts() {
                   <span>{post.comments.length}</span>
                 )}
               </button>
-              <button 
+              <button
                 className="post-action-btn"
                 onClick={async () => {
                   const result = await shareContent({

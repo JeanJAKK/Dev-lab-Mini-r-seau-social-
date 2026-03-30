@@ -1,0 +1,11 @@
+import supabase from "../supabase";
+//  Récupérer tous les posts avec les infos du profil
+export async function postsData() {
+  const { data , error: postsError } = await supabase
+    .from("posts")
+    .select("*, profiles!posts_user_id_fkey(name, avatar_url)")
+    .order("created_at", { ascending: false });
+
+  if (postsError) throw postsError;
+  return data;
+}
