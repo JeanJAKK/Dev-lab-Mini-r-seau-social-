@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
 import supabase from "../services/supabase.js";
 import "../styles/Register.css";
 
@@ -58,24 +60,52 @@ function Register() {
         return;
       }
 
-      const user = data.user;
-      if (!user) {
-        setMessage("Inscription réussie, vérifie ton email.");
-        setIsSuccess(true);
+      // 2️⃣ Création du profil
+      if (data.user) {
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          name: name.trim(),
+          email: email,
+        });
+
+        if (profileError) {
+          console.error("Erreur création profil:", profileError);
+        }
+      }
+
+      setIsSuccess(true);
+      setMessage(
+        "Inscription réussie ! Veuillez vérifier votre email pour activer votre compte."
+      );
+    } catch (err) {
+      setMessage("Erreur lors de l'inscription.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Connexion avec Google
+  const handleGoogleLogin = async () => {
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/home`,
+        },
+      });
+
+      if (error) {
+        setMessage(error.message);
         setLoading(false);
         return;
       }
 
-      setIsSuccess(true);
-      setMessage("✅ Inscription réussie !");
-      setLoading(false);
-
-      setTimeout(() => {
-        navigate("/authPage");
-      }, 1200);
+      // La redirection sera gérée par Supabase
     } catch (err) {
-      console.error(err);
-      setMessage("Erreur inattendue.");
+      setMessage("Erreur lors de la connexion Google.");
       setLoading(false);
     }
   };
@@ -147,6 +177,16 @@ function Register() {
               {message}
             </p>
           )}
+          <div className="divider">ou</div>
+          {/* Boutons de connexion sociale */}
+          <button type="button" className="google-btn" onClick={handleGoogleLogin}>
+            <FcGoogle size={22} style={{ marginRight: "8px" }} />
+            Continuer avec Google
+          </button>
+          <button type="button" className="facebook-btn">
+            <FaFacebook size={22} style={{ marginRight: "8px" }} />
+            Continuer avec Facebook
+          </button>
         </form>
 
         <p className="connect">

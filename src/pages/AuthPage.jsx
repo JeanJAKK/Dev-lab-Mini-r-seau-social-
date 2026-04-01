@@ -53,29 +53,49 @@ function AuthPage({ setAuth }) {
     }
 
     try {
-      // 1️ Connexion avec Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        setMessage("Email ou mot de passe incorrect !");
+        setMessage(error.message);
         setLoading(false);
         return;
       }
 
-      //  Connexion réussie
-      localStorage.setItem("isLogged", "true");
+      setMessage("Connexion réussie !");
       setAuth(true);
-      setMessage(" Connexion réussie !");
-      setLoading(false);
-
-      // Redirection vers la page d'accueil ou création de post
       navigate("/home");
     } catch (err) {
-      console.error(err);
-      setMessage("Erreur inattendue. Regarde la console.");
+      setMessage("Erreur lors de la connexion.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Connexion avec Google
+  const handleGoogleLogin = async () => {
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/home`,
+        },
+      });
+
+      if (error) {
+        setMessage(error.message);
+        setLoading(false);
+        return;
+      }
+
+      // La redirection sera gérée par Supabase
+    } catch (err) {
+      setMessage("Erreur lors de la connexion Google.");
       setLoading(false);
     }
   };
@@ -129,9 +149,9 @@ function AuthPage({ setAuth }) {
           )}
           <div className="divider">ou</div>
           {/* Boutons de connexion sociale */}{" "}
-          <button type="button" className="google-btn">
+          <button type="button" className="google-btn" onClick={handleGoogleLogin}>
             <FcGoogle size={22} style={{ marginRight: "8px" }} />
-            Continuer avec Google{" "}
+            Continuer avec Google
           </button>
           <button type="button" className="facebook-btn">
             <FaFacebook size={22} style={{ marginRight: "8px" }} />
