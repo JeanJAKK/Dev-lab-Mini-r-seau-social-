@@ -1,8 +1,20 @@
 {
   "name": "mini-social",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "description": "Développer un réseau social minimaliste permettant à un utilisateur de s’inscrire, de se connecter, de publier des posts (texte + image), de consulter le fil d’actualité et d’interagir avec les autres utilisateurs via un système de likes.",
+  "homepage": "https://github.com/JeanJAKK/Dev-lab-Mini-r-seau-social-#readme",
+  "bugs": {
+    "url": "https://github.com/JeanJAKK/Dev-lab-Mini-r-seau-social-/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeanJAKK/Dev-lab-Mini-r-seau-social-.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "eslint.config.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
