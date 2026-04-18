@@ -6,22 +6,18 @@ export const serviceNotifications = {
       const { data, error } = await supabase
         .from('notifications')
         .insert([{
-          type: type,
-          destinataire_id: destinataire_id,
-          expediteur_id: expediteur_id,
+          type,
+          destinataire_id,
+          expediteur_id,
           publication_id: publication_id || null,
-          message: message,
+          message,
           est_lu: false,
           cree_le: new Date().toISOString()
         }])
         .select();
       
-      if (error) {
-        console.error("Erreur insertion:", error);
-        return { donnees: null, erreur: error };
-      }
-      
-      return { donnees: data?.[0], erreur: null };
+      if (error) console.error("Erreur insertion:", error);
+      return { donnees: data?.[0], erreur: error };
     } catch (error) {
       console.error("Erreur:", error);
       return { donnees: null, erreur: error };
