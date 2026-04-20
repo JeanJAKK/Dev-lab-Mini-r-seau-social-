@@ -189,7 +189,7 @@ export default function CentreNotifications() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="w-full sm:w-[70%] max-w-[1100px] mx-auto px-0 sm:px-3 py-4">
         
-        {/* Header avec titre et filtres sur une ligne */}
+     
         <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-purple-100/30 mb-4 overflow-hidden">
           <div className="px-5 py-4">
             <div className="flex flex-nowrap items-center justify-between gap-3 overflow-x-auto">
@@ -275,7 +275,6 @@ export default function CentreNotifications() {
                 <div className="p-1 sm:p-2">
                   <div className="flex gap-3 relative">
                     
-                    {/* Avatar */}
                     <div className="relative shrink-0">
                       <img
                         src={notif.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(notif.nom)}&background=8b5cf6&color=fff`}
@@ -284,7 +283,7 @@ export default function CentreNotifications() {
                         onClick={() => navigate(`/home/profile/${notif.expediteur_id}`)}
                       />
                       <div
-                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-md"
+                        className="absolute bottom-4 md:-bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-md"
                         style={{ backgroundColor: getTypeCouleur(notif.type) }}
                       >
                         {getTypeIcone(notif.type, 12)}
@@ -372,7 +371,7 @@ export default function CentreNotifications() {
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer avec infos */}
         {notifsFiltrees.length > 0 && (
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-400 bg-white/50 inline-block px-4 py-1.5 rounded-full shadow-sm">
