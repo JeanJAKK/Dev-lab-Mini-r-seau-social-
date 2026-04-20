@@ -27,6 +27,7 @@ export function useNotifications() {
       
       const expediteursIds = [...new Set(data?.map(n => n.expediteur_id) || [])];
       let expediteursData = {};
+      let followStatus = {};
       
       if (expediteursIds.length > 0) {
         const { data: profils } = await supabase
@@ -38,6 +39,16 @@ export function useNotifications() {
           acc[p.id] = p;
           return acc;
         }, {});
+        
+        const { data: follows } = await supabase
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', user.user.id);
+        
+        followStatus = (follows || []).reduce((acc, f) => {
+          acc[f.following_id] = true;
+          return acc;
+        }, {});
       }
       
       const notificationsFormatees = (data || []).map(n => ({
@@ -47,6 +58,7 @@ export function useNotifications() {
         expediteur_id: n.expediteur_id,
         expediteur_nom: expediteursData[n.expediteur_id]?.name || 'Utilisateur',
         expediteur_avatar: expediteursData[n.expediteur_id]?.avatar_url,
+        expediteur_suit: followStatus[n.expediteur_id] || false,
         message: n.message,
         publication_id: n.publication_id,
         cree_le: n.cree_le
@@ -122,6 +134,33 @@ export function useNotifications() {
     }
   };
 
+  const suivre = async (expediteurId, suitActuellement) => {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+      
+      if (suitActuellement) {
+        await supabase
+          .from('follows')
+          .delete()
+          .eq('follower_id', user.user.id)
+          .eq('following_id', expediteurId);
+      } else {
+        await supabase
+          .from('follows')
+          .insert({ follower_id: user.user.id, following_id: expediteurId });
+      }
+      
+      setNotifications(prev => prev.map(notif => 
+        notif.expediteur_id === expediteurId
+          ? { ...notif, expediteur_suit: !suitActuellement }
+          : notif
+      ));
+    } catch (err) {
+      console.error("Erreur suivre:", err);
+    }
+  };
+
   return {
     notifications,
     chargement,
@@ -130,6 +169,7 @@ export function useNotifications() {
     toutMarquerLu,
     supprimer,
     toutSupprimer,
+    suivre,
     rafraichir: chargerNotifications
   };
 }
