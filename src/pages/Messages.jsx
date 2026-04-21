@@ -75,6 +75,14 @@ export default function Messages() {
     fetchMessages();
   }, []);
 
+  const conversationMessages = selectedUser
+    ? messageInfos.filter(
+        (msg) =>
+          (msg.sender_id === myId && msg.receiver_id === selectedUser.id) ||
+          (msg.sender_id === selectedUser.id && msg.receiver_id === myId),
+      )
+    : [];
+
   return (
     <div className="flex h-[calc(100vh-160px)] sm:h-[calc(100vh-110px)] w-full max-w-5xl mx-auto bg-white sm:rounded-xl shadow-md border-y sm:border border-gray-200 overflow-hidden sm:my-4 relative">
       {/* Sidebar: Liste des discussions */}
@@ -195,21 +203,40 @@ export default function Messages() {
             </div>
 
             {/* Zone des messages (scrollable) */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col relative">
-              <div className="text-center my-4">
-                <span className="text-[11px] font-medium text-gray-500 bg-gray-200 px-3 py-1 rounded-full shadow-sm">
-                  Début de la conversation avec {selectedUser.name}
-                </span>
-              </div>
-              <div>
-                {messageInfos.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`${msg.sender_id === myId ? "text-red-400 justify-start" : "text-blue-300 justify-end"}`}
-                  >
-                    {(selectedUser.id === msg.receiver_id)  && msg.content}
-                  </div>
-                ))}
+            <div className="flex-1 bg-gray-50/80 p-3 sm:p-4">
+              <div className="h-full rounded-2xl border border-gray-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] overflow-hidden flex flex-col">
+                <div className="border-b border-gray-100 bg-gray-50/70 px-4 py-2 text-center">
+                  <span className="text-[11px] font-medium text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
+                    Début de la conversation avec {selectedUser.name}
+                  </span>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-2">
+                  {conversationMessages.length === 0 ? (
+                    <div className="h-full grid place-items-center text-center px-4">
+                      <p className="text-sm text-gray-500">
+                        Aucun message pour le moment. Démarrez la conversation.
+                      </p>
+                    </div>
+                  ) : (
+                    conversationMessages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.sender_id === myId ? "justify-end" : "justify-start"}`}
+                      >
+                        <div
+                          className={`text-sm px-3 py-2 max-w-[78%] sm:max-w-[72%] rounded-2xl border shadow-sm ${
+                            msg.sender_id === myId
+                              ? "text-white bg-purple-600 border-purple-500 rounded-br-md"
+                              : "text-gray-800 bg-gray-100 border-gray-200 rounded-bl-md"
+                          }`}
+                        >
+                          {msg.content}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
 
