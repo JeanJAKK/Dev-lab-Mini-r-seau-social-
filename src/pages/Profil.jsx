@@ -1,15 +1,11 @@
-// ===============================
-// Profile.jsx
-// ===============================
-
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Calendar, X, Camera, ArrowLeft } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Calendar, X, Camera, ArrowLeft, UserPlus, UserCheck } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import supabase from "../services/supabase.js";
 import { getUser } from "../services/systemeLike/getUser.js";
+import { notifierAbonnement } from "../services/notifications/createurNotifications.js";
 
-// Composant PostImage ultra-simple comme dans Posts.jsx
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -54,14 +50,13 @@ export default function Profile() {
   const isDark = theme === "dark";
   const navigate = useNavigate();
 
-  //  ÉTAT POUR LA GESTION DE LA PHOTO DE PROFIL
   const [profileImage, setProfileImage] = useState(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
 
-  // DONNÉES UTILISATEUR (RÉCUPÉRÉES DE SUPABASE)
   const [profile, setProfile] = useState({
     id: null,
     name: "Chargement...",
@@ -75,7 +70,6 @@ export default function Profile() {
     joinedAt: "",
   });
 
-  // Charger les données utilisateur au montage
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
@@ -88,7 +82,6 @@ export default function Profile() {
 
         setCurrentUser(user);
 
-        // Récupérer les données du profil depuis la table profiles
         const { data: profileData, error } = await supabase
           .from("profiles")
           .select("*")
@@ -104,13 +97,11 @@ export default function Profile() {
         if (profileData) {
           setProfile({
             id: profileData.id,
-            name:
-              profileData.name || user.email?.split("@")[0] || "Utilisateur",
+            name: profileData.name || user.email?.split("@")[0] || "Utilisateur",
             username: profileData.username || "",
             bio: profileData.bio || "",
             avatar: profileData.avatar_url,
-            cover:
-              profileData.cover_url || null,
+            cover: profileData.cover_url || null,
             postsCount: profileData.posts_count || 0,
             followers: profileData.followers_count || 0,
             following: profileData.following_count || 0,
@@ -122,7 +113,6 @@ export default function Profile() {
               : "Date inconnue",
           });
         } else {
-          // Créer un profil par défaut si inexistant
           const defaultProfile = {
             id: user.id,
             name: user.email?.split("@")[0] || "Utilisateur",
@@ -141,12 +131,9 @@ export default function Profile() {
           setProfile(defaultProfile);
         }
 
-        // Charger les posts de l'utilisateur
         await loadUserPosts(user.id);
-        // charger listes follow
         await loadFollowersList(user.id);
         await loadFollowingList(user.id);
-        // counts will be synced by effect below
       } catch (err) {
         console.error("Erreur:", err);
         setMessage("Erreur lors du chargement du profil.");
@@ -156,10 +143,8 @@ export default function Profile() {
     loadUserProfile();
   }, []);
 
-  // helpers for followers/following
   const loadFollowersList = async (userId) => {
     try {
-      // first grab follower IDs
       const { data: idsData, error: idsError } = await supabase
         .from("follows")
         .select("follower_id")
@@ -170,7 +155,6 @@ export default function Profile() {
         setFollowersList([]);
         return;
       }
-      // then fetch profiles
       const { data: profiles, error: profError } = await supabase
         .from("profiles")
         .select("id, name, avatar_url")
@@ -205,25 +189,9 @@ export default function Profile() {
     }
   };
 
-  // Charger les posts de l'utilisateur
   const loadUserPosts = async (userId) => {
     setPostsLoading(true);
     try {
-      console.log(" Chargement des posts de l'utilisateur...", userId);
-
-      // Vérifier d'abord si l'utilisateur existe
-      const { data: userCheck, error: userError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", userId)
-        .single();
-
-      if (userError) {
-        console.error(" Erreur vérification utilisateur:", userError);
-      } else {
-        console.log(" Utilisateur vérifié:", userCheck);
-      }
-
       const { data, error } = await supabase
         .from("posts")
         .select("*")
@@ -231,61 +199,80 @@ export default function Profile() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error(" Erreur chargement posts:", error);
-        console.error(" Détails erreur:", {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-        });
-        setMessage(
-          "Erreur lors du chargement des publications: " + error.message,
-        );
+        console.error("Erreur chargement posts:", error);
+        setMessage("Erreur lors du chargement des publications: " + error.message);
         return;
-      }
-
-      console.log("Posts récupérés:", data);
-      console.log("Nombre de posts:", data?.length || 0);
-
-      if (data && data.length > 0) {
-        data.forEach((post, index) => {
-          console.log(`Post ${index + 1}:`, {
-            id: post.id,
-            title: post.title,
-            image_url: post.image_url,
-            created_at: post.created_at,
-          });
-        });
       }
 
       setUserPosts(data || []);
       setProfile((prev) => ({ ...prev, postsCount: data?.length || 0 }));
     } catch (err) {
-      console.error(" Erreur générale loadUserPosts:", err);
+      console.error("Erreur générale loadUserPosts:", err);
       setMessage("Erreur inattendue lors du chargement des posts.");
     } finally {
       setPostsLoading(false);
     }
   };
 
-  // GESTION DES ONGLETS
+  const handleFollow = async () => {
+    if (!currentUser || !profile.id) return;
+    
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", currentUser.id)
+        .eq("following_id", profile.id);
+      
+      if (!error) {
+        setIsFollowing(false);
+        setProfile(prev => ({ ...prev, followers: prev.followers - 1 }));
+      }
+    } else {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: currentUser.id, following_id: profile.id });
+      
+      if (!error) {
+        await notifierAbonnement(currentUser.id, profile.id);
+        setIsFollowing(true);
+        setProfile(prev => ({ ...prev, followers: prev.followers + 1 }));
+      }
+    }
+  };
+
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!currentUser || !profile.id) return;
+      
+      const { data } = await supabase
+        .from("follows")
+        .select("id")
+        .eq("follower_id", currentUser.id)
+        .eq("following_id", profile.id)
+        .maybeSingle();
+      
+      setIsFollowing(!!data);
+    };
+    
+    checkFollowStatus();
+  }, [currentUser, profile.id]);
+
   const [activeTab, setActiveTab] = useState("posts");
   const [userPosts, setUserPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [isEditingCover, setIsEditingCover] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState(null);
 
-  // followers/following lists
   const [followersList, setFollowersList] = useState([]);
   const [followingList, setFollowingList] = useState([]);
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
 
-  // GESTION DE LA PHOTO DE PROFIL AVEC SUPABASE
   const sanitizeFileName = (name) => {
     return name.replace(/[^a-zA-Z0-9._-]/g, "_");
   };
 
-  // Upload de la photo de profil
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -295,21 +282,13 @@ export default function Profile() {
 
     try {
       if (!currentUser) {
-        setMessage(
-          "Vous devez être connecté pour modifier votre photo de profil.",
-        );
+        setMessage("Vous devez être connecté pour modifier votre photo de profil.");
         setLoading(false);
         return;
       }
 
-      // Uploader l'image dans le bucket avatars de Supabase
-      const fileName = sanitizeFileName(
-        `${currentUser.id}_${Date.now()}_${file.name}`,
-      );
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(fileName, file);
+      const fileName = sanitizeFileName(`${currentUser.id}_${Date.now()}_${file.name}`);
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, file);
 
       if (uploadError) {
         setMessage("Erreur upload : " + uploadError.message);
@@ -317,14 +296,9 @@ export default function Profile() {
         return;
       }
 
-      // Obtenir l'URL publique
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
-
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
       const avatarUrl = urlData.publicUrl;
 
-      // Mettre à jour la table profiles
       const { error: updateError } = await supabase.from("profiles").upsert({
         id: currentUser.id,
         avatar_url: avatarUrl,
@@ -337,7 +311,6 @@ export default function Profile() {
         return;
       }
 
-      //Mettre à jour l'état local
       setProfile((prev) => ({ ...prev, avatar: avatarUrl }));
       setProfileImage(avatarUrl);
       setMessage("Photo de profil mise à jour avec succès !");
@@ -349,7 +322,6 @@ export default function Profile() {
     }
   };
 
-  // Upload de la photo de couverture
   const handleCoverUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -359,42 +331,23 @@ export default function Profile() {
 
     try {
       if (!currentUser) {
-        setMessage(
-          "Vous devez être connecté pour modifier votre photo de couverture.",
-        );
+        setMessage("Vous devez être connecté pour modifier votre photo de couverture.");
         setLoading(false);
         return;
       }
 
-      console.log("🔄 Upload de la couverture...");
-
-      // Uploader l'image dans le bucket avatars (temporairement, même bucket que profil)
-      const fileName = sanitizeFileName(
-        `${currentUser.id}_cover_${Date.now()}_${file.name}`,
-      );
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars") // Utiliser le bucket avatars qui existe déjà
-        .upload(fileName, file);
+      const fileName = sanitizeFileName(`${currentUser.id}_cover_${Date.now()}_${file.name}`);
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, file);
 
       if (uploadError) {
-        console.error(" Erreur upload couverture:", uploadError);
         setMessage("Erreur upload couverture : " + uploadError.message);
         setLoading(false);
         return;
       }
 
-      console.log("Upload couverture réussi");
-
-      // Obtenir l'URL publique
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
-
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
       const coverUrl = urlData.publicUrl;
-      console.log(" URL couverture générée:", coverUrl);
 
-      // Mettre à jour la table profiles
       const { error: updateError } = await supabase.from("profiles").upsert({
         id: currentUser.id,
         cover_url: coverUrl,
@@ -402,20 +355,16 @@ export default function Profile() {
       });
 
       if (updateError) {
-        console.error("❌ Erreur mise à jour couverture:", updateError);
         setMessage("Erreur mise à jour couverture : " + updateError.message);
         setLoading(false);
         return;
       }
 
-      console.log("✅ Couverture mise à jour en base");
-
-      //Mettre à jour l'état local
       setProfile((prev) => ({ ...prev, cover: coverUrl }));
-      setMessage("✅ Photo de couverture mise à jour avec succès !");
+      setMessage("Photo de couverture mise à jour avec succès !");
       setIsEditingCover(false);
     } catch (err) {
-      console.error("❌ Erreur upload couverture:", err);
+      console.error("Erreur upload couverture:", err);
       setMessage("Erreur inattendue lors de l'upload de la couverture.");
     } finally {
       setLoading(false);
@@ -428,14 +377,11 @@ export default function Profile() {
 
     try {
       if (!currentUser) {
-        setMessage(
-          "Vous devez être connecté pour modifier votre photo de profil.",
-        );
+        setMessage("Vous devez être connecté pour modifier votre photo de profil.");
         setLoading(false);
         return;
       }
 
-      // Supprimer l'URL de la base de données
       const { error: updateError } = await supabase.from("profiles").upsert({
         id: currentUser.id,
         avatar_url: null,
@@ -448,10 +394,9 @@ export default function Profile() {
         return;
       }
 
-      //  Mettre à jour l'état local
       setProfile((prev) => ({ ...prev, avatar: null }));
       setProfileImage(null);
-      setMessage("✅ Photo de profil supprimée avec succès !");
+      setMessage("Photo de profil supprimée avec succès !");
     } catch (err) {
       console.error("Erreur:", err);
       setMessage("Erreur inattendue lors de la suppression.");
@@ -460,7 +405,6 @@ export default function Profile() {
     }
   };
 
-  // update profile counts when lists change
   useEffect(() => {
     setProfile((prev) => ({
       ...prev,
@@ -469,27 +413,19 @@ export default function Profile() {
     }));
   }, [followersList.length, followingList.length]);
 
-  //RENDER
+  const isOwnProfile = currentUser?.id === profile.id;
+
   return (
-    <div
-      className={`min-h-screen pb-24 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-    >
-      <div
-        className={`w-full max-w-2xl mx-auto ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      >
+    <div className={`min-h-screen pb-24 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
+      <div className={`w-full max-w-2xl mx-auto ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
         {message && (
           <div className="bg-blue-500/10 border-b border-blue-500/20 text-blue-600 px-4 py-2 text-center text-sm font-medium">
             {message}
           </div>
         )}
 
-        {/* ================= COVER IMAGE ================= */}
         <div className="relative h-32 sm:h-48 md:h-56 w-full overflow-hidden">
-          {/* ── Flèche retour ── */}
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 z-40 p-2 sm:p-2.5 rounded-full bg-black/40 text-white hover:bg-black/60 transition shadow-md backdrop-blur-md cursor-pointer border-none"
-          >
+          <button onClick={() => navigate(-1)} className="absolute top-4 left-4 z-40 p-2 sm:p-2.5 rounded-full bg-black/40 text-white hover:bg-black/60 transition shadow-md backdrop-blur-md cursor-pointer border-none">
             <ArrowLeft size={20} />
           </button>
 
@@ -503,108 +439,60 @@ export default function Profile() {
             }}
           />
 
-          {/* Bouton pour modifier la couverture */}
-          <button
-            onClick={() => setIsEditingCover(!isEditingCover)}
-            className="absolute top-4 right-4 bg-black/40 text-white p-2 sm:p-2.5 rounded-full hover:bg-black/60 transition shadow-md backdrop-blur-sm border-none cursor-pointer"
-          >
+          <button onClick={() => setIsEditingCover(!isEditingCover)} className="absolute top-4 right-4 bg-black/40 text-white p-2 sm:p-2.5 rounded-full hover:bg-black/60 transition shadow-md backdrop-blur-sm border-none cursor-pointer">
             <Camera size={20} />
           </button>
         </div>
 
-        {/* Section édition de la couverture */}
         {isEditingCover && (
-          <div
-            className={`p-4 border-b ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"}`}
-          >
+          <div className={`p-4 border-b ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"}`}>
             <div className="max-w-5xl mx-auto">
-              <h4
-                className={`text-sm font-semibold mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}
-              >
-                Modifier la photo de couverture
-              </h4>
+              <h4 className={`text-sm font-semibold mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>Modifier la photo de couverture</h4>
               <div className="flex items-center gap-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverUpload}
-                  disabled={loading}
-                  className={`block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? "file:bg-gray-600 file:text-gray-200 hover:file:bg-gray-500" : "file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"} disabled:opacity-50`}
-                />
-                <button
-                  onClick={() => setIsEditingCover(false)}
-                  className={`px-4 py-2 rounded-lg transition ${isDark ? "bg-gray-600 text-white hover:bg-gray-500" : "bg-gray-500 text-white hover:bg-gray-600"}`}
-                >
-                  Annuler
-                </button>
+                <input type="file" accept="image/*" onChange={handleCoverUpload} disabled={loading} className={`block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? "file:bg-gray-600 file:text-gray-200 hover:file:bg-gray-500" : "file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"} disabled:opacity-50`} />
+                <button onClick={() => setIsEditingCover(false)} className={`px-4 py-2 rounded-lg transition ${isDark ? "bg-gray-600 text-white hover:bg-gray-500" : "bg-gray-500 text-white hover:bg-gray-600"}`}>Annuler</button>
               </div>
             </div>
           </div>
         )}
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6 relative">
-          {/* ================= HEADER PROFIL ================= */}
           <div className="flex items-end justify-between -mt-12 sm:-mt-16 mb-4">
-            {/* Avatar */}
             <div className="relative shrink-0 z-10">
               {profile.avatar || profileImage ? (
-                <img
-                  src={profile.avatar || profileImage}
-                  alt="avatar"
-                  onClick={() => setFullscreenImage(profile.avatar || profileImage)}
-                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover cursor-pointer shadow-md"
-                />
+                <img src={profile.avatar || profileImage} alt="avatar" onClick={() => setFullscreenImage(profile.avatar || profileImage)} className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover cursor-pointer shadow-md" />
               ) : (
-                <div
-                  className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-md flex items-center justify-center ${isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-600"}`}
-                >
-                  <span className="text-4xl sm:text-5xl font-bold">
-                    {profile.name.charAt(0).toUpperCase()}
-                  </span>
+                <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-md flex items-center justify-center ${isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-600"}`}>
+                  <span className="text-4xl sm:text-5xl font-bold">{profile.name.charAt(0).toUpperCase()}</span>
                 </div>
               )}
             </div>
             
-            {/* Bouton pour modifier la photo / profil */}
-            <button
-              onClick={() => setIsEditingProfile(!isEditingProfile)}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition shadow-md mb-2 sm:mb-4"
-            >
-              <Camera size={16} />
-              <span className="hidden sm:inline">Modifier</span>
-            </button>
+            <div className="flex gap-2">
+              {isOwnProfile ? (
+                <button onClick={() => setIsEditingProfile(!isEditingProfile)} className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition shadow-md mb-2 sm:mb-4">
+                  <Camera size={16} />
+                  <span className="hidden sm:inline">Modifier</span>
+                </button>
+              ) : (
+                <button onClick={handleFollow} className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition shadow-md mb-2 sm:mb-4 ${isFollowing ? "bg-gray-500 hover:bg-gray-600 text-white" : "bg-purple-600 hover:bg-purple-700 text-white"}`}>
+                  {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
+                  <span>{isFollowing ? "Abonné" : "Suivre"}</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Nom + username + bio */}
           <div className="mb-5">
-            <h1
-              className={`text-xl sm:text-2xl font-bold leading-tight ${isDark ? "text-white" : "text-gray-900"}`}
-            >
-              {profile.name}
-            </h1>
-            {profile.username && (
-              <p className="text-purple-400 text-sm font-medium mt-0.5">
-                @{profile.username}
-              </p>
-            )}
-            {profile.bio && (
-              <p
-                className={`mt-3 text-sm leading-relaxed max-w-md ${isDark ? "text-gray-300" : "text-gray-600"}`}
-              >
-                {profile.bio}
-              </p>
-            )}
-
-            {/* Date d'inscription */}
-            <div
-              className={`flex items-center gap-1.5 mt-2.5 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
-            >
+            <h1 className={`text-xl sm:text-2xl font-bold leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>{profile.name}</h1>
+            {profile.username && <p className="text-purple-400 text-sm font-medium mt-0.5">@{profile.username}</p>}
+            {profile.bio && <p className={`mt-3 text-sm leading-relaxed max-w-md ${isDark ? "text-gray-300" : "text-gray-600"}`}>{profile.bio}</p>}
+            <div className={`flex items-center gap-1.5 mt-2.5 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
               <Calendar size={12} className="text-purple-400" />
               <span>Membre depuis {profile.joinedAt}</span>
             </div>
           </div>
 
-          {/* Stats : publications / abonnés / abonnements */}
           <div className={`flex gap-0 rounded-2xl overflow-hidden mb-6 border ${isDark ? "border-gray-700/60 bg-gray-800/50" : "border-gray-200 bg-white"}`}>
             <div className="flex-1 flex flex-col items-center py-3 gap-0.5">
               <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile.postsCount}</span>
@@ -612,254 +500,81 @@ export default function Profile() {
             </div>
             <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
             
-            <div 
-              className="flex-1 flex flex-col items-center py-3 gap-0.5 cursor-pointer hover:opacity-80"
-              onClick={() => {
-                setShowFollowers(!showFollowers);
-                setShowFollowing(false);
-              }}
-            >
+            <div className="flex-1 flex flex-col items-center py-3 gap-0.5 cursor-pointer hover:opacity-80" onClick={() => { setShowFollowers(!showFollowers); setShowFollowing(false); }}>
               <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile.followers}</span>
               <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnés</span>
             </div>
             <div className={`w-px ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
             
-            <div 
-              className="flex-1 flex flex-col items-center py-3 gap-0.5 cursor-pointer hover:opacity-80"
-              onClick={() => {
-                setShowFollowing(!showFollowing);
-                setShowFollowers(false);
-              }}
-            >
+            <div className="flex-1 flex flex-col items-center py-3 gap-0.5 cursor-pointer hover:opacity-80" onClick={() => { setShowFollowing(!showFollowing); setShowFollowers(false); }}>
               <span className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{profile.following}</span>
               <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Abonnements</span>
             </div>
           </div>
 
           {showFollowers && (
-                  <div
-                    className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
-                  >
-                    {followersList.length === 0 ? (
-                      <p className={isDark ? "text-gray-400" : "text-gray-500"}>
-                        Aucun abonné
-                      </p>
-                    ) : (
-                      followersList.map((u) => (
-                        <div
-                          key={u.id}
-                          className="flex items-center gap-3 mb-2"
-                        >
-                          {u.avatar_url ? (
-                            <img
-                              src={u.avatar_url}
-                              alt={u.name}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-gray-600" : "bg-gray-300"}`}
-                            >
-                              <span
-                                className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                              >
-                                {u.name?.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <span
-                            className={`text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}
-                          >
-                            {u.name}
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-                {showFollowing && (
-                  <div
-                    className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
-                  >
-                    {followingList.length === 0 ? (
-                      <p className={isDark ? "text-gray-400" : "text-gray-500"}>
-                        Pas d'abonnement
-                      </p>
-                    ) : (
-                      followingList.map((u) => (
-                        <div
-                          key={u.id}
-                          className="flex items-center gap-3 mb-2"
-                        >
-                          {u.avatar_url ? (
-                            <img
-                              src={u.avatar_url}
-                              alt={u.name}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-gray-600" : "bg-gray-300"}`}
-                            >
-                              <span
-                                className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                              >
-                                {u.name?.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <span
-                            className={`text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}
-                          >
-                            {u.name}
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
+            <div className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}>
+              {followersList.length === 0 ? <p className={isDark ? "text-gray-400" : "text-gray-500"}>Aucun abonné</p> : followersList.map((u) => (
+                <div key={u.id} className="flex items-center gap-3 mb-2">
+                  {u.avatar_url ? <img src={u.avatar_url} alt={u.name} className="w-8 h-8 rounded-full object-cover" /> : <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-gray-600" : "bg-gray-300"}`}><span className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}>{u.name?.charAt(0).toUpperCase()}</span></div>}
+                  <span className={`text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}>{u.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {showFollowing && (
+            <div className={`mt-4 max-h-48 overflow-y-auto border p-3 rounded-lg ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}>
+              {followingList.length === 0 ? <p className={isDark ? "text-gray-400" : "text-gray-500"}>Pas d'abonnement</p> : followingList.map((u) => (
+                <div key={u.id} className="flex items-center gap-3 mb-2">
+                  {u.avatar_url ? <img src={u.avatar_url} alt={u.name} className="w-8 h-8 rounded-full object-cover" /> : <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-gray-600" : "bg-gray-300"}`}><span className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}>{u.name?.charAt(0).toUpperCase()}</span></div>}
+                  <span className={`text-sm ${isDark ? "text-gray-200" : "text-gray-700"}`}>{u.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
-          {/* ================= SECTION ÉDITION PROFIL ================= */}
           {isEditingProfile && (
-            <div
-              className={`mt-6 p-6 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
-            >
-              <h3
-                className={`text-lg font-semibold mb-4 ${isDark ? "text-gray-200" : "text-gray-700"}`}
-              >
-                Gérer la photo de profil
-              </h3>
-
+            <div className={`mt-6 p-6 rounded-lg border ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}>
+              <h3 className={`text-lg font-semibold mb-4 ${isDark ? "text-gray-200" : "text-gray-700"}`}>Gérer la photo de profil</h3>
               <div className="space-y-4">
                 <div>
-                  <label
-                    className={`block text-sm font-medium mb-4 ${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  ></label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={loading}
-                    className={`block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? "file:bg-gray-600 file:text-gray-200 hover:file:bg-gray-500" : "file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"} disabled:opacity-50`}
-                  />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} disabled={loading} className={`block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDark ? "file:bg-gray-600 file:text-gray-200 hover:file:bg-gray-500" : "file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"} disabled:opacity-50`} />
                 </div>
-
                 {(profile.avatar || profileImage) && (
                   <div className="flex items-center gap-4">
-                    <img
-                      src={profile.avatar || profileImage}
-                      alt="Aperçu"
-                      className={`w-20 h-20 rounded-full object-cover border-2 ${isDark ? "border-gray-600" : "border-gray-300"}`}
-                    />
-                    <button
-                      onClick={handleRemoveImage}
-                      disabled={loading}
-                      className="px-4 py-2 rounded-lg transition disabled:opacity-50"
-                      style={{
-                        backgroundColor: isDark ? "#dc2626" : "#ef4444",
-                        color: "white",
-                      }}
-                    >
-                      {loading ? "Suppression..." : "Supprimer la photo"}
-                    </button>
+                    <img src={profile.avatar || profileImage} alt="Aperçu" className={`w-20 h-20 rounded-full object-cover border-2 ${isDark ? "border-gray-600" : "border-gray-300"}`} />
+                    <button onClick={handleRemoveImage} disabled={loading} className="px-4 py-2 rounded-lg transition disabled:opacity-50" style={{ backgroundColor: isDark ? "#dc2626" : "#ef4444", color: "white" }}>{loading ? "Suppression..." : "Supprimer la photo"}</button>
                   </div>
                 )}
-
-                {!profile.avatar && !profileImage && (
-                  <p
-                    className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
-                  >
-                    Vous n'avez pas encore de photo de profil.
-                  </p>
-                )}
+                {!profile.avatar && !profileImage && <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>Vous n'avez pas encore de photo de profil.</p>}
               </div>
             </div>
           )}
 
-          {/* ================= ONGLET ================= */}
           <div className="mt-8 sm:mt-12 mb-6 px-2 sm:px-6">
-            {/* ⬅ marge plus grande pour détacher des infos du haut */}
-            <div
-              className={`text-black font-bold rounded-full p-1 flex ${isDark ? "bg-gray-700 text-gray-200" : "bg-gray-200 text-black"}`}
-            >
-              <button
-                onClick={() => setActiveTab("posts")}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
-                  activeTab === "posts"
-                    ? isDark
-                      ? "bg-gray-800 text-gray-100"
-                      : "bg-white text-black"
-                    : isDark
-                      ? "hover:bg-gray-600"
-                      : "hover:bg-gray-400"
-                }`}
-              >
-                Publications
-              </button>
-
-  
-
-              <button
-                onClick={() => setActiveTab("likes")}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
-                  activeTab === "likes"
-                    ? isDark
-                      ? "bg-gray-800 text-gray-100"
-                      : "bg-white text-black"
-                    : isDark
-                      ? "hover:bg-gray-600"
-                      : "hover:bg-gray-400"
-                }`}
-              >
-                Likes
-              </button>
+            <div className={`text-black font-bold rounded-full p-1 flex ${isDark ? "bg-gray-700 text-gray-200" : "bg-gray-200 text-black"}`}>
+              <button onClick={() => setActiveTab("posts")} className={`flex-1 py-2 rounded-full text-sm font-medium transition ${activeTab === "posts" ? isDark ? "bg-gray-800 text-gray-100" : "bg-white text-black" : isDark ? "hover:bg-gray-600" : "hover:bg-gray-400"}`}>Publications</button>
+              <button onClick={() => setActiveTab("likes")} className={`flex-1 py-2 rounded-full text-sm font-medium transition ${activeTab === "likes" ? isDark ? "bg-gray-800 text-gray-100" : "bg-white text-black" : isDark ? "hover:bg-gray-600" : "hover:bg-gray-400"}`}>Likes</button>
             </div>
           </div>
 
-          {/* ================= CONTENU ================= */}
           <div className="mt-6 pb-24">
             {activeTab === "posts" && (
               <div>
-                {postsLoading ? (
-                  <div className="text-center py-10">
-                    <p className="text-gray-500">
-                      Chargement des publications...
-                    </p>
-                  </div>
-                ) : userPosts.length === 0 ? (
-                  <div className="text-center py-10">
-                    <p className="text-gray-500">
-                      Aucune publication pour le moment.
-                    </p>
-                  </div>
-                ) : (
+                {postsLoading ? <div className="text-center py-10"><p className="text-gray-500">Chargement des publications...</p></div> : userPosts.length === 0 ? <div className="text-center py-10"><p className="text-gray-500">Aucune publication pour le moment.</p></div> : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {userPosts.map((post) => (
-                      <div
-                        key={post.id}
-                        className="aspect-square group relative overflow-hidden rounded-lg bg-gray-200"
-                      >
+                      <div key={post.id} className="aspect-square group relative overflow-hidden rounded-lg bg-gray-200">
                         {post.image_url ? (
                           <>
                             <div className="relative w-full h-full">
-                              <PostImage
-                                src={post.image_url}
-                                alt={post.title || "Post"}
-                                onClick={() =>
-                                  console.log("Image cliquée:", post.image_url)
-                                }
-                              />
+                              <PostImage src={post.image_url} alt={post.title || "Post"} onClick={() => console.log("Image cliquée:", post.image_url)} />
                             </div>
                             <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-all duration-200 flex items-center justify-center z-10">
                               <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center pointer-events-none">
-                                <p className="text-sm font-semibold">
-                                  {post.title}
-                                </p>
-                                <p className="text-xs">
-                                  {new Date(post.created_at).toLocaleDateString(
-                                    "fr-FR",
-                                  )}
-                                </p>
+                                <p className="text-sm font-semibold">{post.title}</p>
+                                <p className="text-xs">{new Date(post.created_at).toLocaleDateString("fr-FR")}</p>
                               </div>
                             </div>
                           </>
@@ -875,35 +590,17 @@ export default function Profile() {
               </div>
             )}
 
-
             {activeTab === "likes" && (
-              <div className="text-center text-gray-500 py-10">
-                Aucun contenu aimé.
-              </div>
+              <div className="text-center text-gray-500 py-10">Aucun contenu aimé.</div>
             )}
           </div>
         </div>
       </div>
-      {/* FIN CONTAINER PRINCIPAL */}
 
-      {/* ── Modal Image Plein Écran ── */}
       {fullscreenImage && (
-        <div 
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4"
-          onClick={() => setFullscreenImage(null)}
-        >
-          <button 
-            className="absolute top-6 right-6 text-white hover:bg-black/50 rounded-full p-2"
-            onClick={() => setFullscreenImage(null)}
-          >
-            <X size={32} />
-          </button>
-          <img 
-            src={fullscreenImage} 
-            alt="Plein écran" 
-            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-            onClick={(e) => e.stopPropagation()} 
-          />
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4" onClick={() => setFullscreenImage(null)}>
+          <button className="absolute top-6 right-6 text-white hover:bg-black/50 rounded-full p-2" onClick={() => setFullscreenImage(null)}><X size={32} /></button>
+          <img src={fullscreenImage} alt="Plein écran" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()} />
         </div>
       )}
     </div>

@@ -7,7 +7,9 @@ import { getUser } from "../services/systemeLike/getUser";
 import { like } from "../services/systemeLike/like-a-post";
 import { shareContent } from "../services/share";
 import SuggestionsCarousel from "../components/SuggestionsCarousel";
-import {fetchPostsWithLikes} from "../services/post/post" 
+import { fetchPostsWithLikes } from "../services/post/post";
+import { notifierLike } from "../services/notifications/createurNotifications.js";
+
 function PostImage({ src, alt, onClick }) {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -109,7 +111,6 @@ export default function Posts() {
     return (
       <div className="posts-page" data-theme={theme}>
         <div className="posts-container">
-          
           {[...Array(4)].map((_, i) => (
             <div key={i} className="post-card">
               <div className="flex w-full flex-col gap-4">
@@ -131,7 +132,6 @@ export default function Posts() {
   return (
     <div className="posts-page" data-theme={theme}>
       <div className="posts-container">
-        
         {message && <p className="message">{message}</p>}
         {posts.length === 0 && (
           <p className="empty-message">Aucun post pour le moment.</p>
@@ -145,96 +145,99 @@ export default function Posts() {
                   to={`/home/profile/${post.user_id}`}
                   className="user-avatar"
                 >
-                <img
-                  src={getAvatarUrl(post.profiles)}
-                  alt={post.profiles?.name || "profile"}
-                  className="w-10 h-10 rounded-full border-2 object-cover"
-                  style={{
-                    borderColor: theme === "dark" ? "#6b7280" : "#d1d5db",
-                  }}
-                />
-              </Link>
-              <div className="post-meta">
-                <Link to={`/home/profile/${post.user_id}`}>
-                  <h3 className="post-username" style={{ cursor: "pointer" }}>
-                    {post.profiles?.name}
-                  </h3>
+                  <img
+                    src={getAvatarUrl(post.profiles)}
+                    alt={post.profiles?.name || "profile"}
+                    className="w-10 h-10 rounded-full border-2 object-cover"
+                    style={{
+                      borderColor: theme === "dark" ? "#6b7280" : "#d1d5db",
+                    }}
+                  />
                 </Link>
-                <span className="post-date">
-                  {new Date(post.created_at).toLocaleString()}
-                </span>
+                <div className="post-meta">
+                  <Link to={`/home/profile/${post.user_id}`}>
+                    <h3 className="post-username" style={{ cursor: "pointer" }}>
+                      {post.profiles?.name}
+                    </h3>
+                  </Link>
+                  <span className="post-date">
+                    {new Date(post.created_at).toLocaleString()}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {post.image_url && (
-              <PostImage
-                src={post.image_url}
-                alt={post.title}
-                onClick={() => navigate(`/home/post/${post.id}`)}
-              />
-            )}
-
-            <p className="post-content">{post.content}</p>
-
-            {post.likes > 0 && (
-              <div className="post-likes">
-                ❤️ <span>{post.likes}</span>
-              </div>
-            )}
-
-            <div className="post-actions">
-              <button
-                className={`post-action-btn ${post.liked ? "liked" : ""}`}
-                onClick={async () => {
-                  const newCount = await like(post.id, user.id, post.liked);
-
-                  setPosts((prevPosts) =>
-                    prevPosts.map((p) =>
-                      p.id === post.id
-                        ? { ...p, likes: newCount, liked: !p.liked }
-                        : p,
-                    ),
-                  );
-                }}
-              >
-                <Heart
-                  size={16}
-                  fill={post.liked ? "#ef4444" : "none"}
-                  stroke={post.liked ? "#ef4444" : "currentColor"}
+              {post.image_url && (
+                <PostImage
+                  src={post.image_url}
+                  alt={post.title}
+                  onClick={() => navigate(`/home/post/${post.id}`)}
                 />
-                J'aime
-              </button>
-              <button
-                className="post-action-btn"
-                onClick={() => navigate(`/home/post/${post.id}`)}
-              >
-                <MessageCircle size={16} /> Commenter
-                {post.comments?.length > 0 && (
-                  <span>{post.comments.length}</span>
-                )}
-              </button>
-              <button
-                className="post-action-btn"
-                onClick={async () => {
-                  const result = await shareContent({
-                    title: post.title || "Post",
-                    text: post.content,
-                    url: `${window.location.origin}/home/post/${post.id}`,
-                  });
+              )}
 
-                  if (result.ok && result.mode === "clipboard") {
-                    setMessage("Lien copie dans le presse-papiers.");
-                    setTimeout(() => setMessage(""), 2200);
-                  }
-                }}
-              >
-                <Share2 size={16} /> Partager
-              </button>
+              <p className="post-content">{post.content}</p>
+
+              {post.likes > 0 && (
+                <div className="post-likes">
+                  ❤️ <span>{post.likes}</span>
+                </div>
+              )}
+
+              <div className="post-actions">
+                <button
+                  className={`post-action-btn ${post.liked ? "liked" : ""}`}
+                  onClick={async () => {
+                    const newCount = await like(post.id, user.id, post.liked);
+                    
+                    if (!post.liked) {
+                      await notifierLike(user.id, post.id);
+                    }
+                    
+                    setPosts((prevPosts) =>
+                      prevPosts.map((p) =>
+                        p.id === post.id
+                          ? { ...p, likes: newCount, liked: !p.liked }
+                          : p,
+                      ),
+                    );
+                  }}
+                >
+                  <Heart
+                    size={16}
+                    fill={post.liked ? "#ef4444" : "none"}
+                    stroke={post.liked ? "#ef4444" : "currentColor"}
+                  />
+                  J'aime
+                </button>
+                <button
+                  className="post-action-btn"
+                  onClick={() => navigate(`/home/post/${post.id}`)}
+                >
+                  <MessageCircle size={16} /> Commenter
+                  {post.comments?.length > 0 && (
+                    <span>{post.comments.length}</span>
+                  )}
+                </button>
+                <button
+                  className="post-action-btn"
+                  onClick={async () => {
+                    const result = await shareContent({
+                      title: post.title || "Post",
+                      text: post.content,
+                      url: `${window.location.origin}/home/post/${post.id}`,
+                    });
+
+                    if (result.ok && result.mode === "clipboard") {
+                      setMessage("Lien copie dans le presse-papiers.");
+                      setTimeout(() => setMessage(""), 2200);
+                    }
+                  }}
+                >
+                  <Share2 size={16} /> Partager
+                </button>
+              </div>
             </div>
-          </div>
-          
-          {/* suggestions sur mobile après index+1 post */}
-          {index === 4 && <SuggestionsCarousel />}
+            
+            {index === 4 && <SuggestionsCarousel />}
           </div>
         ))}
       </div>

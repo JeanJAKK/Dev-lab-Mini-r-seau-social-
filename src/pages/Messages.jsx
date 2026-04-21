@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Send, ArrowLeft, MessageSquare, Clock3, Target } from "lucide-react";
+import { Send, ArrowLeft, MessageSquare } from "lucide-react";
 import supabase from "../services/supabase.js";
 import { getUser } from "../services/systemeLike/getUser.js";
 import { getMessage } from "../services/message/getMessages.js";
@@ -17,7 +17,6 @@ export default function Messages() {
     if (!currentUserId) return;
     setLoading(true);
 
-    // 1. Récupérer les ID des utilisateurs que l'on suit
     const { data: followsData, error: followsError } = await supabase
       .from("follows")
       .select("following_id")
@@ -31,14 +30,12 @@ export default function Messages() {
 
     const followingIds = followsData.map((f) => f.following_id);
 
-    // Si on ne suit personne, on arrête là et on vide la liste
     if (followingIds.length === 0) {
       setUsers([]);
       setLoading(false);
       return;
     }
 
-    // 2. Récupérer uniquement les profils des personnes suivies
     const { data, error } = await supabase
       .from("profiles")
       .select(`id, name, avatar_url`)
@@ -68,7 +65,6 @@ export default function Messages() {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      getMessage();
       const msg = await getMessage();
       setMessageInfos(msg);
     };
@@ -79,28 +75,35 @@ export default function Messages() {
     ? messageInfos.filter(
         (msg) =>
           (msg.sender_id === myId && msg.receiver_id === selectedUser.id) ||
-          (msg.sender_id === selectedUser.id && msg.receiver_id === myId),
+          (msg.sender_id === selectedUser.id && msg.receiver_id === myId)
       )
     : [];
 
   return (
-    <div className="flex h-[calc(100vh-160px)] sm:h-[calc(100vh-110px)] w-full max-w-5xl mx-auto bg-white sm:rounded-xl shadow-md border-y sm:border border-gray-200 overflow-hidden sm:my-4 relative">
-      {/* Sidebar: Liste des discussions */}
+    <div className="flex h-[calc(100vh-160px)] sm:h-[calc(100vh-110px)] w-full max-w-5xl mx-auto bg-white sm:rounded-xl shadow-md border-y sm:border border-gray-200 overflow-hidden sm:my-4">
+
+      {/* ── Sidebar contacts ── */}
       <div
-        className={`flex-col border-r border-gray-200 bg-gray-50/50 shrink-0 absolute sm:relative inset-0 z-20 sm:z-auto transition-transform ${selectedUser ? "hidden sm:flex sm:w-[300px] lg:w-[350px]" : "flex w-full sm:w-[300px] lg:w-[350px]"}`}
+        className={`
+          flex flex-col border-r border-gray-200 bg-gray-50/50 shrink-0
+          transition-all duration-300
+          ${selectedUser
+            /* Mobile : masquée quand une conv est ouverte */
+            ? "hidden sm:flex sm:w-[260px] lg:w-[320px]"
+            /* Mobile : plein écran quand aucune conv */
+            : "flex w-full sm:w-[260px] lg:w-[320px]"
+          }
+        `}
       >
         <div className="p-4 border-b border-gray-200 flex items-center bg-white h-[60px]">
           <h2 className="text-lg font-bold text-gray-800">Discussions</h2>
         </div>
+
         <div className="overflow-y-auto flex-1 p-2 space-y-1">
           {loading ? (
-            // Skeleton loaders natif Tailwind
             [1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 p-3 animate-pulse"
-              >
-                <div className="w-10 h-10 bg-gray-300 rounded-full " />
+              <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
+                <div className="w-10 h-10 bg-gray-300 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <div className="h-3 bg-gray-300 rounded w-1/2" />
                   <div className="h-2 bg-gray-200 rounded w-3/4" />
@@ -109,7 +112,7 @@ export default function Messages() {
             ))
           ) : users.length === 0 ? (
             <div className="p-6 text-center">
-              <p className="text-sm text-gray-500 mb-2">
+              <p className="text-sm text-gray-500">
                 Vous ne suivez personne pour le moment.
               </p>
             </div>
@@ -142,9 +145,13 @@ export default function Messages() {
                     {user.name}
                   </p>
                   <p
-                    className={`text-xs truncate ${selectedUser?.id === user.id ? "text-purple-600" : "text-gray-500"}`}
+                    className={`text-xs truncate ${
+                      selectedUser?.id === user.id
+                        ? "text-purple-600"
+                        : "text-gray-500"
+                    }`}
                   >
-                    Appuyez pour écrire...
+                    Appuyez pour écrire…
                   </p>
                 </div>
               </div>
@@ -153,35 +160,39 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* Zone principale de chat */}
+      {/* ── Zone de chat (toujours à droite sur desktop) ── */}
       <div
-        className={`flex-col bg-white min-w-0 w-full sm:flex-1 ${selectedUser ? "fixed inset-0 z-70 flex sm:relative sm:inset-auto sm:z-auto" : "hidden sm:flex"}`}
+        className={`
+          flex flex-col bg-white min-w-0
+          /* Desktop : toujours visible, flex-1 pour occuper le reste */
+          sm:flex sm:flex-1
+          /* Mobile : visible seulement quand une conv est sélectionnée */
+          ${selectedUser ? "flex flex-1" : "hidden"}
+        `}
       >
         {!selectedUser ? (
-          // État vide (affiché uniquement sur les grands écrans car masqué sur mobile sans selectedUser)
-          <div className="flex-1 flex-col justify-center items-center bg-gray-50/50 p-6 hidden sm:flex">
+          /* État vide – desktop uniquement */
+          <div className="flex-1 flex flex-col justify-center items-center bg-gray-50/50 p-6">
             <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mb-4 text-purple-600 shadow-inner">
               <MessageSquare size={32} className="opacity-80" />
             </div>
-            <h3 className="text-xl font-bold text-gray-700 mb-2">
-              Vos messages
-            </h3>
+            <h3 className="text-xl font-bold text-gray-700 mb-2">Vos messages</h3>
             <p className="text-sm text-gray-500 max-w-sm text-center">
               Sélectionnez un contact dans la liste à gauche pour démarrer une
               conversation en privé.
             </p>
           </div>
         ) : (
-          // Discussion active
           <>
             {/* En-tête du chat */}
-            <div className="h-[60px] border-b border-gray-200 flex items-center gap-3 px-4 sm:px-6 bg-white shrink-0 z-10">
+            <div className="h-[60px] border-b border-gray-200 flex items-center gap-3 px-4 sm:px-6 bg-white shrink-0">
               <button
                 onClick={() => setSelectedUser(null)}
                 className="sm:hidden p-2 -ml-2 rounded-full text-gray-500 hover:bg-gray-100 transition"
               >
                 <ArrowLeft size={20} />
               </button>
+
               <div className="relative shrink-0">
                 {selectedUser.avatar_url ? (
                   <img
@@ -195,17 +206,16 @@ export default function Messages() {
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900 text-base truncate">
-                  {selectedUser.name}
-                </p>
-              </div>
+
+              <p className="font-bold text-gray-900 text-base truncate flex-1 min-w-0">
+                {selectedUser.name}
+              </p>
             </div>
 
-            {/* Zone des messages (scrollable) */}
-            <div className="flex-1 bg-gray-50/80 p-3 sm:p-4">
-              <div className="h-full rounded-2xl border border-gray-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] overflow-hidden flex flex-col">
-                <div className="border-b border-gray-100 bg-gray-50/70 px-4 py-2 text-center">
+            {/* Zone des messages */}
+            <div className="flex-1 bg-gray-50/80 p-3 sm:p-4 overflow-hidden flex flex-col">
+              <div className="flex-1 rounded-2xl border border-gray-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] overflow-hidden flex flex-col">
+                <div className="border-b border-gray-100 bg-gray-50/70 px-4 py-2 text-center shrink-0">
                   <span className="text-[11px] font-medium text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
                     Début de la conversation avec {selectedUser.name}
                   </span>
@@ -222,7 +232,9 @@ export default function Messages() {
                     conversationMessages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`flex ${msg.sender_id === myId ? "justify-end" : "justify-start"}`}
+                        className={`flex ${
+                          msg.sender_id === myId ? "justify-end" : "justify-start"
+                        }`}
                       >
                         <div
                           className={`text-sm px-3 py-2 max-w-[78%] sm:max-w-[72%] rounded-2xl border shadow-sm ${
@@ -245,13 +257,14 @@ export default function Messages() {
               <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 focus-within:bg-white shadow-sm">
                 <input
                   type="text"
-                  placeholder={`Envoyer un message à ${selectedUser.name}...`}
+                  placeholder={`Envoyer un message à ${selectedUser.name}…`}
                   className="flex-1 bg-transparent px-1 py-1.5 outline-none text-sm text-gray-800 placeholder-gray-500"
+                  value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      (sendMessage(myId, selectedUser.id, message),
-                        (e.target.value = ""));
+                    if (e.key === "Enter" && message.trim()) {
+                      sendMessage(myId, selectedUser.id, message);
+                      setMessage("");
                     }
                   }}
                 />
@@ -259,8 +272,10 @@ export default function Messages() {
                   className="bg-purple-600 hover:bg-purple-700 text-white flex justify-center items-center w-8 h-8 rounded-full shadow-md active:scale-95 shrink-0 transition-all"
                   title="Envoyer"
                   onClick={() => {
-                    (sendMessage(myId, selectedUser.id, message),
-                      setMessage(""));
+                    if (message.trim()) {
+                      sendMessage(myId, selectedUser.id, message);
+                      setMessage("");
+                    }
                   }}
                 >
                   <Send size={14} className="translate-x-px" />
