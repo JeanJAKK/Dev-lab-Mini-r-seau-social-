@@ -131,6 +131,10 @@ export default function CreatePost() {
       setTitle("");
       setContent("");
       setImageFile(null);
+      setImagePreview(null);
+      
+      const fileInput = document.getElementById("post-image-input");
+      if (fileInput) fileInput.value = "";
     } catch (err) {
       console.error(err);
       setMessage("Erreur inattendue");

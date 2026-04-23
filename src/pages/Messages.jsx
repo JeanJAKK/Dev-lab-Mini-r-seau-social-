@@ -100,7 +100,7 @@ export default function Messages() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-140px)] sm:min-h-[calc(100vh-110px)] w-full max-w-5xl mx-auto bg-white sm:rounded-xl shadow-md border-y sm:border border-gray-200 overflow-hidden sm:my-4 relative">
+    <div className="flex flex-col sm:flex-row min-h-[calc(100vh-140px)] sm:min-h-[calc(100vh-110px)] w-full max-w-5xl mx-auto bg-white sm:rounded-xl shadow-md border-y sm:border border-gray-200 overflow-hidden sm:my-4 relative">
       {/* Sidebar: Liste des discussions */}
       <div
         className={`flex-col border-r border-gray-200 bg-gray-50/80 shrink-0 absolute sm:relative inset-0 z-20 transition-transform ${selectedUser ? "hidden sm:flex sm:w-[300px] lg:w-[320px]" : "flex w-full sm:w-[300px] lg:w-[320px]"}`}
@@ -135,7 +135,7 @@ export default function Messages() {
                 key={user.id}
                 onClick={() => setSelectedUser(user)}
                 className={`flex items-center gap-3.5 p-3.5 rounded-xl cursor-pointer transition-all duration-200 mx-2 ${
-                  selectedUser?.id === user.id ? "bg-gradient-to-r from-purple-100 to-pink-100 shadow-md" : "hover:bg-gray-100"
+                  selectedUser?.id === user.id ? "bg-linear-to-r from-purple-100 to-pink-100 shadow-md" : "hover:bg-gray-100"
                 }`}
               >
                 <div className="relative shrink-0">
@@ -146,7 +146,7 @@ export default function Messages() {
                       className="w-11 h-11 rounded-full object-cover border-2 border-gray-200 shadow-md"
                     />
                   ) : (
-                    <div className="w-11 h-11 flex justify-center items-center bg-gradient-to-br from-purple-100 to-pink-100 text-purple-700 font-bold rounded-full border-2 border-gray-200 text-base shadow-md">
+                    <div className="w-11 h-11 flex justify-center items-center bg-linear-to-br from-purple-100 to-pink-100 text-purple-700 font-bold rounded-full border-2 border-gray-200 text-base shadow-md">
                       {user.name?.charAt(0).toUpperCase() ?? "?"}
                     </div>
                   )}
@@ -204,7 +204,7 @@ export default function Messages() {
                     className="w-11 h-11 rounded-full object-cover border-2 border-gray-200 shadow-md"
                   />
                 ) : (
-                  <div className="w-11 h-11 flex justify-center items-center bg-gradient-to-br from-purple-100 to-pink-100 text-purple-700 font-bold rounded-full border-2 border-gray-200 text-sm shadow-md">
+                  <div className="w-11 h-11 flex justify-center items-center bg-linear-to-br from-purple-100 to-pink-100 text-purple-700 font-bold rounded-full border-2 border-gray-200 text-sm shadow-md">
                     {selectedUser.name?.charAt(0).toUpperCase() ?? "?"}
                   </div>
                 )}
@@ -218,7 +218,7 @@ export default function Messages() {
             </div>
 
             {/* Zone des messages (scrollable) */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-5 bg-gradient-to-b from-gray-50 to-white flex flex-col gap-4 relative">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 bg-linear-to-b from-gray-50 to-white flex flex-col gap-4 relative">
               <div className="text-center my-4">
                 <span className="text-xs font-semibold text-gray-500 bg-gray-200/70 px-4 py-1.5 rounded-full shadow-sm">
                   Début de la conversation avec {selectedUser.name}
@@ -239,9 +239,9 @@ export default function Messages() {
                       }`}
                     >
                       <div
-                        className={`rounded-2xl px-5 py-3.5 max-w-[85%] break-words shadow-md ${
+                        className={`rounded-2xl px-5 py-3.5 max-w-[85%] wrap-break-word shadow-md ${
                           msg.sender_id === myId
-                            ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-br-lg"
+                            ? "bg-linear-to-br from-purple-600 to-pink-600 text-white rounded-br-lg"
                             : "bg-white text-gray-900 rounded-bl-lg border-2 border-gray-200"
                         }`}
                       >
@@ -267,7 +267,7 @@ export default function Messages() {
 
             {/* Barre de saisie */}
             <div className="bg-white border-t-2 border-gray-200 shrink-0 p-4 sm:p-5">
-              <div className="flex items-center gap-2.5 bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-2.5 rounded-2xl border-2 border-gray-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-200 focus-within:bg-white shadow-sm transition-all">
+              <div className="flex items-center gap-2.5 bg-linear-to-r from-gray-100 to-gray-50 px-4 py-2.5 rounded-2xl border-2 border-gray-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-200 focus-within:bg-white shadow-sm transition-all">
                 <input
                   type="text"
                   value={message}
@@ -282,7 +282,7 @@ export default function Messages() {
                   }}
                 />
                 <button
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex justify-center items-center w-10 h-10 rounded-full shadow-lg active:scale-90 shrink-0 transition-all font-semibold"
+                  className="bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex justify-center items-center w-10 h-10 rounded-full shadow-lg active:scale-90 shrink-0 transition-all font-semibold"
                   title="Envoyer"
                   onClick={handleSendMessage}
                 >
