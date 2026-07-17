@@ -79,7 +79,7 @@ function PostImage({ src, alt, onClick }) {
   );
 }
 
-export default function Posts() {
+export default function Posts({ refreshKey }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -105,7 +105,7 @@ export default function Posts() {
       setLoading(false);
     }
     fetchPosts();
-  }, []);
+  }, [refreshKey]);
 
   if (loading)
     return (

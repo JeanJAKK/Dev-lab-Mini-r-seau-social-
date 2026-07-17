@@ -4,7 +4,7 @@ import { Camera } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getUser } from "../services/systemeLike/getUser.js";
 
-export default function CreatePost() {
+export default function CreatePost({ onPostCreated }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -127,7 +127,7 @@ export default function CreatePost() {
         return;
       }
 
-      setMessage(" Post publié avec succès !");
+      setMessage("");
       setTitle("");
       setContent("");
       setImageFile(null);
@@ -135,6 +135,10 @@ export default function CreatePost() {
       
       const fileInput = document.getElementById("post-image-input");
       if (fileInput) fileInput.value = "";
+      
+      if (onPostCreated) {
+          onPostCreated();
+      }
     } catch (err) {
       console.error(err);
       setMessage("Erreur inattendue");

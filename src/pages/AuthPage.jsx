@@ -59,7 +59,24 @@ function AuthPage({ setAuth }) {
       });
 
       if (error) {
-        setMessage(error.message);
+        // Gestion spécifique des erreurs Supabase
+        switch (error.status) {
+          case 400:
+            if (error.message.includes("Invalid login credentials")) {
+              setMessage("Email ou mot de passe incorrect.");
+            } else {
+              setMessage("Erreur de connexion : " + error.message);
+            }
+            break;
+          case 422:
+            setMessage("Email non confirmé. Veuillez vérifier votre boîte mail.");
+            break;
+          case 429:
+            setMessage("Trop de tentatives. Réessayez dans quelques minutes.");
+            break;
+          default:
+            setMessage("Erreur de connexion : " + error.message);
+        }
         setLoading(false);
         return;
       }
@@ -68,7 +85,12 @@ function AuthPage({ setAuth }) {
       setAuth(true);
       navigate("/home");
     } catch (err) {
-      setMessage("Erreur lors de la connexion.");
+      // Erreur réseau ou autre
+      if (err.message && err.message.includes("fetch")) {
+        setMessage("Erreur de connexion réseau. Vérifiez votre internet.");
+      } else {
+        setMessage("Erreur inattendue. Veuillez réessayer.");
+      }
     } finally {
       setLoading(false);
     }
