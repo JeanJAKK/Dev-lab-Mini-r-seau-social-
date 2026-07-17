@@ -1,5 +1,3 @@
-
-
 /* Conteneur principal de la page */
 .auth-container {
   display: flex;
@@ -11,7 +9,7 @@
   user-select: none;
 
   /* Animation */
-  opacity: 0;                 /* commence invisible */
+  opacity: 0; /* commence invisible */
   transform: translateY(20px); /* décalage vers le bas */
   animation: fadeInUp 0.8s ease forwards; /* animation */
 }
@@ -19,7 +17,7 @@
 /* Définition de l'animation */
 @keyframes fadeInUp {
   to {
-    opacity: 1;             /* devient visible */
+    opacity: 1; /* devient visible */
     transform: translateY(0); /* remonte à sa place */
   }
 }
@@ -36,7 +34,7 @@
 .logo {
   font-size: 48px;
   font-weight: bold;
-  background: linear-gradient(to right, #1877f2,#c217d9, #8a2be2);
+  background: linear-gradient(to right, #1877f2, #c217d9, #8a2be2);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -74,15 +72,17 @@
   border-radius: 6px;
   font-size: 15px;
   color: black;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
-.login-form input:focus{
-  border-color: #8a2be2; 
-  outline: none;         
+.login-form input:focus {
+  border-color: #8a2be2;
+  outline: none;
 }
 
-.login-form input::placeholder{
+.login-form input::placeholder {
   color: #888;
 }
 
@@ -94,11 +94,11 @@
   border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
-  transition:  0.5s;
+  transition: 0.5s;
 }
 
 .login-btn:hover {
-  background-color:  rgb(0, 89, 255);
+  background-color: rgb(0, 89, 255);
 }
 
 .divider {
@@ -121,7 +121,7 @@
   transition: background-color 0.5s;
 }
 
-.facebook-btn{
+.facebook-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,7 +163,78 @@
   text-decoration: underline;
 }
 
-.remember-forgot{
+[data-theme="dark"] .auth-container {
+  background: radial-gradient(
+    circle at top,
+    #1e293b 0%,
+    #020617 55%,
+    #020617 100%
+  );
+}
+
+[data-theme="dark"] .auth-left .subtitle {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .login-form {
+  background-color: #0f172a;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .login-form input {
+  background-color: #111827;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .login-form input::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .login-form input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.15);
+}
+
+[data-theme="dark"] .divider,
+[data-theme="dark"] .remember-forgot,
+[data-theme="dark"] .create-account {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .google-btn {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .facebook-btn {
+  background-color: #1d4ed8;
+  color: #eff6ff;
+}
+
+[data-theme="dark"] .google-btn:hover {
+  background-color: #cbd5e1;
+  color: #020617;
+}
+
+[data-theme="dark"] .facebook-btn:hover {
+  background-color: #2563eb;
+  color: #eff6ff;
+}
+
+[data-theme="dark"] .remember-forgot a {
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .toggle-password {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .toggle-password:hover {
+  color: #c084fc;
+}
+
+.remember-forgot {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -171,23 +242,21 @@
   font-weight: bold;
   font-size: 13px;
   margin-top: 15px;
-
 }
 
-.remember-label{
+.remember-label {
   display: flex;
   gap: 8px;
 }
-.remember-forgot a{
+.remember-forgot a {
   color: blue;
   text-align: none;
   transition: 0.5s;
   font-weight: bold;
   margin-bottom: 10px;
-
 }
 
-.remember-forgot a:hover{
+.remember-forgot a:hover {
   text-decoration: underline;
 }
 .password-field {
@@ -212,7 +281,6 @@
 .toggle-password:hover {
   color: #8a2be2;
 }
-
 
 /* ===== Variables globales ===== */
 :root {
@@ -348,7 +416,8 @@
   color: #444;
 }
 
-.google-btn, .facebook-btn {
+.google-btn,
+.facebook-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -369,7 +438,8 @@
   background: #1877f2;
   color: white;
 }
-.google-btn:hover, .facebook-btn:hover {
+.google-btn:hover,
+.facebook-btn:hover {
   transform: scale(1.03);
 }
 
@@ -386,7 +456,8 @@
   margin-right: 6px;
 }
 
-.forgot-link, .create-link {
+.forgot-link,
+.create-link {
   color: var(--accent1);
   text-decoration: none;
   font-weight: 600;
@@ -461,6 +532,3 @@
     padding: 36px;
   }
 }
-
-
-

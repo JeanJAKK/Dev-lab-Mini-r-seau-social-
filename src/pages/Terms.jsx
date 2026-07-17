@@ -10,15 +10,8 @@ import { ArrowLeft, FileText } from "lucide-react";
 
 export default function Terms() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === "dark";
-
-  // Forcer le thème clair au chargement de la page
-  React.useEffect(() => {
-    if (isDark) {
-      toggleTheme();
-    }
-  }, [isDark, toggleTheme]);
 
   return (
     <div

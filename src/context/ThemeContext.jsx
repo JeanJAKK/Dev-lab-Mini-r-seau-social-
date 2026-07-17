@@ -3,16 +3,39 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext();
 const THEME_STORAGE_KEY = "theme";
 
-export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") return "light";
+function getStoredTheme() {
+  if (typeof window === "undefined") return "light";
 
-    return localStorage.getItem(THEME_STORAGE_KEY) || "light";
-  });
+  try {
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    return storedTheme === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+}
+
+function applyThemeToDocument(theme) {
+  if (typeof document === "undefined") return;
+
+  document.documentElement.setAttribute("data-theme", theme);
+  document.documentElement.style.colorScheme = theme;
+
+  if (document.body) {
+    document.body.setAttribute("data-theme", theme);
+  }
+}
+
+export function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState(getStoredTheme);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    applyThemeToDocument(theme);
+
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // Ignore storage failures, the in-memory theme still works.
+    }
   }, [theme]);
 
   const toggleTheme = () => {
