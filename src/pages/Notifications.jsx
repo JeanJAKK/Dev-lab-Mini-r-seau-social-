@@ -31,6 +31,25 @@ export default function CentreNotifications() {
     chargerNotifications();
   }, []);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        chargerNotifications();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      chargerNotifications();
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const chargerNotifications = async () => {
     try {
       setLoading(true);
@@ -94,23 +113,66 @@ export default function CentreNotifications() {
     }
   };
 
+  const handleNotificationClick = async (notif) => {
+    if (!notif.lu) {
+      setNotifications(prev => prev.map(n => 
+        n.id === notif.id ? { ...n, lu: true } : n
+      ));
+      
+      try {
+        await supabase
+          .from('notifications')
+          .update({ est_lu: true })
+          .eq('id', notif.id);
+      } catch (err) {
+        setNotifications(prev => prev.map(n => 
+          n.id === notif.id ? { ...n, lu: false } : n
+        ));
+      }
+    }
+    
+    if (notif.publication_id) {
+      allerVoirPublication(notif.publication_id);
+    } else if (notif.type === 'follow') {
+      navigate(`/home/profile/${notif.expediteur_id}`);
+    }
+  };
+
   const marquerLu = async (id) => {
     await supabase.from("notifications").update({ est_lu: true }).eq("id", id);
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, lu: true } : n)),
     );
     setMenuOpen(null);
+    
+    try {
+      await supabase
+        .from('notifications')
+        .update({ est_lu: true })
+        .eq('id', id);
+    } catch (err) {
+      setNotifications(prev => prev.map(n => 
+        n.id === id ? { ...n, lu: false } : n
+      ));
+      console.error('Erreur lors du marquage comme lu:', err);
+    }
   };
 
   const toutMarquerLu = async () => {
-    const { data: user } = await supabase.auth.getUser();
-    if (user.user) {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+      
+      setNotifications(prev => prev.map(n => ({ ...n, lu: true })));
+      
       await supabase
-        .from("notifications")
+        .from('notifications')
         .update({ est_lu: true })
-        .eq("destinataire_id", user.user.id)
-        .eq("est_lu", false);
-      setNotifications((prev) => prev.map((n) => ({ ...n, lu: true })));
+        .eq('destinataire_id', user.user.id)
+        .eq('est_lu', false);
+    } catch (err) {
+      console.error('Erreur:', err);
+      await chargerNotifications();
     }
   };
 
@@ -124,18 +186,32 @@ export default function CentreNotifications() {
     await supabase.from("notifications").delete().eq("id", id);
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     setMenuOpen(null);
+    
+    try {
+      await supabase.from('notifications').delete().eq('id', id);
+    } catch (err) {
+      console.error('Erreur lors de la suppression:', err);
+      await chargerNotifications();
+    }
   };
 
   const toutSupprimer = async () => {
-    if (!confirm("Supprimer toutes les notifications ?")) return;
-    const { data: user } = await supabase.auth.getUser();
-    if (user.user) {
-      await supabase
-        .from("notifications")
-        .delete()
-        .eq("destinataire_id", user.user.id);
-      setNotifications([]);
-      localStorage.setItem("pinned_notifications", JSON.stringify([]));
+    if (!confirm('Supprimer toutes les notifications ?')) return;
+    
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (user.user) {
+        setNotifications([]);
+        localStorage.setItem('pinned_notifications', JSON.stringify([]));
+        
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('destinataire_id', user.user.id);
+      }
+    } catch (err) {
+      console.error('Erreur:', err);
+      await chargerNotifications();
     }
   };
 
@@ -160,6 +236,19 @@ export default function CentreNotifications() {
       ),
     );
     setMenuOpen(null);
+    
+    try {
+      if (suitActuellement) {
+        await supabase.from('follows').delete().eq('follower_id', user.user.id).eq('following_id', id);
+      } else {
+        await supabase.from('follows').insert({ follower_id: user.user.id, following_id: id });
+      }
+    } catch (err) {
+      setNotifications(prev => prev.map(n => 
+        n.expediteur_id === id ? { ...n, jeSuit: suitActuellement } : n
+      ));
+      console.error('Erreur:', err);
+    }
   };
 
   const epingler = (id) => {
@@ -240,44 +329,62 @@ export default function CentreNotifications() {
   }
 
   return (
-    <div
-      className={`min-h-screen ${isDark ? "bg-gradient-to-br from-slate-950 to-slate-900 text-slate-100" : "bg-gradient-to-br from-gray-50 to-gray-100"}`}
-    >
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>
       <div className="w-full sm:w-[70%] max-w-[1100px] mx-auto px-0 sm:px-3 py-4">
-        <div
-          className={`rounded-2xl border mb-4 overflow-hidden ${isDark ? "bg-slate-900 border-slate-800 shadow-none" : "bg-white border-slate-200 shadow-xl shadow-purple-100/20"}`}
-        >
+        
+        <div className={`rounded-2xl border shadow-xl mb-4 overflow-hidden transition-colors duration-300 ${
+          isDark 
+            ? 'bg-gray-800 border-gray-700 shadow-purple-900/20' 
+            : 'bg-white border-gray-200 shadow-purple-100/30'
+        }`}>
           <div className="px-5 py-4">
             <div className="flex flex-nowrap items-center justify-between gap-3 overflow-x-auto">
-              {/* Titre */}
               <div className="flex items-center gap-2 min-w-0">
                 <div className="relative">
-                  <Bell size={24} className="text-purple-600" />
+                  <Bell size={24} className={isDark ? 'text-purple-400' : 'text-purple-600'} />
                   {nonLus > 0 && (
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                       {nonLus}
                     </span>
                   )}
                 </div>
-                <h1 className="font-bold text-2xl md:text-3xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">
+                <h1 className={`font-bold text-2xl md:text-3xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r ${
+                  isDark ? 'from-purple-400 to-pink-400' : 'from-purple-600 to-pink-500'
+                }`}>
                   Notifications
                 </h1>
               </div>
 
-              {/* Actions à droite */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={toutMarquerLu}
                   disabled={!notifications.length}
-                  className={`p-2 rounded-xl border transition-all duration-200 ${isDark ? "border-slate-700" : "border-gray-200"} ${notifications.length ? (isDark ? "bg-slate-800 text-slate-200 hover:bg-slate-700" : "bg-gray-100 text-gray-600 hover:bg-gray-200") : isDark ? "bg-slate-900 text-slate-500 cursor-not-allowed" : "bg-gray-50 text-gray-300 cursor-not-allowed"}`}
+                  className={`p-2 rounded-xl border transition-all duration-200 ${
+                    notifications.length 
+                      ? isDark 
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 border-gray-600' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'
+                      : isDark
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed border-gray-700'
+                        : 'bg-gray-50 text-gray-300 cursor-not-allowed border-gray-200'
+                  }`}
                   title="Tout marquer lu"
                 >
                   <CheckCheck size={16} />
                 </button>
+                
                 <button
                   onClick={toutSupprimer}
                   disabled={!notifications.length}
-                  className={`p-2 rounded-xl border transition-all duration-200 ${isDark ? "border-slate-700" : "border-gray-200"} ${notifications.length ? (isDark ? "bg-white text-slate-900 hover:bg-slate-100" : "bg-gray-900 text-white hover:bg-black") : isDark ? "bg-slate-900 text-slate-500 cursor-not-allowed" : "bg-gray-50 text-gray-300 cursor-not-allowed"}`}
+                  className={`p-2 rounded-xl border transition-all duration-200 ${
+                    notifications.length 
+                      ? isDark
+                        ? 'bg-red-600 text-white hover:bg-red-700 border-red-600'
+                        : 'bg-gray-900 text-white hover:bg-black border-gray-900'
+                      : isDark
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed border-gray-700'
+                        : 'bg-gray-50 text-gray-300 cursor-not-allowed border-gray-200'
+                  }`}
                   title="Tout supprimer"
                 >
                   <Trash2 size={16} />
@@ -286,13 +393,18 @@ export default function CentreNotifications() {
             </div>
           </div>
 
-          {/* Onglets */}
-          <div
-            className={`flex border-t ${isDark ? "border-slate-800" : "border-gray-100"}`}
-          >
+          <div className={`flex border-t ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
             <button
-              onClick={() => setOnglet("toutes")}
-              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 ${onglet === "toutes" ? "text-purple-600 border-b-2 border-purple-600 bg-purple-50/30" : isDark ? "text-slate-400 hover:text-slate-200" : "text-gray-500 hover:text-gray-700"}`}
+              onClick={() => setOnglet('toutes')}
+              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 ${
+                onglet === 'toutes' 
+                  ? isDark
+                    ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                    : 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/30'
+                  : isDark
+                    ? 'text-gray-400 hover:text-gray-200'
+                    : 'text-gray-500 hover:text-gray-700'
+              }`}
             >
               <div className="flex items-center justify-center gap-2">
                 <Sparkles size={14} />
@@ -305,8 +417,16 @@ export default function CentreNotifications() {
               </div>
             </button>
             <button
-              onClick={() => setOnglet("nonLus")}
-              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 ${onglet === "nonLus" ? "text-purple-600 border-b-2 border-purple-600 bg-purple-50/30" : isDark ? "text-slate-400 hover:text-slate-200" : "text-gray-500 hover:text-gray-700"}`}
+              onClick={() => setOnglet('nonLus')}
+              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 ${
+                onglet === 'nonLus' 
+                  ? isDark
+                    ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                    : 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/30'
+                  : isDark
+                    ? 'text-gray-400 hover:text-gray-200'
+                    : 'text-gray-500 hover:text-gray-700'
+              }`}
             >
               <div className="flex items-center justify-center gap-2">
                 <Bell size={14} />
@@ -352,7 +472,18 @@ export default function CentreNotifications() {
             notifsFiltrees.map((notif) => (
               <div
                 key={notif.id}
-                className={`rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 ${isDark ? "bg-slate-900 border border-slate-800" : "bg-white border border-slate-200"} ${notif.pinned ? "ring-2 ring-yellow-400 ring-offset-2 shadow-lg" : ""} ${!notif.lu ? (isDark ? "ring-1 ring-purple-500/40" : "ring-1 ring-slate-200") : ""}`}
+                onClick={() => handleNotificationClick(notif)}
+                className={`rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${
+                  isDark ? 'bg-gray-800' : 'bg-white'
+                } ${
+                  notif.pinned 
+                    ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-lg' 
+                    : `border ${isDark ? 'border-gray-700' : 'border-gray-100'}`
+                } ${
+                  !notif.lu 
+                    ? isDark ? 'border-purple-500 border-2' : 'border-purple-300 border-2'
+                    : ''
+                }`}
               >
                 <div className="p-1 sm:p-2">
                   <div className="flex gap-3 relative">
@@ -363,10 +494,13 @@ export default function CentreNotifications() {
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(notif.nom)}&background=8b5cf6&color=fff`
                         }
                         alt=""
-                        className={`w-12 h-12 rounded-full object-cover border-2 shadow-md cursor-pointer hover:opacity-90 transition ${isDark ? "border-slate-700" : "border-slate-200"}`}
-                        onClick={() =>
-                          navigate(`/home/profile/${notif.expediteur_id}`)
-                        }
+                        className={`w-12 h-12 rounded-full object-cover border-2 shadow-md cursor-pointer hover:opacity-90 transition ${
+                          isDark ? 'border-gray-600' : 'border-gray-200'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/home/profile/${notif.expediteur_id}`);
+                        }}
                       />
                       <div
                         className={`absolute bottom-4 md:-bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 shadow-md ${isDark ? "border-slate-900" : "border-white"}`}
@@ -383,43 +517,34 @@ export default function CentreNotifications() {
                       )}
                     </div>
 
-                    {/* Contenu */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span
-                              className="font-semibold text-base cursor-pointer hover:text-purple-600 transition"
-                              onClick={() =>
-                                navigate(`/home/profile/${notif.expediteur_id}`)
-                              }
+                              className={`font-semibold text-base cursor-pointer transition ${
+                                isDark 
+                                  ? 'text-gray-200 hover:text-purple-400' 
+                                  : 'text-gray-900 hover:text-purple-600'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/home/profile/${notif.expediteur_id}`);
+                              }}
                             >
                               {notif.nom}
                             </span>
-                            <span
-                              className={
-                                isDark
-                                  ? "text-sm text-slate-300"
-                                  : "text-sm text-gray-600"
-                              }
-                            >
+                            <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                               {notif.message}
                             </span>
                           </div>
-                          <div
-                            className={
-                              isDark
-                                ? "flex items-center gap-2 mt-1.5 text-xs text-slate-400"
-                                : "flex items-center gap-2 mt-1.5 text-xs text-gray-400"
-                            }
-                          >
+                          <div className={`flex items-center gap-2 mt-1.5 text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                             <span className="flex items-center gap-1">
                               ⏱️ {tempsDepuis(notif.date)}
                             </span>
                           </div>
                         </div>
 
-                        {/* Bouton Voir + Menu */}
                         <div className="flex items-center gap-1 shrink-0">
                           {notif.publication_id && (
                             <button
@@ -448,14 +573,20 @@ export default function CentreNotifications() {
                               }
                             />
                           </button>
+                          
                           {menuOpen === notif.id && (
-                            <div
-                              className={`absolute right-2 top-12 rounded-xl shadow-2xl py-2 z-50 min-w-[180px] ${isDark ? "bg-slate-900 border border-slate-700" : "bg-white border border-slate-200"}`}
-                            >
+                            <div className={`absolute right-2 top-12 rounded-xl shadow-2xl border py-2 z-50 min-w-[180px] ${
+                              isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                            }`}>
                               {!notif.lu && (
                                 <button
-                                  onClick={() => marquerLu(notif.id)}
-                                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition font-medium ${isDark ? "text-slate-200 hover:bg-slate-800" : "hover:bg-purple-50 text-gray-800"}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    marquerLu(notif.id);
+                                  }}
+                                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition font-medium ${
+                                    isDark ? 'hover:bg-purple-900/30 text-gray-200' : 'hover:bg-purple-50 text-gray-700'
+                                  }`}
                                 >
                                   <CheckCheck
                                     size={16}
@@ -469,8 +600,13 @@ export default function CentreNotifications() {
                                 </button>
                               )}
                               <button
-                                onClick={() => epingler(notif.id)}
-                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition font-medium ${isDark ? "text-slate-200 hover:bg-slate-800" : "hover:bg-yellow-50 text-gray-800"}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  epingler(notif.id);
+                                }}
+                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition font-medium ${
+                                  isDark ? 'hover:bg-yellow-900/30 text-gray-200' : 'hover:bg-yellow-50 text-gray-700'
+                                }`}
                               >
                                 <Pin
                                   size={16}
@@ -484,12 +620,15 @@ export default function CentreNotifications() {
                                   {notif.pinned ? "Désépingler" : "Épingler"}
                                 </span>
                               </button>
-                              <div
-                                className={`my-1 ${isDark ? "border-t border-slate-700" : "border-t border-slate-200"}`}
-                              ></div>
+                              <div className={`border-t my-1 ${isDark ? 'border-gray-700' : 'border-gray-150'}`}></div>
                               <button
-                                onClick={() => supprimer(notif.id)}
-                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition font-medium ${isDark ? "text-red-300 hover:bg-slate-800" : "text-red-600 hover:bg-red-50"}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  supprimer(notif.id);
+                                }}
+                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition font-medium ${
+                                  isDark ? 'text-red-400 hover:bg-red-900/30' : 'text-red-600 hover:bg-red-50'
+                                }`}
                               >
                                 <Trash2 size={16} />
                                 <span>Supprimer</span>
@@ -506,17 +645,16 @@ export default function CentreNotifications() {
           )}
         </div>
 
-        {/* Footer avec infos */}
         {notifsFiltrees.length > 0 && (
           <div className="mt-6 text-center">
-            <p
-              className={`text-xs inline-block px-4 py-1.5 rounded-full shadow-sm ${isDark ? "text-slate-300 bg-slate-900/80" : "text-gray-400 bg-white/50"}`}
-            >
-              {notifsFiltrees.length} notification
-              {notifsFiltrees.length > 1 ? "s" : ""}
-              {nonLus > 0 && ` • ${nonLus} non lue${nonLus > 1 ? "s" : ""}`}
-              {notifications.filter((n) => n.pinned).length > 0 &&
-                ` • 📌 ${notifications.filter((n) => n.pinned).length} épinglée${notifications.filter((n) => n.pinned).length > 1 ? "s" : ""}`}
+            <p className={`text-xs inline-block px-4 py-1.5 rounded-full shadow-sm ${
+              isDark ? 'bg-gray-800/50 text-gray-400' : 'bg-white/50 text-gray-400'
+            }`}>
+              {notifsFiltrees.length} notification{notifsFiltrees.length > 1 ? 's' : ''}
+              {nonLus > 0 && ` • ${nonLus} non lue${nonLus > 1 ? 's' : ''}`}
+              {notifications.filter(n => n.pinned).length > 0 && 
+                ` • 📌 ${notifications.filter(n => n.pinned).length} épinglée${notifications.filter(n => n.pinned).length > 1 ? 's' : ''}`
+              }
             </p>
           </div>
         )}
