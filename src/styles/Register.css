@@ -206,3 +206,42 @@
 .checkbox-container .text-blue-700:hover {
   color: #c217d9 !important;
 }
+
+[data-theme="dark"] .regis-form {
+  background-color: #0f172a;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .regis-form input {
+  background-color: #111827;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .regis-form input::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .regis-form input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.15);
+}
+
+[data-theme="dark"] .policy,
+[data-theme="dark"] .connect,
+[data-theme="dark"] .checkbox-container p {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .checkmark {
+  background-color: #111827;
+  border-color: #8b5cf6;
+}
+
+[data-theme="dark"] .checkbox-container .text-blue-700 {
+  color: #c084fc !important;
+}
+
+[data-theme="dark"] body {
+  background-color: #020617;
+}

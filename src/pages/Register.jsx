@@ -4,9 +4,12 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import supabase from "../services/supabase.js";
+import { useTheme } from "../context/ThemeContext";
 import "../styles/Register.css";
 
 function Register() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -75,7 +78,7 @@ function Register() {
 
       setIsSuccess(true);
       setMessage(
-        "Inscription réussie ! Veuillez vérifier votre email pour activer votre compte."
+        "Inscription réussie ! Veuillez vérifier votre email pour activer votre compte.",
       );
     } catch (err) {
       setMessage("Erreur lors de l'inscription.");
@@ -91,7 +94,7 @@ function Register() {
 
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/home`,
         },
@@ -111,7 +114,13 @@ function Register() {
   };
 
   return (
-    <div className="bg-white h-screen w-full">
+    <div
+      className={
+        isDark
+          ? "bg-slate-950 text-slate-100 h-screen w-full"
+          : "bg-white text-slate-900 h-screen w-full"
+      }
+    >
       <div className="logos">
         <h1 className="logo1">SynapseLink</h1>
       </div>
@@ -179,7 +188,11 @@ function Register() {
           )}
           <div className="divider">ou</div>
           {/* Boutons de connexion sociale */}
-          <button type="button" className="google-btn" onClick={handleGoogleLogin}>
+          <button
+            type="button"
+            className="google-btn"
+            onClick={handleGoogleLogin}
+          >
             <FcGoogle size={22} style={{ marginRight: "8px" }} />
             Continuer avec Google
           </button>

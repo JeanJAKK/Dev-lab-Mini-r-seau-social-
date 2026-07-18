@@ -1,21 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Trash2, CheckCheck, Heart, MessageCircle, UserPlus,
-  Share2, ArrowLeft, Eye, MoreVertical, Pin,
-  Bell, Sparkles, Loader2
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import supabase from '../services/supabase.js';
+import React, { useState, useEffect } from "react";
+import {
+  Trash2,
+  CheckCheck,
+  Heart,
+  MessageCircle,
+  UserPlus,
+  Share2,
+  ArrowLeft,
+  Eye,
+  MoreVertical,
+  Pin,
+  Bell,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import supabase from "../services/supabase.js";
+import { useTheme } from "../context/ThemeContext";
 
 export default function CentreNotifications() {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(null);
-  const [onglet, setOnglet] = useState('toutes');
+  const [onglet, setOnglet] = useState("toutes");
 
   useEffect(() => {
     chargerNotifications();
@@ -47,47 +57,55 @@ export default function CentreNotifications() {
       if (!user.user) return;
 
       const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('destinataire_id', user.user.id)
-        .order('cree_le', { ascending: false });
+        .from("notifications")
+        .select("*")
+        .eq("destinataire_id", user.user.id)
+        .order("cree_le", { ascending: false });
 
-      const expediteursIds = [...new Set(data?.map(n => n.expediteur_id) || [])];
+      const expediteursIds = [
+        ...new Set(data?.map((n) => n.expediteur_id) || []),
+      ];
       let profils = {};
       let followStatus = {};
 
       if (expediteursIds.length) {
         const { data: p } = await supabase
-          .from('profiles')
-          .select('id, name, avatar_url')
-          .in('id', expediteursIds);
-        profils = Object.fromEntries(p?.map(p => [p.id, p]) || []);
-        
+          .from("profiles")
+          .select("id, name, avatar_url")
+          .in("id", expediteursIds);
+        profils = Object.fromEntries(p?.map((p) => [p.id, p]) || []);
+
         const { data: follows } = await supabase
-          .from('follows')
-          .select('following_id')
-          .eq('follower_id', user.user.id);
-        followStatus = Object.fromEntries(follows?.map(f => [f.following_id, true]) || []);
+          .from("follows")
+          .select("following_id")
+          .eq("follower_id", user.user.id);
+        followStatus = Object.fromEntries(
+          follows?.map((f) => [f.following_id, true]) || [],
+        );
       }
 
-      const pinnedIds = JSON.parse(localStorage.getItem('pinned_notifications') || '[]');
+      const pinnedIds = JSON.parse(
+        localStorage.getItem("pinned_notifications") || "[]",
+      );
 
-      const nouvellesNotifs = (data || []).map(n => ({
+      const nouvellesNotifs = (data || []).map((n) => ({
         id: n.id,
         type: n.type,
         lu: n.est_lu,
         expediteur_id: n.expediteur_id,
-        nom: profils[n.expediteur_id]?.name || 'Utilisateur',
+        nom: profils[n.expediteur_id]?.name || "Utilisateur",
         avatar: profils[n.expediteur_id]?.avatar_url,
         message: n.message,
         publication_id: n.publication_id,
         date: n.cree_le,
         jeSuit: followStatus[n.expediteur_id] || false,
-        pinned: pinnedIds.includes(n.id)
+        pinned: pinnedIds.includes(n.id),
       }));
 
       setNotifications(nouvellesNotifs);
-      
+
+      const nouvellesNonLues = nouvellesNotifs.filter((n) => !n.lu).length;
+      // Notification sound removed: no audio playback by default.
     } catch (err) {
       console.error(err);
     } finally {
@@ -121,9 +139,10 @@ export default function CentreNotifications() {
   };
 
   const marquerLu = async (id) => {
-    setNotifications(prev => prev.map(n => 
-      n.id === id ? { ...n, lu: true } : n
-    ));
+    await supabase.from("notifications").update({ est_lu: true }).eq("id", id);
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, lu: true } : n)),
+    );
     setMenuOpen(null);
     
     try {
@@ -158,11 +177,14 @@ export default function CentreNotifications() {
   };
 
   const supprimer = async (id) => {
-    const pinnedIds = JSON.parse(localStorage.getItem('pinned_notifications') || '[]');
-    const newPinned = pinnedIds.filter(pid => pid !== id);
-    localStorage.setItem('pinned_notifications', JSON.stringify(newPinned));
-    
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    const pinnedIds = JSON.parse(
+      localStorage.getItem("pinned_notifications") || "[]",
+    );
+    const newPinned = pinnedIds.filter((pid) => pid !== id);
+    localStorage.setItem("pinned_notifications", JSON.stringify(newPinned));
+
+    await supabase.from("notifications").delete().eq("id", id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
     setMenuOpen(null);
     
     try {
@@ -196,10 +218,23 @@ export default function CentreNotifications() {
   const suivreUtilisateur = async (id, suitActuellement) => {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return;
-    
-    setNotifications(prev => prev.map(n => 
-      n.expediteur_id === id ? { ...n, jeSuit: !suitActuellement } : n
-    ));
+
+    if (suitActuellement) {
+      await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", user.user.id)
+        .eq("following_id", id);
+    } else {
+      await supabase
+        .from("follows")
+        .insert({ follower_id: user.user.id, following_id: id });
+    }
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.expediteur_id === id ? { ...n, jeSuit: !suitActuellement } : n,
+      ),
+    );
     setMenuOpen(null);
     
     try {
@@ -217,18 +252,20 @@ export default function CentreNotifications() {
   };
 
   const epingler = (id) => {
-    const pinnedIds = JSON.parse(localStorage.getItem('pinned_notifications') || '[]');
+    const pinnedIds = JSON.parse(
+      localStorage.getItem("pinned_notifications") || "[]",
+    );
     let newPinned;
     if (pinnedIds.includes(id)) {
-      newPinned = pinnedIds.filter(pid => pid !== id);
+      newPinned = pinnedIds.filter((pid) => pid !== id);
     } else {
       newPinned = [...pinnedIds, id];
     }
-    localStorage.setItem('pinned_notifications', JSON.stringify(newPinned));
-    
-    setNotifications(prev => prev.map(n => 
-      n.id === id ? { ...n, pinned: !n.pinned } : n
-    ));
+    localStorage.setItem("pinned_notifications", JSON.stringify(newPinned));
+
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, pinned: !n.pinned } : n)),
+    );
     setMenuOpen(null);
   };
 
@@ -253,19 +290,24 @@ export default function CentreNotifications() {
       like: <Heart size={size} color="white" />,
       comment: <MessageCircle size={size} color="white" />,
       follow: <UserPlus size={size} color="white" />,
-      share: <Share2 size={size} color="white" />
+      share: <Share2 size={size} color="white" />,
     };
     return icons[type] || <Bell size={size} color="white" />;
   };
 
   const getTypeCouleur = (type) => {
-    const couleurs = { like: '#ef4444', comment: '#3b82f6', follow: '#10b981', share: '#8b5cf6' };
-    return couleurs[type] || '#6b7280';
+    const couleurs = {
+      like: "#ef4444",
+      comment: "#3b82f6",
+      follow: "#10b981",
+      share: "#8b5cf6",
+    };
+    return couleurs[type] || "#6b7280";
   };
 
   const notifsFiltrees = notifications
-    .filter(n => {
-      if (onglet === 'nonLus' && n.lu) return false;
+    .filter((n) => {
+      if (onglet === "nonLus" && n.lu) return false;
       return true;
     })
     .sort((a, b) => {
@@ -273,13 +315,15 @@ export default function CentreNotifications() {
       if (!a.pinned && b.pinned) return 1;
       return 0;
     });
-    
-  const nonLus = notifications.filter(n => !n.lu).length;
+
+  const nonLus = notifications.filter((n) => !n.lu).length;
 
   if (loading) {
     return (
-      <div className={`flex justify-center items-center min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
-        <Loader2 size={32} className={`animate-spin ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+      <div
+        className={`flex justify-center items-center min-h-screen ${isDark ? "bg-slate-950" : "bg-gray-50"}`}
+      >
+        <Loader2 size={32} className="animate-spin text-purple-600" />
       </div>
     );
   }
@@ -365,7 +409,9 @@ export default function CentreNotifications() {
               <div className="flex items-center justify-center gap-2">
                 <Sparkles size={14} />
                 Toutes
-                <span className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full ${isDark ? "bg-slate-800 text-slate-200" : "bg-gray-100 text-gray-600"}`}
+                >
                   {notifications.length}
                 </span>
               </div>
@@ -395,25 +441,35 @@ export default function CentreNotifications() {
           </div>
         </div>
 
-        <div className="space-y-1">
+        {/* Liste des notifications */}
+        <div className="space-y-3">
           {notifsFiltrees.length === 0 ? (
-            <div className={`rounded-2xl p-12 text-center shadow-lg transition-colors duration-300 ${
-              isDark ? 'bg-gray-800 shadow-purple-900/20' : 'bg-white shadow-purple-100/30'
-            }`}>
-              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md ${
-                isDark ? 'bg-gradient-to-br from-purple-900 to-pink-900' : 'bg-gradient-to-br from-purple-100 to-pink-100'
-              }`}>
-                <Bell size={32} className="text-purple-400" />
+            <div
+              className={`rounded-2xl p-12 text-center ${isDark ? "bg-slate-900 border border-slate-800 shadow-none" : "bg-white border border-slate-200 shadow-lg shadow-purple-100/20"}`}
+            >
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md ${isDark ? "bg-slate-800" : "bg-gradient-to-br from-purple-100 to-pink-100"}`}
+              >
+                <Bell
+                  size={32}
+                  className={isDark ? "text-purple-300" : "text-purple-400"}
+                />
               </div>
-              <p className={`text-lg font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+              <p
+                className={`text-lg font-semibold mb-2 ${isDark ? "text-slate-100" : "text-gray-800"}`}
+              >
                 Aucune notification
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>
+              <p
+                className={
+                  isDark ? "text-sm text-slate-400" : "text-sm text-gray-400"
+                }
+              >
                 Revenez plus tard pour voir vos interactions !
               </p>
             </div>
           ) : (
-            notifsFiltrees.map(notif => (
+            notifsFiltrees.map((notif) => (
               <div
                 key={notif.id}
                 onClick={() => handleNotificationClick(notif)}
@@ -433,7 +489,10 @@ export default function CentreNotifications() {
                   <div className="flex gap-3 relative">
                     <div className="relative shrink-0">
                       <img
-                        src={notif.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(notif.nom)}&background=8b5cf6&color=fff`}
+                        src={
+                          notif.avatar ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(notif.nom)}&background=8b5cf6&color=fff`
+                        }
                         alt=""
                         className={`w-12 h-12 rounded-full object-cover border-2 shadow-md cursor-pointer hover:opacity-90 transition ${
                           isDark ? 'border-gray-600' : 'border-gray-200'
@@ -444,13 +503,15 @@ export default function CentreNotifications() {
                         }}
                       />
                       <div
-                        className="absolute bottom-4 md:-bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-md"
+                        className={`absolute bottom-4 md:-bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 shadow-md ${isDark ? "border-slate-900" : "border-white"}`}
                         style={{ backgroundColor: getTypeCouleur(notif.type) }}
                       >
                         {getTypeIcone(notif.type, 12)}
                       </div>
                       {notif.pinned && (
-                        <div className="absolute -top-2 -left-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                        <div
+                          className={`absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 ${isDark ? "bg-slate-500 border-slate-900" : "bg-gray-400 border-white"}`}
+                        >
                           <Pin size={12} className="text-white" />
                         </div>
                       )}
@@ -485,17 +546,32 @@ export default function CentreNotifications() {
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0">
+                          {notif.publication_id && (
+                            <button
+                              onClick={() =>
+                                allerVoirPublication(notif.publication_id)
+                              }
+                              className={`p-1.5 rounded-lg transition ${isDark ? "hover:bg-slate-800 text-sky-300 hover:text-sky-200" : "hover:bg-blue-50 text-blue-600 hover:text-blue-700"}`}
+                              title="Voir la publication"
+                            >
+                              <Eye size={16} />
+                            </button>
+                          )}
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMenuOpen(menuOpen === notif.id ? null : notif.id);
-                            }}
-                            className={`p-1.5 rounded-lg transition ${
-                              isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
-                            }`}
+                            onClick={() =>
+                              setMenuOpen(
+                                menuOpen === notif.id ? null : notif.id,
+                              )
+                            }
+                            className={`p-1.5 rounded-lg transition ${isDark ? "hover:bg-slate-800" : "hover:bg-gray-100"}`}
                             title="Options"
                           >
-                            <MoreVertical size={20} />
+                            <MoreVertical
+                              size={20}
+                              className={
+                                isDark ? "text-slate-400" : "text-gray-500"
+                              }
+                            />
                           </button>
                           
                           {menuOpen === notif.id && (
@@ -512,7 +588,14 @@ export default function CentreNotifications() {
                                     isDark ? 'hover:bg-purple-900/30 text-gray-200' : 'hover:bg-purple-50 text-gray-700'
                                   }`}
                                 >
-                                  <CheckCheck size={16} className="text-purple-500" />
+                                  <CheckCheck
+                                    size={16}
+                                    className={
+                                      isDark
+                                        ? "text-purple-300"
+                                        : "text-purple-500"
+                                    }
+                                  />
                                   <span>Marquer comme lu</span>
                                 </button>
                               )}
@@ -525,8 +608,17 @@ export default function CentreNotifications() {
                                   isDark ? 'hover:bg-yellow-900/30 text-gray-200' : 'hover:bg-yellow-50 text-gray-700'
                                 }`}
                               >
-                                <Pin size={16} className="text-yellow-500" />
-                                <span>{notif.pinned ? 'Désépingler' : 'Épingler'}</span>
+                                <Pin
+                                  size={16}
+                                  className={
+                                    isDark
+                                      ? "text-yellow-300"
+                                      : "text-yellow-500"
+                                  }
+                                />
+                                <span>
+                                  {notif.pinned ? "Désépingler" : "Épingler"}
+                                </span>
                               </button>
                               <div className={`border-t my-1 ${isDark ? 'border-gray-700' : 'border-gray-150'}`}></div>
                               <button
