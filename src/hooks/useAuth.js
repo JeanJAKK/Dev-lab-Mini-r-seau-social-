@@ -1,0 +1,1 @@
+// Intermédiare entre auth.service.js et le front (contient les useStates et useEffects nécessaire au fonctionnent)

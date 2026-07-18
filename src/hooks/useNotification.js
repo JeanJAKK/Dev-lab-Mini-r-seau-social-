@@ -1,0 +1,1 @@
+// Intermédiare entre notifications.service.js et le front (contient les useStates et useEffects nécessaire au fonctionnent)
