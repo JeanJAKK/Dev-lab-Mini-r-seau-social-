@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import AuthPage from "./pages/AuthPage";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -8,9 +8,7 @@ import {
   Routes,
   Route,
   Navigate,
-  Outlet,
 } from "react-router-dom";
-import { isAuthenticated } from "./fakeAuth";
 import Posts from "./pages/Posts";
 import Acceuil from "./pages/Acceuil";
 import Messages from "./pages/Messages";
@@ -24,21 +22,29 @@ import UserProfile from "./pages/UserProfile";
 import AccountSettings from "./pages/AccountSettings";
 import Terms from "./pages/Terms";
 import { FollowProvider } from "./context/FollowContext";
+import { useAuth } from "./hooks/useAuth";
 
 function App() {
-  const [auth, setAuth] = useState(isAuthenticated());
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
+  }
 
   return (
     <FollowProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/authPage" />} />
+          <Route path="/" element={<Navigate to={isAuthenticated ? "/home" : "/authPage"} />} />
 
-          <Route path="/authPage" element={<AuthPage setAuth={setAuth} />} />
+          <Route
+            path="/authPage"
+            element={isAuthenticated ? <Navigate to="/home" /> : <AuthPage />}
+          />
           <Route path="/register" element={<Register />} />
           <Route path="/terms" element={<Terms />} />
 
-          {auth ? (
+          {isAuthenticated ? (
             <Route path="/home" element={<Home />}>
               <Route index element={<Acceuil />} />
 
