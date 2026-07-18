@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Send, ArrowLeft, MessageSquare } from "lucide-react";
 import supabase from "../services/supabase.js";
 import { getUser } from "../services/systemeLike/getUser.js";
-import { getMessage } from "../services/message/getMessages.js";
-import { sendMessage } from "../services/message/sendMessage.js";
+import { useMessages } from "../hooks/useMessages.js";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Messages() {
@@ -14,7 +13,13 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState("");
-  const [messageInfos, setMessageInfos] = useState([]);
+
+  // ── Branché sur le nouveau hook ──
+  const {
+    messages: conversationMessages,
+    loading: messagesLoading,
+    envoyerMessage,
+  } = useMessages(myId, selectedUser?.id);
 
   const getUsers = async (currentUserId) => {
     if (!currentUserId) return;
@@ -66,21 +71,14 @@ export default function Messages() {
     init();
   }, []);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const msg = await getMessage();
-      setMessageInfos(msg);
-    };
-    fetchMessages();
-  }, []);
+  const handleSend = async () => {
+    if (!message.trim() || !selectedUser) return;
 
-  const conversationMessages = selectedUser
-    ? messageInfos.filter(
-        (msg) =>
-          (msg.sender_id === myId && msg.receiver_id === selectedUser.id) ||
-          (msg.sender_id === selectedUser.id && msg.receiver_id === myId),
-      )
-    : [];
+    const texte = message;
+    setMessage("");
+
+    await envoyerMessage(texte);
+  };
 
   return (
     <div
@@ -93,10 +91,8 @@ export default function Messages() {
           transition-all duration-300
           ${
             selectedUser
-              ? /* Mobile : masquée quand une conv est ouverte */
-                "hidden sm:flex sm:w-[260px] lg:w-[320px]"
-              : /* Mobile : plein écran quand aucune conv */
-                "flex w-full sm:w-[260px] lg:w-[320px]"
+              ? "hidden sm:flex sm:w-[260px] lg:w-[320px]"
+              : "flex w-full sm:w-[260px] lg:w-[320px]"
           }
         `}
       >
@@ -192,14 +188,11 @@ export default function Messages() {
       <div
         className={`
           flex flex-col min-w-0 ${isDark ? "bg-slate-950" : "bg-white"}
-          /* Desktop : toujours visible, flex-1 pour occuper le reste */
           sm:flex sm:flex-1
-          /* Mobile : visible seulement quand une conv est sélectionnée */
           ${selectedUser ? "flex flex-1" : "hidden"}
         `}
       >
         {!selectedUser ? (
-          /* État vide – desktop uniquement */
           <div
             className={`flex-1 flex flex-col justify-center items-center p-6 ${isDark ? "bg-slate-900/60" : "bg-gray-50/50"}`}
           >
@@ -272,7 +265,11 @@ export default function Messages() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-2">
-                  {conversationMessages.length === 0 ? (
+                  {messagesLoading ? (
+                    <div className="h-full grid place-items-center text-center px-4">
+                      <p className="text-sm text-gray-500">Chargement…</p>
+                    </div>
+                  ) : conversationMessages.length === 0 ? (
                     <div className="h-full grid place-items-center text-center px-4">
                       <p className="text-sm text-gray-500">
                         Aucun message pour le moment. Démarrez la conversation.
@@ -281,7 +278,7 @@ export default function Messages() {
                   ) : (
                     conversationMessages.map((msg) => (
                       <div
-                        key={msg.id}
+                        key={msg.idmessage}
                         className={`flex ${
                           msg.sender_id === myId
                             ? "justify-end"
@@ -319,20 +316,14 @@ export default function Messages() {
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && message.trim()) {
-                      sendMessage(myId, selectedUser.id, message);
-                      setMessage("");
+                      handleSend();
                     }
                   }}
                 />
                 <button
                   className="bg-purple-600 hover:bg-purple-700 text-white flex justify-center items-center w-8 h-8 rounded-full shadow-md active:scale-95 shrink-0 transition-all"
                   title="Envoyer"
-                  onClick={() => {
-                    if (message.trim()) {
-                      sendMessage(myId, selectedUser.id, message);
-                      setMessage("");
-                    }
-                  }}
+                  onClick={handleSend}
                 >
                   <Send size={14} className="translate-x-px" />
                 </button>
