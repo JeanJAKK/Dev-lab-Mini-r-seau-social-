@@ -305,12 +305,16 @@ export default function Messages() {
             </div>
 
             {/* Barre de saisie */}
-            <div className="bg-white border-t border-gray-200 shrink-0 p-3">
-              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 focus-within:bg-white shadow-sm">
+            <div
+              className={`shrink-0 p-3 border-t ${isDark ? "bg-slate-950 border-slate-800" : "bg-white border-gray-200"}`}
+            >
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm transition ${isDark ? "bg-slate-900 border-slate-700 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20" : "bg-gray-100 border-gray-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 focus-within:bg-white"}`}
+              >
                 <input
                   type="text"
                   placeholder={`Envoyer un message à ${selectedUser.name}…`}
-                  className="flex-1 bg-transparent px-1 py-1.5 outline-none text-sm text-gray-800 placeholder-gray-500"
+                  className={`flex-1 bg-transparent px-1 py-1.5 outline-none text-sm ${isDark ? "text-slate-100 placeholder-slate-400" : "text-gray-800 placeholder-gray-500"}`}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
