@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Home, Search, Bell, Mail, User, Plus, Settings, ChevronDown, LogOut } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { logout } from "../fakeAuth";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../hooks/useAuth";
 import supabase from "../services/supabase.js";
 
 export default function NavBar() {
@@ -14,6 +14,7 @@ export default function NavBar() {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [notificationsNonLues, setNotificationsNonLues] = useState(0);
+  const { logout } = useAuth();
 
   const chargerNotifNonLues = async (userId) => {
     if (!userId) return;
@@ -75,8 +76,8 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/authPage", { replace: true });
   };
 
@@ -89,7 +90,7 @@ export default function NavBar() {
       <nav className={`w-full h-16 flex items-center border-b fixed top-0 left-0 right-0 z-50 shadow-sm ${isDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-100"}`}>
         <div className="max-w-7xl mx-auto px-4 w-full">
           <div className="flex items-center justify-between">
-            <p className="text-xl font-extrabold bg-gradient-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent">
+            <p className="text-xl font-extrabold bg-linear-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent">
               SynapseLink
             </p>
 
@@ -152,7 +153,7 @@ export default function NavBar() {
             <NavLink to="notifications" className={({ isActive }) => `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`}>
               <Bell size={20} /> Notifications
               {notificationsNonLues > 0 && (
-                <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center">
+                <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-4 text-center">
                   {notificationsNonLues > 99 ? '99+' : notificationsNonLues}
                 </span>
               )}

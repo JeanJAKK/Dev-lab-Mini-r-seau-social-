@@ -3,10 +3,10 @@ import { FcGoogle } from "react-icons/fc"; // icône Google (React Icons)
 import { FaFacebook } from "react-icons/fa"; // icône facebook (React Icons)
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import supabase from "../services/supabase.js";
+import { useAuth } from "../hooks/useAuth";
 import "../styles/AuthPage.css"; // tu peux réutiliser le même CSS que pour l'inscription
 
-function AuthPage({ setAuth }) {
+function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +14,7 @@ function AuthPage({ setAuth }) {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState();
   const navigate = useNavigate();
+  const { login, loginWithOAuth } = useAuth();
 
   // useEffect(() => {
   //   //  Vérifie si la session existe
@@ -53,10 +54,7 @@ function AuthPage({ setAuth }) {
     }
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await login(email, password);
 
       if (error) {
         setMessage(error.message);
@@ -65,7 +63,6 @@ function AuthPage({ setAuth }) {
       }
 
       setMessage("Connexion réussie !");
-      setAuth(true);
       navigate("/home");
     } catch (err) {
       setMessage("Erreur lors de la connexion.");
@@ -80,8 +77,7 @@ function AuthPage({ setAuth }) {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+      const { error } = await loginWithOAuth('google', {
         options: {
           redirectTo: `${window.location.origin}/home`,
         },
