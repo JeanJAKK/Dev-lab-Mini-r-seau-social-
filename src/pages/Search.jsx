@@ -11,19 +11,29 @@ function Search() {
   const [loading, setLoading] = useState(true);
   const [followingIds, setFollowingIds] = useState([]);
   const [myId, setMyId] = useState(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const { theme } = useTheme();
 
-  const getUsers = async () => {
-    setLoading(true);
+  const getUsers = async (offset = 0, limit = 20) => {
+    if (offset === 0) setLoading(true);
     const { data, error } = await supabase
       .from("profiles")
       .select(`id, name, avatar_url`)
-      .order("name", { ascending: true });
+      .order("name", { ascending: true })
+      .range(offset, offset + limit - 1);
 
     if (!error && data) {
-      setUsers(data);
+      if (offset === 0) {
+        setUsers(data);
+      } else {
+        setUsers((prev) => [...prev, ...data]);
+      }
+      setHasMore(data.length === limit);
     }
-    setLoading(false);
+    if (offset === 0) setLoading(false);
+    else setLoadingMore(false);
   };
 
   useEffect(() => {
@@ -33,10 +43,19 @@ function Search() {
         setMyId(user.id);
         loadFollowing(user.id);
       }
-      getUsers();
+      setPage(0);
+      getUsers(0, 20);
     };
     init();
   }, []);
+
+  const loadMoreUsers = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    await getUsers(nextPage * 20, 20);
+    setPage(nextPage);
+  };
 
   const loadFollowing = async (userId) => {  
     const { data, error } = await supabase
@@ -152,6 +171,29 @@ function Search() {
                   </button>
                 </div>
               ))
+          )}
+          
+          {hasMore && filteredUsers.length > 0 && (
+            <button
+              onClick={loadMoreUsers}
+              disabled={loadingMore}
+              className="load-more-btn"
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginTop: "20px",
+                borderRadius: "8px",
+                backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
+                color: theme === "dark" ? "#f3f4f6" : "#1f2937",
+                border: "none",
+                cursor: loadingMore ? "not-allowed" : "pointer",
+                opacity: loadingMore ? 0.7 : 1,
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              {loadingMore ? "Chargement..." : "Charger plus d'utilisateurs"}
+            </button>
           )}
         </div>
       </div>

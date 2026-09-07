@@ -13,6 +13,9 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState("");
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // ── Branché sur le nouveau hook ──
   const {
@@ -21,9 +24,9 @@ export default function Messages() {
     envoyerMessage,
   } = useMessages(myId, selectedUser?.id);
 
-  const getUsers = async (currentUserId) => {
+  const getUsers = async (currentUserId, offset = 0, limit = 20) => {
     if (!currentUserId) return;
-    setLoading(true);
+    if (offset === 0) setLoading(true);
 
     const { data: followsData, error: followsError } = await supabase
       .from("follows")
@@ -32,15 +35,18 @@ export default function Messages() {
 
     if (followsError) {
       console.error("Erreur chargement abonnements:", followsError);
-      setLoading(false);
+      if (offset === 0) setLoading(false);
       return;
     }
 
     const followingIds = followsData.map((f) => f.following_id);
 
     if (followingIds.length === 0) {
-      setUsers([]);
-      setLoading(false);
+      if (offset === 0) {
+        setUsers([]);
+        setLoading(false);
+      }
+      setHasMore(false);
       return;
     }
 
@@ -48,14 +54,21 @@ export default function Messages() {
       .from("profiles")
       .select(`id, name, avatar_url`)
       .in("id", followingIds)
-      .order("name", { ascending: true });
+      .order("name", { ascending: true })
+      .range(offset, offset + limit - 1);
 
     if (!error && data) {
-      setUsers(data);
+      if (offset === 0) {
+        setUsers(data);
+      } else {
+        setUsers((prev) => [...prev, ...data]);
+      }
+      setHasMore(data.length === limit);
     } else if (error) {
       console.error("Erreur chargement profils:", error);
     }
-    setLoading(false);
+    if (offset === 0) setLoading(false);
+    else setLoadingMore(false);
   };
 
   useEffect(() => {
@@ -63,13 +76,22 @@ export default function Messages() {
       const user = await getUser();
       if (user && user.id) {
         setMyId(user.id);
-        getUsers(user.id);
+        setPage(0);
+        getUsers(user.id, 0, 20);
       } else {
         setLoading(false);
       }
     };
     init();
   }, []);
+
+  const loadMoreUsers = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    await getUsers(myId, nextPage * 20, 20);
+    setPage(nextPage);
+  };
 
   const handleSend = async () => {
     if (!message.trim() || !selectedUser) return;
@@ -180,6 +202,27 @@ export default function Messages() {
                 </div>
               </div>
             ))
+          )}
+          {hasMore && users.length > 0 && (
+            <button
+              onClick={loadMoreUsers}
+              disabled={loadingMore}
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "10px",
+                borderRadius: "6px",
+                backgroundColor: isDark ? "#374151" : "#e5e7eb",
+                color: isDark ? "#f3f4f6" : "#1f2937",
+                border: "none",
+                cursor: loadingMore ? "not-allowed" : "pointer",
+                opacity: loadingMore ? 0.7 : 1,
+                fontSize: "13px",
+                fontWeight: "500",
+              }}
+            >
+              {loadingMore ? "Chargement..." : "Charger plus"}
+            </button>
           )}
         </div>
       </div>

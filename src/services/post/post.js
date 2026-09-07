@@ -3,10 +3,10 @@ import { CommentsData } from "./all-post-comment";
 import { likesData } from "./all-post-likes";
 import { getUser } from "../systemeLike/getUser";
 import { postsWithLikesAndComments } from "./post-infos";
-export const fetchPostsWithLikes = async () => {
+export const fetchPostsWithLikes = async (offset = 0, limit = 10) => {
   try {
     const user = await getUser();
-    const post_data = await postsData();
+    const post_data = await postsData(offset, limit);
     const like_data = await likesData();
     const comment_data = await CommentsData();
     const data = postsWithLikesAndComments(
@@ -18,6 +18,6 @@ export const fetchPostsWithLikes = async () => {
     return data;
   } catch (err) {
     console.error(err);
-    setMessage("❌ Erreur lors du chargement des posts");
+    setMessage(" Erreur lors du chargement des posts");
   }
 };

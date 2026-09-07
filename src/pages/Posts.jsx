@@ -59,7 +59,6 @@ function PostImage({ src, alt, onClick }) {
         alt={alt}
         onClick={onClick}
         onLoad={() => {
-          console.log("PostImage loaded:", src);
           setLoaded(true);
         }}
         onError={() => console.error("PostImage failed to load:", src)}
@@ -84,6 +83,9 @@ export default function Posts({ refreshKey }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState();
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const navigate = useNavigate();
 
   const { theme } = useTheme();
@@ -98,14 +100,27 @@ export default function Posts({ refreshKey }) {
   useEffect(() => {
     async function fetchPosts() {
       setLoading(true);
-      const response = await fetchPostsWithLikes();
+      setPage(0);
+      const response = await fetchPostsWithLikes(0, 10);
       setPosts(response);
+      setHasMore(response.length === 10);
       const user = await getUser();
       setUser(user);
       setLoading(false);
     }
     fetchPosts();
   }, [refreshKey]);
+
+  const loadMorePosts = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    const newPosts = await fetchPostsWithLikes(nextPage * 10, 10);
+    setPosts((prev) => [...prev, ...newPosts]);
+    setPage(nextPage);
+    setHasMore(newPosts.length === 10);
+    setLoadingMore(false);
+  };
 
   if (loading)
     return (
@@ -240,6 +255,29 @@ export default function Posts({ refreshKey }) {
             {index === 4 && <SuggestionsCarousel />}
           </div>
         ))}
+        
+        {hasMore && (
+          <button
+            onClick={loadMorePosts}
+            disabled={loadingMore}
+            className="load-more-btn"
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginTop: "20px",
+              borderRadius: "8px",
+              backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
+              color: theme === "dark" ? "#f3f4f6" : "#1f2937",
+              border: "none",
+              cursor: loadingMore ? "not-allowed" : "pointer",
+              opacity: loadingMore ? 0.7 : 1,
+              fontSize: "14px",
+              fontWeight: "500",
+            }}
+          >
+            {loadingMore ? "Chargement..." : "Charger plus de posts"}
+          </button>
+        )}
       </div>
     </div>
   );
