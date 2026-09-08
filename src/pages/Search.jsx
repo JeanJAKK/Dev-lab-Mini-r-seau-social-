@@ -1,60 +1,57 @@
 import React, { useEffect, useState } from "react";
 import { Search as SearchIcon, UserPlus } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../services/supabase.js";
 import { useTheme } from "../context/ThemeContext";
 import { getUser } from "../services/systemeLike/getUser.js";
 import "../styles/Search.css";
 
 function Search() {
-  const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const [followingIds, setFollowingIds] = useState([]);
   const [myId, setMyId] = useState(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const { theme } = useTheme();
+  const queryClient = useQueryClient();
 
-  const getUsers = async (offset = 0, limit = 20) => {
-    if (offset === 0) setLoading(true);
+  const fetchUsers = async (offset = 0, limit = 20) => {
     const { data, error } = await supabase
       .from("profiles")
       .select(`id, name, avatar_url`)
       .order("name", { ascending: true })
       .range(offset, offset + limit - 1);
-
-    if (!error && data) {
-      if (offset === 0) {
-        setUsers(data);
-      } else {
-        setUsers((prev) => [...prev, ...data]);
-      }
-      setHasMore(data.length === limit);
-    }
-    if (offset === 0) setLoading(false);
-    else setLoadingMore(false);
+    if (error) throw error;
+    return data;
   };
 
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => fetchUsers(0, 20),
+  });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getUser,
+  });
+
   useEffect(() => {
-    const init = async () => {
-      const user = await getUser();
-      if (user && user.id) {
-        setMyId(user.id);
-        loadFollowing(user.id);
-      }
-      setPage(0);
-      getUsers(0, 20);
-    };
-    init();
-  }, []);
+    if (currentUser && currentUser.id) {
+      setMyId(currentUser.id);
+      loadFollowing(currentUser.id);
+    }
+  }, [currentUser]);
 
   const loadMoreUsers = async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     const nextPage = page + 1;
-    await getUsers(nextPage * 20, 20);
+    const newUsers = await fetchUsers(nextPage * 20, 20);
+    queryClient.setQueryData(["users"], (old) => [...old, ...newUsers]);
     setPage(nextPage);
+    setHasMore(newUsers.length === 20);
+    setLoadingMore(false);
   };
 
   const loadFollowing = async (userId) => {  
@@ -122,7 +119,7 @@ function Search() {
 
         {/* Users List */}
         <div className="users-list">
-          {loading ? (
+          {isLoading ? (
             // Skeleton loaders
             [1, 2, 3].map((i) => (
               <div key={i} className="user-item skeleton">
