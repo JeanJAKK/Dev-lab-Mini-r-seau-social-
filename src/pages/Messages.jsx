@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Send, ArrowLeft, MessageSquare } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../services/supabase.js";
 import { getUser } from "../services/systemeLike/getUser.js";
 import { useMessages } from "../hooks/useMessages.js";
@@ -8,22 +9,22 @@ import { useTheme } from "../context/ThemeContext";
 export default function Messages() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [users, setUsers] = useState([]);
-  const [myId, setMyId] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState("");
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const queryClient = useQueryClient();
 
   // ── Branché sur le nouveau hook ──
   const {
     messages: conversationMessages,
     loading: messagesLoading,
     envoyerMessage,
-  } = useMessages(myId, selectedUser?.id);
+  } = useMessages(null, selectedUser?.id);
 
-  const getUsers = async (currentUserId) => {
-    if (!currentUserId) return;
-    setLoading(true);
+  const fetchFollowedUsers = async (currentUserId, offset = 0, limit = 20) => {
+    if (!currentUserId) return [];
 
     const { data: followsData, error: followsError } = await supabase
       .from("follows")
@@ -32,44 +33,51 @@ export default function Messages() {
 
     if (followsError) {
       console.error("Erreur chargement abonnements:", followsError);
-      setLoading(false);
-      return;
+      return [];
     }
 
     const followingIds = followsData.map((f) => f.following_id);
 
     if (followingIds.length === 0) {
-      setUsers([]);
-      setLoading(false);
-      return;
+      return [];
     }
 
     const { data, error } = await supabase
       .from("profiles")
       .select(`id, name, avatar_url`)
       .in("id", followingIds)
-      .order("name", { ascending: true });
+      .order("name", { ascending: true })
+      .range(offset, offset + limit - 1);
 
-    if (!error && data) {
-      setUsers(data);
-    } else if (error) {
+    if (error) {
       console.error("Erreur chargement profils:", error);
+      return [];
     }
-    setLoading(false);
+
+    return data;
   };
 
-  useEffect(() => {
-    const init = async () => {
-      const user = await getUser();
-      if (user && user.id) {
-        setMyId(user.id);
-        getUsers(user.id);
-      } else {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getUser,
+  });
+
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["followedUsers", currentUser?.id],
+    queryFn: () => fetchFollowedUsers(currentUser?.id, 0, 20),
+    enabled: !!currentUser?.id,
+  });
+
+  const loadMoreUsers = async () => {
+    if (loadingMore || !hasMore || !currentUser?.id) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    const newUsers = await fetchFollowedUsers(currentUser.id, nextPage * 20, 20);
+    queryClient.setQueryData(["followedUsers", currentUser.id], (old) => [...old, ...newUsers]);
+    setPage(nextPage);
+    setHasMore(newUsers.length === 20);
+    setLoadingMore(false);
+  };
 
   const handleSend = async () => {
     if (!message.trim() || !selectedUser) return;
@@ -107,7 +115,7 @@ export default function Messages() {
         </div>
 
         <div className="overflow-y-auto flex-1 p-2 space-y-1">
-          {loading ? (
+          {isLoading ? (
             [1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
@@ -180,6 +188,27 @@ export default function Messages() {
                 </div>
               </div>
             ))
+          )}
+          {hasMore && users.length > 0 && (
+            <button
+              onClick={loadMoreUsers}
+              disabled={loadingMore}
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "10px",
+                borderRadius: "6px",
+                backgroundColor: isDark ? "#374151" : "#e5e7eb",
+                color: isDark ? "#f3f4f6" : "#1f2937",
+                border: "none",
+                cursor: loadingMore ? "not-allowed" : "pointer",
+                opacity: loadingMore ? 0.7 : 1,
+                fontSize: "13px",
+                fontWeight: "500",
+              }}
+            >
+              {loadingMore ? "Chargement..." : "Charger plus"}
+            </button>
           )}
         </div>
       </div>
@@ -280,14 +309,14 @@ export default function Messages() {
                       <div
                         key={msg.idmessage}
                         className={`flex ${
-                          msg.sender_id === myId
+                          msg.sender_id === currentUser?.id
                             ? "justify-end"
                             : "justify-start"
                         }`}
                       >
                         <div
                           className={`text-sm px-3 py-2 max-w-[78%] sm:max-w-[72%] rounded-2xl border shadow-sm ${
-                            msg.sender_id === myId
+                            msg.sender_id === currentUser?.id
                               ? "text-white bg-purple-600 border-purple-500 rounded-br-md"
                               : "text-gray-800 bg-gray-100 border-gray-200 rounded-bl-md"
                           }`}

@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import "../styles/Posts.css";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -59,7 +60,6 @@ function PostImage({ src, alt, onClick }) {
         alt={alt}
         onClick={onClick}
         onLoad={() => {
-          console.log("PostImage loaded:", src);
           setLoaded(true);
         }}
         onError={() => console.error("PostImage failed to load:", src)}
@@ -80,13 +80,24 @@ function PostImage({ src, alt, onClick }) {
 }
 
 export default function Posts({ refreshKey }) {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState();
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { theme } = useTheme();
+
+  const { data: user } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getUser,
+  });
+
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ["posts"],
+    queryFn: () => fetchPostsWithLikes(0, 10),
+  });
 
   const getAvatarUrl = (profile) => {
     if (!profile)
@@ -95,19 +106,18 @@ export default function Posts({ refreshKey }) {
     return `https://ui-avatars.com/api/?name=${profile.name || "User"}&background=random`;
   };
 
-  useEffect(() => {
-    async function fetchPosts() {
-      setLoading(true);
-      const response = await fetchPostsWithLikes();
-      setPosts(response);
-      const user = await getUser();
-      setUser(user);
-      setLoading(false);
-    }
-    fetchPosts();
-  }, [refreshKey]);
+  const loadMorePosts = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    const newPosts = await fetchPostsWithLikes(nextPage * 10, 10);
+    queryClient.setQueryData(["posts"], (old) => [...old, ...newPosts]);
+    setPage(nextPage);
+    setHasMore(newPosts.length === 10);
+    setLoadingMore(false);
+  };
 
-  if (loading)
+  if (isLoading)
     return (
       <div className="posts-page" data-theme={theme}>
         <div className="posts-container">
@@ -192,8 +202,8 @@ export default function Posts({ refreshKey }) {
                       await notifierLike(user.id, post.id);
                     }
                     
-                    setPosts((prevPosts) =>
-                      prevPosts.map((p) =>
+                    queryClient.setQueryData(["posts"], (oldPosts) =>
+                      oldPosts.map((p) =>
                         p.id === post.id
                           ? { ...p, likes: newCount, liked: !p.liked }
                           : p,
@@ -240,6 +250,29 @@ export default function Posts({ refreshKey }) {
             {index === 4 && <SuggestionsCarousel />}
           </div>
         ))}
+        
+        {hasMore && (
+          <button
+            onClick={loadMorePosts}
+            disabled={loadingMore}
+            className="load-more-btn"
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginTop: "20px",
+              borderRadius: "8px",
+              backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
+              color: theme === "dark" ? "#f3f4f6" : "#1f2937",
+              border: "none",
+              cursor: loadingMore ? "not-allowed" : "pointer",
+              opacity: loadingMore ? 0.7 : 1,
+              fontSize: "14px",
+              fontWeight: "500",
+            }}
+          >
+            {loadingMore ? "Chargement..." : "Charger plus de posts"}
+          </button>
+        )}
       </div>
     </div>
   );
