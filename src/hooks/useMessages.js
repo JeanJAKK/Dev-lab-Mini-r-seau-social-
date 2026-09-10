@@ -5,18 +5,53 @@ import { getMessages, sendMessage } from '../services/messages.service';
 export function useMessages(senderId, receiverId) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!senderId || !receiverId) return;
+    let active = true;
+    setMessages([]);
+    setError(null);
+    setLoading(Boolean(senderId && receiverId));
 
-    // 1. Chargement initial
+    if (!senderId || !receiverId) return undefined;
+
+    const addMessage = (message) => {
+      setMessages((previous) => {
+        const messageId = message.idmessage ?? message.id;
+        const alreadyExists = messageId
+          ? previous.some((item) => (item.idmessage ?? item.id) === messageId)
+          : previous.some(
+              (item) =>
+                item.sender_id === message.sender_id &&
+                item.receiver_id === message.receiver_id &&
+                item.created_at === message.created_at,
+            );
+
+        if (alreadyExists) return previous;
+
+        return [...previous, message].sort(
+          (first, second) =>
+            new Date(first.created_at).getTime() -
+            new Date(second.created_at).getTime(),
+        );
+      });
+    };
+
     getMessages(senderId, receiverId)
-      .then(setMessages)
-      .finally(() => setLoading(false));
+      .then((initialMessages) => {
+        if (!active) return;
+        initialMessages.forEach(addMessage);
+      })
+      .catch((loadError) => {
+        if (active) setError(loadError);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-    // 2. Souscription realtime — écoute les messages dans les deux sens
     const channel = supabase
-      .channel(`messages:${senderId}-${receiverId}`)
+      .channel(`messages:${[senderId, receiverId].sort().join('-')}`)
       .on(
         'postgres_changes',
         {
@@ -30,22 +65,43 @@ export function useMessages(senderId, receiverId) {
             (msg.sender_id === senderId && msg.receiver_id === receiverId) ||
             (msg.sender_id === receiverId && msg.receiver_id === senderId);
 
-          if (concerneCetteConv) {
-            setMessages((prev) => [...prev, msg]);
-          }
+          if (concerneCetteConv) addMessage(msg);
         }
       )
       .subscribe();
 
-    // 3. Cleanup
     return () => {
+      active = false;
       supabase.removeChannel(channel);
     };
   }, [senderId, receiverId]);
 
   const envoyerMessage = async (content) => {
-    await sendMessage(senderId, receiverId, content);
+    if (!senderId || !receiverId || !content?.trim()) return;
+
+    setSending(true);
+    setError(null);
+    try {
+      const sentMessage = await sendMessage(senderId, receiverId, content.trim());
+      setMessages((previous) => {
+        const messageId = sentMessage.idmessage ?? sentMessage.id;
+        if (messageId && previous.some((item) => (item.idmessage ?? item.id) === messageId)) {
+          return previous;
+        }
+        return [...previous, sentMessage].sort(
+          (first, second) =>
+            new Date(first.created_at).getTime() -
+            new Date(second.created_at).getTime(),
+        );
+      });
+      return sentMessage;
+    } catch (sendError) {
+      setError(sendError);
+      throw sendError;
+    } finally {
+      setSending(false);
+    }
   };
 
-  return { messages, loading, envoyerMessage };
+  return { messages, loading, sending, error, envoyerMessage };
 }

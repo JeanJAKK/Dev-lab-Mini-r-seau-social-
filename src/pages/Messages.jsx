@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabase from "../services/supabase.js";
@@ -14,14 +14,25 @@ export default function Messages() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [sendError, setSendError] = useState("");
+  const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
 
-  // ── Branché sur le nouveau hook ──
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getUser,
+  });
+
   const {
     messages: conversationMessages,
     loading: messagesLoading,
+    sending: messageSending,
     envoyerMessage,
-  } = useMessages(null, selectedUser?.id);
+  } = useMessages(currentUser?.id, selectedUser?.id);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [conversationMessages, selectedUser?.id]);
 
   const fetchFollowedUsers = async (currentUserId, offset = 0, limit = 20) => {
     if (!currentUserId) return [];
@@ -57,11 +68,6 @@ export default function Messages() {
     return data;
   };
 
-  const { data: currentUser } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: getUser,
-  });
-
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["followedUsers", currentUser?.id],
     queryFn: () => fetchFollowedUsers(currentUser?.id, 0, 20),
@@ -82,39 +88,48 @@ export default function Messages() {
   const handleSend = async () => {
     if (!message.trim() || !selectedUser) return;
 
-    const texte = message;
+    const texte = message.trim();
     setMessage("");
+    setSendError("");
 
-    await envoyerMessage(texte);
+    try {
+      await envoyerMessage(texte);
+    } catch {
+      setMessage(texte);
+      setSendError("Le message n'a pas pu être envoyé. Réessayez.");
+    }
   };
 
   return (
     <div
-      className={`flex h-[calc(100vh-160px)] sm:h-[calc(100vh-110px)] w-full max-w-5xl mx-auto ${isDark ? "bg-slate-950 text-slate-100 sm:border-slate-800" : "bg-white text-slate-900 sm:border-gray-200"} sm:rounded-xl border-y sm:border overflow-hidden sm:my-4`}
+      className={`flex w-full max-w-5xl mx-auto overflow-hidden ${
+        selectedUser
+          ? `fixed inset-x-0 top-2 bottom-2 z-60 min-h-0 shadow-[0_0_0_100vmax_${isDark ? "#111827" : "#f8fafc"}] md:static md:h-[calc(100dvh-110px)] md:min-h-0 md:my-4 md:rounded-xl md:border ${isDark ? "md:border-gray-700" : "md:border-slate-200"} md:shadow-none`
+          : "h-[calc(100dvh-128px)] min-h-[420px] sm:h-[calc(100dvh-110px)] sm:my-4"
+      } ${isDark ? "bg-gray-900 text-gray-100 sm:border-gray-700" : "bg-slate-50 text-slate-900 sm:border-slate-200"} sm:rounded-xl`}
     >
-      {/* ── Sidebar contacts ── */}
       <div
         className={`
-          flex flex-col shrink-0 border-r ${isDark ? "border-slate-800 bg-slate-900/70" : "border-gray-200 bg-gray-50/50"}
+          flex flex-col shrink-0 border-r ${isDark ? "border-gray-700 bg-gray-900" : "border-slate-200 bg-slate-50"}
           transition-all duration-300
           ${
             selectedUser
-              ? "hidden sm:flex sm:w-[260px] lg:w-[320px]"
-              : "flex w-full sm:w-[260px] lg:w-[320px]"
+              ? "hidden sm:flex sm:w-[280px] lg:w-[340px]"
+              : "flex w-full sm:w-[280px] lg:w-[340px]"
           }
         `}
       >
         <div
-          className={`p-4 border-b flex items-center h-[60px] ${isDark ? "border-slate-800 bg-slate-950" : "border-gray-200 bg-white"}`}
+          className={`px-5 border-b flex items-center h-[68px] ${isDark ? "border-gray-700 bg-gray-900" : "border-slate-200 bg-slate-50"}`}
         >
           <h2
-            className={`text-lg font-bold ${isDark ? "text-slate-100" : "text-gray-800"}`}
+            className={`text-lg font-bold ${isDark ? "text-gray-100" : "text-slate-800"}`}
           >
-            Discussions
+            Messages
           </h2>
         </div>
 
-        <div className="overflow-y-auto flex-1 p-2 space-y-1">
+        <div className="overflow-y-auto flex-1 p-3 space-y-1">
           {isLoading ? (
             [1, 2, 3, 4, 5, 6].map((i) => (
               <div
@@ -141,14 +156,14 @@ export default function Messages() {
               <div
                 key={user.id}
                 onClick={() => setSelectedUser(user)}
-                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 border border-transparent ${
                   selectedUser?.id === user.id
                     ? isDark
-                      ? "bg-purple-950/40"
-                      : "bg-purple-100"
+                      ? "bg-purple-950/40 border-purple-900/60"
+                      : "bg-purple-50 border-purple-100"
                     : isDark
-                      ? "hover:bg-slate-800"
-                      : "hover:bg-gray-100"
+                      ? "hover:bg-gray-800"
+                      : "hover:bg-slate-100"
                 }`}
               >
                 <div className="relative shrink-0">
@@ -172,19 +187,21 @@ export default function Messages() {
                   >
                     {user.name}
                   </p>
-                  <p
-                    className={`text-xs truncate ${
-                      selectedUser?.id === user.id
-                        ? isDark
-                          ? "text-purple-300"
-                          : "text-purple-600"
-                        : isDark
-                          ? "text-slate-400"
-                          : "text-gray-500"
-                    }`}
-                  >
-                    Appuyez pour écrire…
-                  </p>
+                  {selectedUser?.id !== user.id || conversationMessages.length === 0 ? (
+                    <p
+                      className={`text-xs truncate ${
+                        selectedUser?.id === user.id
+                          ? isDark
+                            ? "text-purple-300"
+                            : "text-purple-600"
+                          : isDark
+                            ? "text-slate-400"
+                            : "text-gray-500"
+                      }`}
+                    >
+                      Appuyez pour écrire…
+                    </p>
+                  ) : null}
                 </div>
               </div>
             ))
@@ -198,13 +215,13 @@ export default function Messages() {
                 padding: "10px",
                 marginTop: "10px",
                 borderRadius: "6px",
-                backgroundColor: isDark ? "#374151" : "#e5e7eb",
-                color: isDark ? "#f3f4f6" : "#1f2937",
-                border: "none",
+                backgroundColor: "transparent",
+                color: isDark ? "#c4b5fd" : "#6d28d9",
+                border: isDark ? "1px solid #4b5563" : "1px solid #ddd6fe",
                 cursor: loadingMore ? "not-allowed" : "pointer",
                 opacity: loadingMore ? 0.7 : 1,
                 fontSize: "13px",
-                fontWeight: "500",
+                fontWeight: "600",
               }}
             >
               {loadingMore ? "Chargement..." : "Charger plus"}
@@ -213,17 +230,16 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* ── Zone de chat (toujours à droite sur desktop) ── */}
       <div
         className={`
-          flex flex-col min-w-0 ${isDark ? "bg-slate-950" : "bg-white"}
+          flex flex-col min-w-0 min-h-0 ${isDark ? "bg-gray-900" : "bg-slate-50"}
           sm:flex sm:flex-1
           ${selectedUser ? "flex flex-1" : "hidden"}
         `}
       >
         {!selectedUser ? (
           <div
-            className={`flex-1 flex flex-col justify-center items-center p-6 ${isDark ? "bg-slate-900/60" : "bg-gray-50/50"}`}
+            className={`flex-1 flex flex-col justify-center items-center p-6 ${isDark ? "bg-gray-900" : "bg-slate-50"}`}
           >
             <div
               className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 shadow-inner ${isDark ? "bg-purple-950/60 text-purple-300" : "bg-purple-100 text-purple-600"}`}
@@ -244,9 +260,8 @@ export default function Messages() {
           </div>
         ) : (
           <>
-            {/* En-tête du chat */}
             <div
-              className={`h-[60px] border-b flex items-center gap-3 px-4 sm:px-6 shrink-0 ${isDark ? "border-slate-800 bg-slate-950" : "border-gray-200 bg-white"}`}
+              className={`h-[68px] border-b flex items-center gap-3 px-4 sm:px-7 shrink-0 ${isDark ? "border-gray-700 bg-gray-900" : "border-slate-200 bg-slate-50"}`}
             >
               <button
                 onClick={() => setSelectedUser(null)}
@@ -260,10 +275,10 @@ export default function Messages() {
                   <img
                     src={selectedUser.avatar_url}
                     alt={selectedUser.name}
-                    className="w-9 h-9 rounded-full object-cover border border-gray-200"
+                    className={`w-10 h-10 rounded-full object-cover border ${isDark ? "border-gray-600" : "border-slate-200"}`}
                   />
                 ) : (
-                  <div className="w-9 h-9 flex justify-center items-center bg-purple-100 text-purple-700 font-bold rounded-full border border-gray-200 text-sm">
+                  <div className={`w-10 h-10 flex justify-center items-center font-bold rounded-full border text-sm ${isDark ? "bg-purple-950/60 text-purple-200 border-gray-600" : "bg-purple-100 text-purple-700 border-purple-100"}`}>
                     {selectedUser.name?.charAt(0).toUpperCase() ?? "?"}
                   </div>
                 )}
@@ -276,24 +291,18 @@ export default function Messages() {
               </p>
             </div>
 
-            {/* Zone des messages */}
             <div
-              className={`flex-1 p-3 sm:p-4 overflow-hidden flex flex-col ${isDark ? "bg-slate-900/70" : "bg-gray-50/80"}`}
+              className={`flex-1 min-h-0 p-2 md:p-0 overflow-hidden flex flex-col ${isDark ? "bg-gray-800/70" : "bg-slate-100/80"}`}
             >
               <div
-                className={`flex-1 rounded-2xl border overflow-hidden flex flex-col ${isDark ? "border-slate-800 bg-slate-950 shadow-none" : "border-gray-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"}`}
+                className={`flex-1 overflow-hidden flex flex-col ${isDark ? "bg-gray-900" : "bg-slate-50"}`}
               >
-                <div
-                  className={`border-b px-4 py-2 text-center shrink-0 ${isDark ? "border-slate-800 bg-slate-900/80" : "border-gray-100 bg-gray-50/70"}`}
-                >
-                  <span
-                    className={`text-[11px] font-medium px-3 py-1 rounded-full shadow-sm ${isDark ? "text-slate-300 bg-slate-900 border border-slate-700" : "text-gray-500 bg-white border border-gray-200"}`}
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 sm:px-4 py-4 space-y-2">
+                  <p
+                    className={`text-center text-[11px] font-medium pb-2 ${isDark ? "text-gray-400" : "text-slate-500"}`}
                   >
                     Début de la conversation avec {selectedUser.name}
-                  </span>
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-2">
+                  </p>
                   {messagesLoading ? (
                     <div className="h-full grid place-items-center text-center px-4">
                       <p className="text-sm text-gray-500">Chargement…</p>
@@ -307,7 +316,7 @@ export default function Messages() {
                   ) : (
                     conversationMessages.map((msg) => (
                       <div
-                        key={msg.idmessage}
+                        key={msg.idmessage ?? msg.id ?? `${msg.sender_id}-${msg.created_at}`}
                         className={`flex ${
                           msg.sender_id === currentUser?.id
                             ? "justify-end"
@@ -315,10 +324,12 @@ export default function Messages() {
                         }`}
                       >
                         <div
-                          className={`text-sm px-3 py-2 max-w-[78%] sm:max-w-[72%] rounded-2xl border shadow-sm ${
+                          className={`text-sm leading-5 wrap-break-word whitespace-pre-wrap px-3 py-2 max-w-[88%] sm:max-w-[72%] rounded-2xl shadow-sm ${
                             msg.sender_id === currentUser?.id
-                              ? "text-white bg-purple-600 border-purple-500 rounded-br-md"
-                              : "text-gray-800 bg-gray-100 border-gray-200 rounded-bl-md"
+                              ? "text-white bg-linear-to-r from-purple-600 to-indigo-500 rounded-br-md"
+                              : isDark
+                                ? "text-gray-100 bg-gray-800 rounded-bl-md"
+                                : "text-slate-800 bg-white rounded-bl-md"
                           }`}
                         >
                           {msg.content}
@@ -326,37 +337,40 @@ export default function Messages() {
                       </div>
                     ))
                   )}
+                  <div ref={messagesEndRef} aria-hidden="true" />
                 </div>
               </div>
             </div>
 
-            {/* Barre de saisie */}
             <div
-              className={`shrink-0 p-3 border-t ${isDark ? "bg-slate-950 border-slate-800" : "bg-white border-gray-200"}`}
+              className={`shrink-0 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:p-3 border-t ${isDark ? "bg-gray-900 border-gray-700" : "bg-slate-50 border-slate-200"}`}
             >
               <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm transition ${isDark ? "bg-slate-900 border-slate-700 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20" : "bg-gray-100 border-gray-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 focus-within:bg-white"}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm transition ${isDark ? "bg-gray-800 border-gray-700 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20" : "bg-white border-slate-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100"}`}
               >
                 <input
                   type="text"
                   placeholder={`Envoyer un message à ${selectedUser.name}…`}
-                  className={`flex-1 bg-transparent px-1 py-1.5 outline-none text-sm ${isDark ? "text-slate-100 placeholder-slate-400" : "text-gray-800 placeholder-gray-500"}`}
+                  disabled={messageSending}
+                  className={`flex-1 min-w-0 bg-transparent px-1 py-1.5 outline-none text-sm ${isDark ? "text-slate-100 placeholder-slate-400" : "text-gray-800 placeholder-gray-500"}`}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && message.trim()) {
+                    if (e.key === "Enter" && message.trim() && !messageSending) {
                       handleSend();
                     }
                   }}
                 />
                 <button
-                  className="bg-purple-600 hover:bg-purple-700 text-white flex justify-center items-center w-8 h-8 rounded-full shadow-md active:scale-95 shrink-0 transition-all"
+                  disabled={messageSending || !message.trim()}
+                  className="bg-linear-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 text-white flex justify-center items-center w-8 h-8 rounded-full shadow-md active:scale-95 shrink-0 transition-all"
                   title="Envoyer"
                   onClick={handleSend}
                 >
-                  <Send size={14} className="translate-x-px" />
+                  <Send size={14} />
                 </button>
               </div>
+              {sendError && <p className="mt-2 text-center text-xs text-red-500">{sendError}</p>}
             </div>
           </>
         )}
