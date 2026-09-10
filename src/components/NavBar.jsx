@@ -145,8 +145,8 @@ export default function NavBar() {
           <li><NavLink to="." end className={({ isActive }) => `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`}><Home size={20} /> Accueil</NavLink></li>
           <li><NavLink to="search" className={({ isActive }) => `flex flex-col items-center gap-0.5 ${isActive ? activeClass : normalClass}`}><Search size={20} /> Rechercher</NavLink></li>
           <li className="relative -translate-y-3">
-            <NavLink to="plus" className="flex items-center justify-center w-11 h-11 rounded-full bg-purple-600 text-white shadow-lg">
-              <Plus size={22} />
+            <NavLink to="plus" className="flex items-center justify-center w-12 h-12 rotate-45 rounded-xl bg-linear-to-r from-purple-600 to-indigo-500 text-white shadow-lg transition hover:shadow-xl">
+              <Plus size={23} className="-rotate-45" />
             </NavLink>
           </li>
           <li className="relative">
